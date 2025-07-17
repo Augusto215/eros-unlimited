@@ -4,9 +4,6 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3010;
 
-require('dotenv').config();
-const bcrypt = require('bcrypt');
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname , 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -27,8 +24,8 @@ app.get('/contact', (req, res) => {
   res.render('contact', { title: 'Contact', isLoggedIn: !!req.session?.user });
 });
 
-app.get('/cadastro', (req, res) => {
-  res.render('cadastro', { title: 'Cadastro', isLoggedIn: !!req.session?.user });
+app.get('/register', (req, res) => {
+  res.render('register', { title: 'Register', isLoggedIn: !!req.session?.user });
 });
 
 app.get('/login', (req, res) => {
@@ -40,42 +37,65 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+require('dotenv').config();
+const bcrypt = require('bcrypt');
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/cadastro', async (req, res) => {
+app.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
 
-  // Verifica se o email já existe
-  const { data: existingUser, error } = await supabase
-    .from('users')
-    .select('id')
-    .eq('email', email)
-    .single();
+  try {
+    const hashedPassword = await bcrypt.hash(password, 6);
 
-  if (existingUser) {
-    // Email já cadastrado
-    return res.render('cadastro', { error: 'Email já cadastrado!', title: 'Cadastro', isLoggedIn: !!req.session?.user });
+    const { data, error: insertError } = await supabase
+      .from('users')
+      .insert([{ 
+        name, 
+        email, 
+        password_hash: hashedPassword 
+      }])
+      .select()
+      .single();
+
+    if (insertError) {
+      // Verificar se é erro de email duplicado
+      if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+        return res.render('register', { 
+          error: 'Email already registered! Log in or use another email.', 
+          title: 'Register', 
+          isLoggedIn: !!req.session?.user 
+        });
+      }
+      
+      console.error('Erro ao cadastrar usuário:', insertError);
+      return res.render('register', { 
+        error: 'Error registering user. Please try again.', 
+        title: 'Register', 
+        isLoggedIn: !!req.session?.user 
+      });
+    }
+
+    // Registration successful
+    return res.render('register', { 
+      success: true, 
+      title: 'Register', 
+      isLoggedIn: !!req.session?.user 
+    });
+
+  } catch (error) {
+    console.error('Error during registration process:', error);
+
+    return res.render('register', { 
+      error: 'Error processing registration. Please try again.', 
+      title: 'Register', 
+      isLoggedIn: !!req.session?.user 
+    });
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  // Salva novo usuário
-  const { data, error: insertError } = await supabase
-    .from('users')
-    .insert([{ name, email, password_hash: hashedPassword }]);
-
-  if (insertError) {
-    console.log('Erro ao cadastrar usuário:', insertError);
-    return res.render('cadastro', { error: 'Erro ao cadastrar!', title: 'Cadastro', isLoggedIn: !!req.session?.user });
-  }
-
-  // Cadastro realizado com sucesso
-  res.redirect('/login');
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
