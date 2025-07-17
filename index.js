@@ -24,6 +24,14 @@ app.get('/contact', (req, res) => {
   res.render('contact', { title: 'Contact' });
 });
 
+app.get('/cadastro', (req, res) => {
+  res.render('cadastro', { title: 'Cadastro' });
+});
+
+app.get('/login', (req, res) => {
+  res.render('login', { title: 'Login' });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
