@@ -34,38 +34,38 @@
       <ul class="navbar-nav ms-auto">
 
         <li class="nav-item mx-2">
-          
           <a class="nav-link<%= (title === 'Site de Filmes') ? ' active' : '' %>" aria-current="page" href="/">Home</a>
-
         </li>
 
         <li class="nav-item mx-2">
-
           <a class="nav-link<%= (title === 'About') ? ' active' : '' %>" href="/about">About</a>
-
         </li>
 
         <li class="nav-item mx-2">
-
           <a class="nav-link<%= (title === 'Partner') ? ' active' : '' %>" href="/partner">Partner</a>
-
         </li>
 
         <li class="nav-item mx-2">
           <a class="nav-link<%= (title === 'Contact') ? ' active' : '' %>" href="/contact">Contact</a>
         </li>
 
-        <li class="nav-item mx-2">
+        <% if (!isLoggedIn) { %>
 
-          <a class="nav-link<%= (title === 'Cadastro') ? ' active' : '' %>" href="/cadastro">Cadastro</a>
+          <li class="nav-item mx-2">
+            <a class="nav-link<%= (title === 'Cadastro') ? ' active' : '' %>" href="/cadastro">Cadastro</a>
+          </li>
 
-        </li>
+          <li class="nav-item mx-2">
+            <a class="nav-link<%= (title === 'Login') ? ' active' : '' %>" href="/login">Login</a>
+          </li>
 
-         <li class="nav-item mx-2">
+        <% } else { %>
+          
+          <li class="nav-item mx-2">
+            <a class="nav-link" href="/logout">Sair</a>
+          </li>
 
-          <a class="nav-link<%= (title === 'Login') ? ' active' : '' %>" href="/login">Login</a>
-
-        </li>
+        <% } %>
 
       </ul>
 
