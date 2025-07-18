@@ -93,32 +93,43 @@
 
         <!-- Opções adicionais -->
         <div class="mb-3 d-flex justify-content-between align-items-center">
+
           <div class="form-check">
+
             <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
             <label class="form-check-label" for="rememberMe">
               Remember me
             </label>
+
           </div>
+
           <a href="/forgot-password" class="text-decoration-none small">Forgot password?</a>
+
         </div>
 
         <button type="submit" class="btn btn-danger w-100 mb-3" id="submitBtn">
+
           <span id="btnText">
             <i class="fas fa-sign-in-alt me-2"></i>
             Sign In
           </span>
+
           <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status">
             <span class="visually-hidden">Loading...</span>
           </span>
+
         </button>
 
-        <!-- Link para registro -->
         <div class="text-center">
+
           <p class="mb-0">Don't have an account? 
+
             <a href="/register" class="text-danger text-decoration-none">
               <strong>Register here</strong>
             </a>
+
           </p>
+
         </div>
 
       </form>
@@ -174,8 +185,10 @@
 
     // Validação em tempo real do email
     const emailInput = document.getElementById('email');
+
     emailInput.addEventListener('blur', function() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
       if (this.value && !emailRegex.test(this.value)) {
         this.classList.add('is-invalid');
       } else if (this.value) {
