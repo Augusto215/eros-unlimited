@@ -1,0 +1,100 @@
+import type { Film, Client, ClientFilm } from "./types"
+
+export const mockFilms: Film[] = [
+  {
+    id: "1",
+    title: "The Summer I Turned Pretty",
+    description: "Uma história de amadurecimento sobre amor, família e descobertas.",
+    synopsis:
+      "Belly sempre esperou pelo verão. É a época do ano em que ela fica na casa de praia dos Fisher, onde tudo é perfeito. Mas este verão será diferente.",
+    price: 19.9,
+    posterUrl: "/placeholder.svg?height=600&width=400&text=Summer+Pretty",
+    trailerUrl: "/placeholder-video.mp4",
+    videoUrl: "/placeholder-video.mp4",
+    genre: "Romance",
+    duration: 120,
+    releaseYear: 2023,
+    rating: 4.5,
+  },
+  {
+    id: "2",
+    title: "Wolf Man",
+    description: "Um thriller sobrenatural cheio de suspense e terror.",
+    synopsis: "Uma família se muda para uma casa isolada na floresta, onde descobrem que não estão sozinhos.",
+    price: 24.9,
+    posterUrl: "/placeholder.svg?height=600&width=400&text=Wolf+Man",
+    trailerUrl: "/placeholder-video.mp4",
+    videoUrl: "/placeholder-video.mp4",
+    genre: "Terror",
+    duration: 105,
+    releaseYear: 2024,
+    rating: 4.2,
+  },
+  {
+    id: "3",
+    title: "Follow",
+    description: "Um thriller psicológico sobre obsessão e redes sociais.",
+    synopsis: "Uma influenciadora digital descobre que está sendo perseguida por um stalker online.",
+    price: 22.9,
+    posterUrl: "/placeholder.svg?height=600&width=400&text=Follow",
+    trailerUrl: "/placeholder-video.mp4",
+    videoUrl: "/placeholder-video.mp4",
+    genre: "Thriller",
+    duration: 98,
+    releaseYear: 2024,
+    rating: 4.0,
+  },
+  {
+    id: "4",
+    title: "Cuckoo",
+    description: "Um drama familiar sobre segredos e revelações.",
+    synopsis: "Uma jovem descobre segredos sombrios sobre sua família durante as férias de verão.",
+    price: 18.9,
+    posterUrl: "/placeholder.svg?height=600&width=400&text=Cuckoo",
+    trailerUrl: "/placeholder-video.mp4",
+    videoUrl: "/placeholder-video.mp4",
+    genre: "Drama",
+    duration: 110,
+    releaseYear: 2023,
+    rating: 4.3,
+  },
+  {
+    id: "5",
+    title: "Heads of State",
+    description: "Uma comédia de ação sobre dois presidentes improváveis.",
+    synopsis: "Dois líderes mundiais precisam trabalhar juntos para salvar o mundo de uma conspiração internacional.",
+    price: 21.9,
+    posterUrl: "/placeholder.svg?height=600&width=400&text=Heads+State",
+    trailerUrl: "/placeholder-video.mp4",
+    videoUrl: "/placeholder-video.mp4",
+    genre: "Comédia",
+    duration: 115,
+    releaseYear: 2024,
+    rating: 3.8,
+  },
+]
+
+export const mockClients: Client[] = [
+  {
+    id: "1",
+    name: "João Silva",
+    email: "joao@email.com",
+    password: "123456",
+    avatar: "/placeholder.svg?height=40&width=40&text=JS",
+  },
+]
+
+export const mockClientFilms: ClientFilm[] = [
+  {
+    id: "1",
+    clientId: "1",
+    filmId: "1",
+    purchaseDate: new Date("2024-01-15"),
+  },
+  {
+    id: "2",
+    clientId: "1",
+    filmId: "3",
+    purchaseDate: new Date("2024-01-20"),
+  },
+]

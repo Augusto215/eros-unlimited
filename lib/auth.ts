@@ -1,0 +1,191 @@
+import { supabase, type Database } from './supabase'
+import type { User } from '@supabase/supabase-js'
+
+export interface Client {
+  id: string
+  name: string
+  email: string
+  created_at?: string
+}
+
+// Get current authenticated user
+export const getCurrentUser = (): Client | null => {
+  if (typeof window === 'undefined') return null
+  
+  const userData = localStorage.getItem('eros_user')
+  return userData ? JSON.parse(userData) : null
+}
+
+// Check if user is authenticated
+export const isAuthenticated = (): boolean => {
+  return getCurrentUser() !== null
+}
+
+// Login function
+export const login = async (email: string, password: string): Promise<Client | null> => {
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (authError) {
+      console.error('Auth error:', authError)
+      return null
+    }
+
+    if (!authData.user) {
+      console.error('No user returned from auth')
+      return null
+    }
+
+    // Get user profile from clients table
+    const { data: clientData, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single()
+
+    if (clientError) {
+      console.error('Client fetch error:', clientError)
+      return null
+    }
+
+    const client: Client = {
+      id: clientData.id,
+      name: clientData.name,
+      email: clientData.email,
+      created_at: clientData.created_at,
+    }
+
+    // Store in localStorage for persistence
+    localStorage.setItem('eros_user', JSON.stringify(client))
+    
+    return client
+  } catch (error) {
+    console.error('Login error:', error)
+    return null
+  }
+}
+
+// Register function
+export const register = async (name: string, email: string, password: string): Promise<Client | null> => {
+  try {
+    // Create auth user with metadata
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name
+        }
+      }
+    })
+
+    if (authError) {
+      console.error('Auth registration error:', authError)
+      throw new Error(authError.message)
+    }
+
+    if (!authData.user) {
+      throw new Error('Falha ao criar usuário')
+    }
+
+    // Wait a moment for auth to complete
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    // Create client profile
+    const { data: clientData, error: clientError } = await supabase
+      .from('clients')
+      .insert({
+        id: authData.user.id,
+        name,
+        email,
+      })
+      .select()
+      .single()
+
+    if (clientError) {
+      console.error('Client creation error:', clientError)
+      // Try to sign out the user if profile creation fails
+      try {
+        await supabase.auth.signOut()
+      } catch (e) {
+        console.error('Error signing out after failed registration:', e)
+      }
+      throw new Error('Falha ao criar perfil do usuário: ' + clientError.message)
+    }
+
+    const client: Client = {
+      id: clientData.id,
+      name: clientData.name,
+      email: clientData.email,
+      created_at: clientData.created_at,
+    }
+
+    // Store in localStorage
+    localStorage.setItem('eros_user', JSON.stringify(client))
+    
+    return client
+  } catch (error) {
+    console.error('Registration error:', error)
+    throw error
+  }
+}
+
+// Logout function
+export const logout = async (): Promise<void> => {
+  try {
+    await supabase.auth.signOut()
+    localStorage.removeItem('eros_user')
+  } catch (error) {
+    console.error('Logout error:', error)
+    // Even if Supabase logout fails, remove local data
+    localStorage.removeItem('eros_user')
+  }
+}
+
+// Initialize auth state on app load
+export const initializeAuth = async (): Promise<Client | null> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user) {
+      localStorage.removeItem('eros_user')
+      return null
+    }
+
+    // Check if we have user data in localStorage
+    const storedUser = getCurrentUser()
+    if (storedUser && storedUser.id === session.user.id) {
+      return storedUser
+    }
+
+    // Fetch fresh user data
+    const { data: clientData, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', session.user.id)
+      .single()
+
+    if (error || !clientData) {
+      console.error('Error fetching client data:', error)
+      await logout()
+      return null
+    }
+
+    const client: Client = {
+      id: clientData.id,
+      name: clientData.name,
+      email: clientData.email,
+      created_at: clientData.created_at,
+    }
+
+    localStorage.setItem('eros_user', JSON.stringify(client))
+    return client
+  } catch (error) {
+    console.error('Auth initialization error:', error)
+    localStorage.removeItem('eros_user')
+    return null
+  }
+}
