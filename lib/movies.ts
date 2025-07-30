@@ -6,6 +6,7 @@ const transformDbFilmToFilm = (dbFilm: any): Film => ({
   id: dbFilm.id,
   title: dbFilm.title,
   synopsis: dbFilm.synopsis,
+  description: dbFilm.description || dbFilm.synopsis,
   genre: dbFilm.genre,
   duration: dbFilm.duration,
   releaseYear: dbFilm.release_year,
