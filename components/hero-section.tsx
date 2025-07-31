@@ -3,14 +3,16 @@
 import { useState, useEffect } from "react"
 import { Play, Plus, Info } from "lucide-react"
 import type { Film } from "@/lib/types"
+import AdminOnly from "@/components/admin-only"
 import Image from "next/image"
 
 interface HeroSectionProps {
   film: Film
   onPlayClick: () => void
+  onAdminClick?: () => void // New prop for admin action
 }
 
-export default function HeroSection({ film, onPlayClick }: HeroSectionProps) {
+export default function HeroSection({ film, onPlayClick, onAdminClick }: HeroSectionProps) {
   const [showVideo, setShowVideo] = useState(false)
 
   useEffect(() => {
@@ -22,6 +24,12 @@ export default function HeroSection({ film, onPlayClick }: HeroSectionProps) {
 
     return () => clearTimeout(timer)
   }, [])
+
+  const handleAdminAction = () => {
+    if (onAdminClick) {
+      onAdminClick()
+    }
+  }
 
   return (
     <div className="relative h-[70vh] w-full overflow-hidden">
@@ -55,14 +63,20 @@ export default function HeroSection({ film, onPlayClick }: HeroSectionProps) {
           </button>
 
           <button className="flex items-center space-x-2 bg-gray-600/80 text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-600 transition-colors">
-            <Plus className="w-5 h-5" />
-            <span>Minha Lista</span>
-          </button>
-
-          <button className="flex items-center space-x-2 bg-gray-600/80 text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-600 transition-colors">
             <Info className="w-5 h-5" />
             <span>Mais Informações</span>
           </button>
+
+          <AdminOnly>
+            <button 
+              onClick={handleAdminAction}
+              className="flex items-center space-x-2 bg-red-600/80 text-white px-6 py-3 rounded-md font-semibold hover:bg-red-600 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              <span>ADMIN BUTTON</span>
+            </button>
+          </AdminOnly>
+          
         </div>
       </div>
     </div>

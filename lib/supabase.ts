@@ -1,3 +1,4 @@
+// lib/supabase.ts
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -19,18 +20,21 @@ export interface Database {
           id: string
           name: string
           email: string
+          role: 'CLIENT' | 'ADMIN'
           created_at: string
         }
         Insert: {
           id?: string
           name: string
           email: string
+          role?: 'CLIENT' | 'ADMIN'
           created_at?: string
         }
         Update: {
           id?: string
           name?: string
           email?: string
+          role?: 'CLIENT' | 'ADMIN'
           created_at?: string
         }
       }
@@ -97,6 +101,12 @@ export interface Database {
           film_id?: string
           purchase_date?: string
         }
+      }
+    }
+    Functions: {
+      is_admin: {
+        Args: {}
+        Returns: boolean
       }
     }
   }
