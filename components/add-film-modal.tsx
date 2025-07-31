@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, Plus, Upload, Film } from "lucide-react"
+import { X, Plus, Upload, Film, Crown, Star, Sparkles, Heart, Calendar, Clock, DollarSign, Camera, Video, Image as ImageIcon } from "lucide-react"
 import { addFilm, type NewFilmData } from "@/lib/movies"
 
 interface FilmFormData {
@@ -28,10 +28,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
     title: '',
     synopsis: '',
     genre: '',
-    duration: 0,
+    duration: '',
     releaseYear: new Date().getFullYear(),
-    rating: 0,
-    price: 0,
+    rating: '',
+    price: '',
     posterUrl: '',
     trailerUrl: '',
     videoUrl: ''
@@ -88,24 +88,38 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
     const rating = Number(formData.rating)
     const price = Number(formData.price)
 
-    if (isNaN(duration) || duration <= 0) {
-      newErrors.duration = 'Duração deve ser maior que 0'
+    // Duration validation (should be positive integer)
+    if (isNaN(duration) || duration <= 0 || duration > 999) {
+      newErrors.duration = 'Duração deve estar entre 1 e 999 minutos'
     }
 
+    // Release year validation
     if (isNaN(releaseYear) || releaseYear < 1900 || releaseYear > currentYear) {
       newErrors.releaseYear = 'Ano de lançamento inválido'
     }
 
-    if (isNaN(rating) || rating < 0 || rating > 10) {
-      newErrors.rating = 'Avaliação deve estar entre 0 e 10'
+    // Rating validation - CRITICAL: limit to 9.9 due to database constraint NUMERIC(2,1)
+    if (isNaN(rating) || rating < 0 || rating > 9.9) {
+      newErrors.rating = 'Avaliação deve estar entre 0 e 9.9'
     }
 
-    if (isNaN(price) || price < 0) {
-      newErrors.price = 'Preço deve ser maior ou igual a 0'
+    // Price validation - limit to reasonable values
+    if (isNaN(price) || price < 0 || price > 9999.99) {
+      newErrors.price = 'Preço deve estar entre 0 e 9999.99'
     }
 
-    // URL validation disabled for testing - just leave URLs empty if you don't want to use them
-    // URLs are optional, so no validation needed for now
+    // URL validation (optional)
+    const urlFields = ['posterUrl', 'trailerUrl', 'videoUrl'] as const
+    urlFields.forEach(field => {
+      const url = formData[field] as string
+      if (url && url.trim()) {
+        try {
+          new URL(url.trim())
+        } catch {
+          newErrors[field] = 'URL inválida'
+        }
+      }
+    })
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -127,21 +141,21 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
     try {
       console.log('Starting film addition process...')
       
-      // Call the real API to add the film
+      // Prepare data with proper type conversion and limits
       const filmToAdd = {
-        title: formData.title,
-        synopsis: formData.synopsis,
+        title: formData.title.trim(),
+        synopsis: formData.synopsis.trim(),
         genre: formData.genre,
-        duration: Number(formData.duration),
+        duration: Math.min(999, Math.max(1, Number(formData.duration))), // Clamp between 1-999
         releaseYear: Number(formData.releaseYear),
-        rating: Number(formData.rating),
-        price: Number(formData.price),
+        rating: Math.min(9.9, Math.max(0, Number(formData.rating))), // Clamp between 0-9.9
+        price: Math.min(9999.99, Math.max(0, Number(formData.price))), // Clamp price
         posterUrl: formData.posterUrl.trim() || undefined,
         trailerUrl: formData.trailerUrl.trim() || undefined,
         videoUrl: formData.videoUrl.trim() || undefined,
       }
 
-      console.log('Film data to add:', filmToAdd)
+      console.log('Film data to add (with safe limits):', filmToAdd)
 
       const newFilm = await addFilm(filmToAdd)
 
@@ -155,10 +169,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           title: '',
           synopsis: '',
           genre: '',
-          duration: 0,
+          duration: '',
           releaseYear: new Date().getFullYear(),
-          rating: 0,
-          price: 0,
+          rating: '',
+          price: '',
           posterUrl: '',
           trailerUrl: '',
           videoUrl: ''
@@ -198,194 +212,258 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <div className="bg-gray-900 rounded-lg max-w-4xl w-full max-h-[95vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+      <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-xl rounded-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto border border-white/20 shadow-2xl relative">
+        
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden rounded-2xl">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-pulse"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
+            >
+              {i % 6 === 0 ? (
+                <Star className="w-3 h-3 text-yellow-400/30" />
+              ) : i % 6 === 1 ? (
+                <Heart className="w-3 h-3 text-pink-400/30" />
+              ) : i % 6 === 2 ? (
+                <Sparkles className="w-2 h-2 text-cyan-400/30" />
+              ) : i % 6 === 3 ? (
+                <Film className="w-3 h-3 text-purple-400/30" />
+              ) : i % 6 === 4 ? (
+                <Crown className="w-2 h-2 text-orange-400/30" />
+              ) : (
+                <div className="w-1 h-1 rounded-full bg-gradient-to-r from-pink-400 to-purple-500 opacity-30" />
+              )}
+            </div>
+          ))}
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <div className="flex items-center space-x-3">
-            <Film className="w-6 h-6 text-blue-400" />
-            <h2 className="text-white text-2xl font-bold">Adicionar Novo Filme</h2>
+        <div className="relative z-10 flex items-center justify-between p-8 border-b border-white/20">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
+              <Crown className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-white text-3xl font-bold">
+                <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
+                  Admin Studio
+                </span>
+              </h2>
+              <p className="text-gray-300 text-sm">Adicionar novo filme à plataforma</p>
+            </div>
           </div>
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="text-gray-400 hover:text-white p-2 disabled:opacity-50"
+            className="text-gray-400 hover:text-white p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="relative z-10 p-8 space-y-8">
           {/* Basic Information */}
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-white font-semibold mb-4">Informações Básicas</h3>
+          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20">
+            <h3 className="text-white font-bold text-xl mb-6 flex items-center">
+              <Sparkles className="w-5 h-5 mr-3 text-yellow-400" />
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                Informações Básicas
+              </span>
+            </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Title */}
               <div className="md:col-span-2">
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Film className="w-4 h-4 mr-2 text-purple-400" />
                   Título *
                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Ex: Inception"
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.title ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  placeholder="Ex: Call Me By Your Name"
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.title ? 'border-red-500' : 'border-white/20'
+                  } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 />
                 {errors.title && (
-                  <p className="text-red-400 text-sm mt-1">{errors.title}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-4 h-4 mr-1" />
+                    {errors.title}
+                  </p>
                 )}
               </div>
 
               {/* Genre */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Heart className="w-4 h-4 mr-2 text-pink-400" />
                   Gênero *
                 </label>
                 <select
                   value={formData.genre}
                   onChange={(e) => handleInputChange('genre', e.target.value)}
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.genre ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.genre ? 'border-red-500' : 'border-white/20'
+                  } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 >
                   <option value="">Selecione um gênero</option>
                   {genres.map(genre => (
-                    <option key={genre} value={genre}>{genre}</option>
+                    <option key={genre} value={genre} className="bg-gray-800">{genre}</option>
                   ))}
                 </select>
                 {errors.genre && (
-                  <p className="text-red-400 text-sm mt-1">{errors.genre}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.genre}</p>
                 )}
               </div>
 
               {/* Release Year */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Calendar className="w-4 h-4 mr-2 text-blue-400" />
                   Ano de Lançamento *
                 </label>
                 <select
                   value={formData.releaseYear}
                   onChange={(e) => handleInputChange('releaseYear', parseInt(e.target.value))}
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.releaseYear ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.releaseYear ? 'border-red-500' : 'border-white/20'
+                  } focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 >
                   {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
+                    <option key={year} value={year} className="bg-gray-800">{year}</option>
                   ))}
                 </select>
                 {errors.releaseYear && (
-                  <p className="text-red-400 text-sm mt-1">{errors.releaseYear}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.releaseYear}</p>
                 )}
               </div>
 
               {/* Duration */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
-                  Duração (minutos) *
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Clock className="w-4 h-4 mr-2 text-green-400" />
+                  Duração (minutos) * <span className="text-gray-500 ml-2">(1-999)</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.duration === 0 ? '' : formData.duration}
-                  onChange={(e) => handleInputChange('duration', e.target.value ? parseInt(e.target.value) : 0)}
-                  placeholder="Ex: 148"
+                  value={formData.duration}
+                  onChange={(e) => handleInputChange('duration', e.target.value)}
+                  placeholder="Ex: 132"
                   min="1"
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.duration ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  max="999"
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.duration ? 'border-red-500' : 'border-white/20'
+                  } focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 />
                 {errors.duration && (
-                  <p className="text-red-400 text-sm mt-1">{errors.duration}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.duration}</p>
                 )}
               </div>
 
               {/* Rating */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
-                  Avaliação (0-10) *
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Star className="w-4 h-4 mr-2 text-yellow-400" />
+                  Avaliação * <span className="text-gray-500 ml-2">(0-9.9)</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.rating === 0 ? '' : formData.rating}
-                  onChange={(e) => handleInputChange('rating', e.target.value ? parseFloat(e.target.value) : 0)}
-                  placeholder="Ex: 8.8"
+                  value={formData.rating}
+                  onChange={(e) => handleInputChange('rating', e.target.value)}
+                  placeholder="Ex: 8.7"
                   min="0"
-                  max="10"
+                  max="9.9"
                   step="0.1"
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.rating ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.rating ? 'border-red-500' : 'border-white/20'
+                  } focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 />
                 {errors.rating && (
-                  <p className="text-red-400 text-sm mt-1">{errors.rating}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.rating}</p>
                 )}
+                <p className="text-gray-400 text-xs mt-2 flex items-center">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  ⚠️ Máximo 9.9 devido às limitações atuais do banco de dados
+                </p>
               </div>
 
               {/* Price */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
-                  Preço (R$) *
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <DollarSign className="w-4 h-4 mr-2 text-emerald-400" />
+                  Preço (R$) * <span className="text-gray-500 ml-2">(0-9999.99)</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.price === 0 ? '' : formData.price}
-                  onChange={(e) => handleInputChange('price', e.target.value ? parseFloat(e.target.value) : 0)}
-                  placeholder="Ex: 15.99"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
+                  placeholder="Ex: 24.99"
                   min="0"
+                  max="9999.99"
                   step="0.01"
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.price ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.price ? 'border-red-500' : 'border-white/20'
+                  } focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 />
                 {errors.price && (
-                  <p className="text-red-400 text-sm mt-1">{errors.price}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.price}</p>
                 )}
               </div>
 
               {/* Synopsis */}
               <div className="md:col-span-2">
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Heart className="w-4 h-4 mr-2 text-pink-400" />
                   Sinopse *
                 </label>
                 <textarea
                   value={formData.synopsis}
                   onChange={(e) => handleInputChange('synopsis', e.target.value)}
-                  placeholder="Descreva a história do filme..."
+                  placeholder="Conte a história deste filme incrível..."
                   rows={4}
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.synopsis ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none resize-vertical`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.synopsis ? 'border-red-500' : 'border-white/20'
+                  } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300 resize-vertical`}
                   disabled={isSubmitting}
                 />
                 {errors.synopsis && (
-                  <p className="text-red-400 text-sm mt-1">{errors.synopsis}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.synopsis}</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Media URLs */}
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-white font-semibold mb-4 flex items-center">
-              <Upload className="w-4 h-4 mr-2" />
-              URLs de Mídia
+          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20">
+            <h3 className="text-white font-bold text-xl mb-6 flex items-center">
+              <Upload className="w-5 h-5 mr-3 text-cyan-400" />
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                URLs de Mídia (Opcionais)
+              </span>
             </h3>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Poster URL */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
                   URL do Poster
                 </label>
                 <input
@@ -393,19 +471,20 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   value={formData.posterUrl}
                   onChange={(e) => handleInputChange('posterUrl', e.target.value)}
                   placeholder="https://example.com/poster.jpg"
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.posterUrl ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.posterUrl ? 'border-red-500' : 'border-white/20'
+                  } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 />
                 {errors.posterUrl && (
-                  <p className="text-red-400 text-sm mt-1">{errors.posterUrl}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.posterUrl}</p>
                 )}
               </div>
 
               {/* Trailer URL */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Camera className="w-4 h-4 mr-2 text-orange-400" />
                   URL do Trailer
                 </label>
                 <input
@@ -413,19 +492,20 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   value={formData.trailerUrl}
                   onChange={(e) => handleInputChange('trailerUrl', e.target.value)}
                   placeholder="https://example.com/trailer.mp4"
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.trailerUrl ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.trailerUrl ? 'border-red-500' : 'border-white/20'
+                  } focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 />
                 {errors.trailerUrl && (
-                  <p className="text-red-400 text-sm mt-1">{errors.trailerUrl}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.trailerUrl}</p>
                 )}
               </div>
 
               {/* Video URL */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Video className="w-4 h-4 mr-2 text-green-400" />
                   URL do Filme Completo
                 </label>
                 <input
@@ -433,47 +513,64 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   value={formData.videoUrl}
                   onChange={(e) => handleInputChange('videoUrl', e.target.value)}
                   placeholder="https://example.com/movie.mp4"
-                  className={`w-full p-3 bg-gray-700 text-white rounded-md border ${
-                    errors.videoUrl ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-blue-500 focus:outline-none`}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.videoUrl ? 'border-red-500' : 'border-white/20'
+                  } focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-300`}
                   disabled={isSubmitting}
                 />
                 {errors.videoUrl && (
-                  <p className="text-red-400 text-sm mt-1">{errors.videoUrl}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.videoUrl}</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-700">
+          <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-6 pt-6 border-t border-white/20">
             <button
               type="button"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="px-6 py-3 bg-gray-600 text-white rounded-md font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
+              className="px-8 py-4 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-orange-500/25 flex items-center justify-center space-x-3"
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Adicionando...</span>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <span>Adicionando com amor...</span>
                 </>
               ) : (
                 <>
-                  <Plus className="w-5 h-5" />
+                  <Crown className="w-6 h-6" />
                   <span>Adicionar Filme</span>
+                  <Plus className="w-5 h-5" />
                 </>
               )}
             </button>
           </div>
         </form>
+
+        {/* Pride Footer */}
+        <div className="relative z-10 p-6 border-t border-white/20">
+          <div className="text-center">
+            <div className="flex justify-center space-x-1 mb-3">
+              {['🎬', '🌈', '👑', '✨', '❤️', '🧡', '💛', '💚', '💙', '💜'].map((emoji, i) => (
+                <span key={i} className="text-lg animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}>
+                  {emoji}
+                </span>
+              ))}
+            </div>
+            <p className="text-gray-300 text-sm">
+              🎭 Criando conteúdo diverso e inclusivo para nossa comunidade 🎭
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
