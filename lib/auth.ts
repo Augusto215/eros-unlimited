@@ -1,10 +1,13 @@
 import { supabase, type Database } from './supabase'
 import type { User } from '@supabase/supabase-js'
 
+export type UserRole = 'CLIENT' | 'ADMIN'
+
 export interface Client {
   id: string
   name: string
   email: string
+  role: UserRole
   created_at?: string
 }
 
@@ -29,32 +32,67 @@ export const login = async (email: string, password: string): Promise<Client | n
       password,
     })
 
-    if (authError) {
+    if (authError || !authData.user) {
       console.error('Auth error:', authError)
       return null
     }
 
-    if (!authData.user) {
-      console.error('No user returned from auth')
-      return null
-    }
+    console.log('Authenticated user ID:', authData.user.id)
 
     // Get user profile from clients table
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
-      .select('*')
+      .select('id, name, email, role, created_at')
       .eq('id', authData.user.id)
-      .single()
+      .maybeSingle() // Use maybeSingle instead of single to avoid errors
 
+    console.log('Client query result:', { clientData, clientError })
+
+    // If client doesn't exist, create one
+    if (!clientData) {
+      console.log('No client found, creating new client profile...')
+      
+      const { data: newClientData, error: createError } = await supabase
+        .from('clients')
+        .insert({
+          id: authData.user.id,
+          name: authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User',
+          email: authData.user.email || email,
+          role: 'CLIENT'
+        })
+        .select('id, name, email, role, created_at')
+        .single()
+
+      if (createError) {
+        console.error('Error creating client profile:', createError)
+        await supabase.auth.signOut()
+        return null
+      }
+
+      const client: Client = {
+        id: newClientData.id,
+        name: newClientData.name,
+        email: newClientData.email,
+        role: newClientData.role,
+        created_at: newClientData.created_at,
+      }
+
+      localStorage.setItem('eros_user', JSON.stringify(client))
+      return client
+    }
+
+    // If there was an error fetching existing client
     if (clientError) {
       console.error('Client fetch error:', clientError)
       return null
     }
 
+    // Success - client exists
     const client: Client = {
       id: clientData.id,
       name: clientData.name,
       email: clientData.email,
+      role: clientData.role,
       created_at: clientData.created_at,
     }
 
@@ -62,6 +100,7 @@ export const login = async (email: string, password: string): Promise<Client | n
     localStorage.setItem('eros_user', JSON.stringify(client))
     
     return client
+    
   } catch (error) {
     console.error('Login error:', error)
     return null
@@ -91,7 +130,7 @@ export const register = async (name: string, email: string, password: string): P
       throw new Error('Falha ao criar usuário')
     }
 
-    // Wait a moment for auth to complete
+    // Wait for auth to complete
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     // Create client profile
@@ -101,8 +140,9 @@ export const register = async (name: string, email: string, password: string): P
         id: authData.user.id,
         name,
         email,
+        role: 'CLIENT'
       })
-      .select()
+      .select('id, name, email, role, created_at')
       .single()
 
     if (clientError) {
@@ -120,6 +160,7 @@ export const register = async (name: string, email: string, password: string): P
       id: clientData.id,
       name: clientData.name,
       email: clientData.email,
+      role: clientData.role,
       created_at: clientData.created_at,
     }
 
@@ -155,7 +196,7 @@ export const initializeAuth = async (): Promise<Client | null> => {
       return null
     }
 
-    // Check if we have user data in localStorage
+    // Check localStorage first
     const storedUser = getCurrentUser()
     if (storedUser && storedUser.id === session.user.id) {
       return storedUser
@@ -164,9 +205,9 @@ export const initializeAuth = async (): Promise<Client | null> => {
     // Fetch fresh user data
     const { data: clientData, error } = await supabase
       .from('clients')
-      .select('*')
+      .select('id, name, email, role, created_at')
       .eq('id', session.user.id)
-      .single()
+      .maybeSingle()
 
     if (error || !clientData) {
       console.error('Error fetching client data:', error)
@@ -178,6 +219,7 @@ export const initializeAuth = async (): Promise<Client | null> => {
       id: clientData.id,
       name: clientData.name,
       email: clientData.email,
+      role: clientData.role,
       created_at: clientData.created_at,
     }
 

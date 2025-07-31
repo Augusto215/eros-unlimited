@@ -1,4 +1,4 @@
-// next.config.js
+// next.config.js - More flexible version
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone', // OBRIGATÓRIO para Docker
@@ -7,15 +7,21 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      // Allow any HTTPS domain (more flexible for testing)
       {
         protocol: 'https',
-        hostname: 'a-static.mlcdn.com.br',
+        hostname: '**',
+      },
+      // Specific domains (more secure for production)
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'example.com',
+        hostname: 'm.media-amazon.com',
         port: '',
         pathname: '/**',
       },
@@ -27,13 +33,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
+        hostname: 'commondatastorage.googleapis.com',
         port: '',
         pathname: '/**',
       }

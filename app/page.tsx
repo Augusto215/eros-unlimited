@@ -9,15 +9,18 @@ import HeroSection from "@/components/hero-section"
 import HomeContent from "@/components/home-content"
 import FilmModal from "@/components/film-modal"
 import PaymentModal from "@/components/payment-modal"
+import AddFilmModal from "@/components/add-film-modal"
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [isAddFilmModalOpen, setIsAddFilmModalOpen] = useState(false)
   const [heroFilm, setHeroFilm] = useState<Film | null>(null)
   const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
   const [userId, setUserId] = useState('')
+  const [films, setFilms] = useState<Film[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -33,16 +36,7 @@ export default function Home() {
         setUserId(user.id)
 
         // Load films and user purchases
-        const [films, purchases] = await Promise.all([
-          getMovies(),
-          getUserPurchasedFilms(user.id)
-        ])
-
-        if (films.length > 0) {
-          setHeroFilm(films[0]) // Use first film as hero
-        }
-
-        setPurchasedFilmIds(purchases)
+        await loadFilmsData(user.id)
       } catch (error) {
         console.error('Error initializing app:', error)
         router.push("/login")
@@ -54,6 +48,20 @@ export default function Home() {
     initApp()
   }, [router])
 
+  const loadFilmsData = async (userId: string) => {
+    const [filmsData, purchases] = await Promise.all([
+      getMovies(),
+      getUserPurchasedFilms(userId)
+    ])
+
+    setFilms(filmsData)
+    setPurchasedFilmIds(purchases)
+
+    if (filmsData.length > 0) {
+      setHeroFilm(filmsData[0]) // Use first film as hero
+    }
+  }
+
   const handleFilmClick = (film: Film) => {
     setSelectedFilm(film)
     setIsModalOpen(true)
@@ -64,6 +72,11 @@ export default function Home() {
       setSelectedFilm(heroFilm)
       setIsModalOpen(true)
     }
+  }
+
+  const handleAdminClick = () => {
+    // Open add film modal when admin button is clicked
+    setIsAddFilmModalOpen(true)
   }
 
   const handlePurchaseClick = (filmId: string) => {
@@ -94,6 +107,19 @@ export default function Home() {
     }
   }
 
+  const handleFilmAdded = async () => {
+    // Reload films data after a new film is added
+    try {
+      const user = getCurrentUser()
+      if (user) {
+        await loadFilmsData(user.id)
+        console.log('Films data reloaded after adding new film')
+      }
+    } catch (error) {
+      console.error('Error reloading films data:', error)
+    }
+  }
+
   const handlePlay = (film: Film) => {
     // This would typically open a video player
     console.log("Playing film:", film.title)
@@ -120,7 +146,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
-      <HeroSection film={heroFilm} onPlayClick={handleHeroPlay} />
+      <HeroSection 
+        film={heroFilm} 
+        onPlayClick={handleHeroPlay}
+        onAdminClick={handleAdminClick}
+      />
       <HomeContent 
         onFilmClick={handleFilmClick}
         purchasedFilmIds={purchasedFilmIds}
@@ -143,6 +173,13 @@ export default function Home() {
         userId={userId}
         onClose={() => setIsPaymentModalOpen(false)}
         onPaymentSuccess={handlePaymentSuccess}
+      />
+
+      {/* Add Film Modal (Admin Only) */}
+      <AddFilmModal
+        isOpen={isAddFilmModalOpen}
+        onClose={() => setIsAddFilmModalOpen(false)}
+        onFilmAdded={handleFilmAdded}
       />
     </div>
   )

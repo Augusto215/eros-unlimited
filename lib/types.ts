@@ -1,7 +1,6 @@
 export interface Film {
   id: string
   title: string
-  description: string
   synopsis: string
   price: number
   posterUrl: string
