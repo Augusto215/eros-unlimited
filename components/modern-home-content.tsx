@@ -30,6 +30,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const [showControls, setShowControls] = useState(true)
+  const [videoLoaded, setVideoLoaded] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -57,9 +58,6 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
     // Show expanded card after delay
     hoverTimeoutRef.current = setTimeout(() => {
       setShowExpandedCard(true)
-      if (film.trailerUrl) {
-        setIsPlaying(true)
-      }
     }, 1200) // 1.2 second delay like Netflix
   }
 
@@ -79,6 +77,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
       setShowExpandedCard(false)
       setIsPlaying(false)
       setShowControls(true)
+      setVideoLoaded(false)
       if (videoRef.current) {
         videoRef.current.pause()
         videoRef.current.currentTime = 0
@@ -86,53 +85,69 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
     }, 300)
   }
 
-  const togglePlay = (e: React.MouseEvent) => {
+  const togglePlay = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (videoRef.current) {
+    
+    if (!videoRef.current || !videoLoaded) return
+    
+    try {
       if (isPlaying) {
         videoRef.current.pause()
         setIsPlaying(false)
-        setShowControls(true) // Show controls when paused
+        setShowControls(true)
         if (controlsTimeoutRef.current) {
           clearTimeout(controlsTimeoutRef.current)
           controlsTimeoutRef.current = null
         }
       } else {
-        videoRef.current.play().then(() => {
-          setIsPlaying(true)
-          // Hide controls after 2 seconds when playing
-          controlsTimeoutRef.current = setTimeout(() => {
-            setShowControls(false)
-          }, 2000)
-        }).catch(() => {
-          setIsPlaying(false)
-        })
+        await videoRef.current.play()
+        setIsPlaying(true)
+        // Hide controls after 2 seconds when playing
+        controlsTimeoutRef.current = setTimeout(() => {
+          setShowControls(false)
+        }, 2000)
       }
+    } catch (error) {
+      console.error('Error toggling video playback:', error)
+      setIsPlaying(false)
     }
   }
 
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (videoRef.current) {
-      const newMutedState = !isMuted
-      videoRef.current.muted = newMutedState
-      setIsMuted(newMutedState)
-      
-      // Show controls temporarily when toggling mute
-      setShowControls(true)
-      if (isPlaying) {
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current)
-        }
-        controlsTimeoutRef.current = setTimeout(() => {
-          setShowControls(false)
-        }, 2000)
-      }
+    
+    if (!videoRef.current) return
+    
+    const newMutedState = !isMuted
+    videoRef.current.muted = newMutedState
+    setIsMuted(newMutedState)
+    
+    // Show controls temporarily when toggling mute
+    setShowControls(true)
+    if (isPlaying && controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current)
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false)
+      }, 2000)
     }
   }
 
   const handleVideoLoad = () => {
-    // Video loaded, useEffect will handle the play state
+    setVideoLoaded(true)
+    if (videoRef.current && showExpandedCard && film.trailerUrl) {
+      videoRef.current.muted = isMuted
+      // Auto-play when video loads and card is expanded
+      videoRef.current.play().then(() => {
+        setIsPlaying(true)
+        // Hide controls after 2 seconds when auto-playing
+        controlsTimeoutRef.current = setTimeout(() => {
+          setShowControls(false)
+        }, 2000)
+      }).catch((error) => {
+        console.error('Auto-play failed:', error)
+        setIsPlaying(false)
+      })
+    }
   }
 
   const handleMouseMoveOnVideo = () => {
@@ -150,76 +165,54 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
     }
   }
 
-  // Effect to handle video state changes when showExpandedCard changes
+  // Handle video events
+  const handleVideoPlay = () => {
+    setIsPlaying(true)
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current)
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false)
+    }, 2000)
+  }
+
+  const handleVideoPause = () => {
+    setIsPlaying(false)
+    setShowControls(true)
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current)
+      controlsTimeoutRef.current = null
+    }
+  }
+
+  const handleVideoEnded = () => {
+    setIsPlaying(false)
+    setShowControls(true)
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current)
+      controlsTimeoutRef.current = null
+    }
+  }
+
+  // Effect to handle expanded card state changes
   useEffect(() => {
     if (showExpandedCard && videoRef.current && film.trailerUrl) {
       const video = videoRef.current
       video.muted = isMuted
       
-      // Add event listeners to sync state with video events
-      const handlePlay = () => {
-        setIsPlaying(true)
-        // Hide controls after 2 seconds when video starts playing
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current)
-        }
-        controlsTimeoutRef.current = setTimeout(() => {
-          setShowControls(false)
-        }, 2000)
-      }
-      const handlePause = () => {
-        setIsPlaying(false)
-        setShowControls(true) // Always show controls when paused
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current)
-          controlsTimeoutRef.current = null
-        }
-      }
-      const handleEnded = () => {
-        setIsPlaying(false)
-        setShowControls(true) // Show controls when video ends
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current)
-          controlsTimeoutRef.current = null
-        }
-      }
+      // Add event listeners
+      video.addEventListener('play', handleVideoPlay)
+      video.addEventListener('pause', handleVideoPause)
+      video.addEventListener('ended', handleVideoEnded)
       
-      video.addEventListener('play', handlePlay)
-      video.addEventListener('pause', handlePause)
-      video.addEventListener('ended', handleEnded)
-      
-      // Start playing if needed
-      if (isPlaying) {
-        video.play().catch(() => {
-          setIsPlaying(false)
-        })
-      }
-      
-      // Cleanup
+      // Cleanup function
       return () => {
-        video.removeEventListener('play', handlePlay)
-        video.removeEventListener('pause', handlePause)
-        video.removeEventListener('ended', handleEnded)
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current)
-          controlsTimeoutRef.current = null
-        }
+        video.removeEventListener('play', handleVideoPlay)
+        video.removeEventListener('pause', handleVideoPause)
+        video.removeEventListener('ended', handleVideoEnded)
       }
     }
   }, [showExpandedCard, film.trailerUrl, isMuted])
-  
-  // Separate effect for play state changes
-  useEffect(() => {
-    if (showExpandedCard && videoRef.current && film.trailerUrl) {
-      if (isPlaying && videoRef.current.paused) {
-        videoRef.current.play().catch(() => {
-          setIsPlaying(false)
-        })
-      } else if (!isPlaying && !videoRef.current.paused) {
-        videoRef.current.pause()
-      }
-    }
-  }, [isPlaying, showExpandedCard, film.trailerUrl])
 
   // Cleanup effect for all timeouts
   useEffect(() => {
@@ -324,7 +317,9 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
                 muted={isMuted}
                 loop
                 onLoadedData={handleVideoLoad}
+                onCanPlay={handleVideoLoad}
                 playsInline
+                preload="metadata"
               >
                 <source src={getVideoUrl(film.trailerUrl)} type="video/mp4" />
               </video>
@@ -371,7 +366,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
               )}
 
               {/* Gradient overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
 
