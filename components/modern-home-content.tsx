@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film, Sparkles } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles } from "lucide-react"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
 
@@ -198,7 +198,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
       <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-pink-900/20 flex items-center justify-center">
         <div className="text-center">
           <div className="w-32 h-32 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-            <Film className="w-16 h-16 text-pink-400" />
+            <FilmIcon className="w-16 h-16 text-pink-400" />
           </div>
           <h2 className="text-white text-2xl font-bold mb-2">Biblioteca em Construção</h2>
           <p className="text-gray-400">Nenhum filme disponível no momento</p>
@@ -236,7 +236,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
             </div>
           </div>
 
-          {/* Purchased Films Section */}
+          {/* Purchased Films Section - Only show if user has purchased films */}
           {purchasedFilms.length > 0 && (
             <ModernFilmRow
               title="Meus Filmes"
@@ -248,11 +248,11 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
             />
           )}
 
-          {/* Available Films Section */}
-          {availableFilms.length > 0 && (
+          {/* Available Films Section - Show all films if no purchases, or only available if user has purchases */}
+          {(purchasedFilms.length === 0 ? films : availableFilms).length > 0 && (
             <ModernFilmRow
-              title="Filmes Disponíveis"
-              films={availableFilms}
+              title={purchasedFilms.length === 0 ? "Catálogo de Filmes" : "Filmes Disponíveis"}
+              films={purchasedFilms.length === 0 ? films : availableFilms}
               purchasedFilmIds={purchasedFilmIds}
               onFilmClick={onFilmClick}
               icon={<ShoppingBag className="w-4 h-4 text-white" />}
@@ -260,8 +260,8 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
             />
           )}
 
-          {/* Recommended Section */}
-          {recommendedFilms.length > 3 && (
+          {/* Recommended Section - Only show if there are enough films and user has purchases */}
+          {recommendedFilms.length > 3 && purchasedFilms.length > 0 && (
             <ModernFilmRow
               title="Recomendados para Você"
               films={recommendedFilms}
@@ -272,8 +272,8 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
             />
           )}
 
-          {/* Trending Section */}
-          {films.length > 4 && (
+          {/* Trending Section - Only show if there are enough films and user has purchases */}
+          {films.length > 4 && purchasedFilms.length > 0 && (
             <ModernFilmRow
               title="Em Alta"
               films={films.slice(1, 7)} // Filmes do índice 1 ao 6
@@ -289,7 +289,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
       {/* Floating action elements */}
       <div className="fixed bottom-8 right-8 z-20">
         <div className="bg-gradient-to-r from-pink-500 to-purple-500 rounded-full p-4 shadow-lg hover:shadow-pink-500/25 transition-all duration-300 cursor-pointer">
-          <Film className="w-6 h-6 text-white" />
+          <FilmIcon className="w-6 h-6 text-white" />
         </div>
       </div>
     </div>

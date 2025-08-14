@@ -147,6 +147,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-4">
                 <button
+                  style={{ cursor: 'pointer' }}
                   onClick={onPlayClick}
                   className="group flex items-center space-x-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-pink-500/25"
                 >
@@ -154,12 +155,12 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                   <span>Assistir Agora</span>
                 </button>
 
-                <button className="group flex items-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition-all duration-300 border border-white/20">
+                <button style={ { cursor: 'pointer'}} className="group flex items-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition-all duration-300 border border-white/20">
                   <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform" />
                   <span>Minha Lista</span>
                 </button>
 
-                <button className="group flex items-center space-x-3 bg-gray-800/50 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:bg-gray-700/50 transition-all duration-300 border border-gray-600/30">
+                <button style={{ cursor: 'pointer' }} className="group flex items-center space-x-3 bg-gray-800/50 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:bg-gray-700/50 transition-all duration-300 border border-gray-600/30">
                   <Info className="w-6 h-6 group-hover:scale-110 transition-transform" />
                   <span>Mais Info</span>
                 </button>

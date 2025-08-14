@@ -156,7 +156,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   className="flex-1 flex items-center justify-center space-x-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-pink-500/25"
                 >
                   <Play className="w-6 h-6" />
-                  <span>Assistir Agora</span>
+                  <span style={{ cursor: 'pointer' }}>Assistir Agora</span>
                 </button>
                 
                 {/* Add to Favorites */}

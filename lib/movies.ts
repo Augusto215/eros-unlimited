@@ -1,5 +1,6 @@
 // lib/movies.ts - Complete version with addFilm function
 import { supabase } from './supabase'
+import { mockFilms } from './mock-data'
 import type { Film } from './types'
 
 // Transform database film to app Film type
@@ -42,13 +43,20 @@ export const getMovies = async (): Promise<Film[]> => {
 
     if (error) {
       console.error('Error fetching movies:', error)
-      return []
+      console.log('🎬 Fallback: Using mock films data')
+      return mockFilms
+    }
+
+    if (!data || data.length === 0) {
+      console.log('🎬 No films in database, using mock films data')
+      return mockFilms
     }
 
     return data.map(transformDbFilmToFilm)
   } catch (error) {
     console.error('Error in getMovies:', error)
-    return []
+    console.log('🎬 Fallback: Using mock films data')
+    return mockFilms
   }
 }
 

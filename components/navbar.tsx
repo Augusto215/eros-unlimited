@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { User } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { getCurrentUser, logout } from "@/lib/auth"
 import type { Client } from "@/lib/auth"
@@ -12,6 +12,7 @@ export default function Navbar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     setMounted(true)
@@ -42,6 +43,14 @@ export default function Navbar() {
     }
   }
 
+  // Helper function to determine if a link is active
+  const getLinkClasses = (href: string) => {
+    const isActive = pathname === href
+    return `text-white/80 hover:text-white transition-colors ${
+      isActive ? 'font-bold text-white border-b-2 border-pink-400' : ''
+    }`
+  }
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -50,11 +59,17 @@ export default function Navbar() {
             Eros Unlimited
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/about" className="text-white/80 hover:text-white transition-colors">
+            <Link href="/" className={getLinkClasses("/")}>
+              Home
+            </Link>
+            <Link href="/about" className={getLinkClasses("/about")}>
               About
             </Link>
-            <Link href="/partner" className="text-white/80 hover:text-white transition-colors">
+            <Link href="/partner" className={getLinkClasses("/partner")}>
               Partner
+            </Link>
+            <Link href="/releases" className={getLinkClasses("/releases")}>
+              Releases
             </Link>
           </div>
         </div>

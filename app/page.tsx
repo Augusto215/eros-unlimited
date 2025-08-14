@@ -26,20 +26,35 @@ export default function Home() {
   useEffect(() => {
     const initApp = async () => {
       try {
-        // Check authentication
+        // Check authentication (optional for this page)
         const user = await initializeAuth()
-        if (!user) {
-          router.push("/login")
-          return
+        
+        if (user) {
+          setUserId(user.id)
+          // Load films and user purchases if logged in
+          await loadFilmsData(user.id)
+        } else {
+          // Load only films data if not logged in
+          const filmsData = await getMovies()
+          setFilms(filmsData)
+          
+          if (filmsData.length > 0) {
+            setHeroFilm(filmsData[0]) // Use first film as hero
+          }
         }
-
-        setUserId(user.id)
-
-        // Load films and user purchases
-        await loadFilmsData(user.id)
       } catch (error) {
         console.error('Error initializing app:', error)
-        router.push("/login")
+        // Still load films even if auth fails
+        try {
+          const filmsData = await getMovies()
+          setFilms(filmsData)
+          
+          if (filmsData.length > 0) {
+            setHeroFilm(filmsData[0])
+          }
+        } catch (filmError) {
+          console.error('Error loading films:', filmError)
+        }
       } finally {
         setIsLoading(false)
       }
@@ -63,15 +78,29 @@ export default function Home() {
   }
 
   const handleFilmClick = (film: Film) => {
+    // Check if user is logged in before opening modal
+    if (!userId) {
+      // Redirect to login if not logged in
+      router.push("/login")
+      return
+    }
+    
     setSelectedFilm(film)
     setIsModalOpen(true)
   }
 
   const handleHeroPlay = () => {
-    if (heroFilm) {
-      setSelectedFilm(heroFilm)
-      setIsModalOpen(true)
+    if (!heroFilm) return
+    
+    // Check if user is logged in before opening modal
+    if (!userId) {
+      // Redirect to login if not logged in
+      router.push("/login")
+      return
     }
+    
+    setSelectedFilm(heroFilm)
+    setIsModalOpen(true)
   }
 
   const handleAdminClick = () => {
