@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles } from "lucide-react"
+import React, { useState, useRef, useEffect } from "react"
+import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles, Pause, Volume2, VolumeX, Plus, Info } from "lucide-react"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
 
@@ -26,16 +26,229 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
   onFilmClick: (film: Film) => void
 }) {
   const [isHovered, setIsHovered] = useState(false)
+  const [showExpandedCard, setShowExpandedCard] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(true)
+  const [showControls, setShowControls] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Convert Google Drive link for video element
+  const getVideoUrl = (url: string) => {
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/)
+      if (match) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`
+      }
+    }
+    return url
+  }
+
+  const handleMouseEnter = () => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current)
+      leaveTimeoutRef.current = null
+    }
+    
+    setIsHovered(true)
+    
+    // Show expanded card after delay
+    hoverTimeoutRef.current = setTimeout(() => {
+      setShowExpandedCard(true)
+      if (film.trailerUrl) {
+        setIsPlaying(true)
+      }
+    }, 1200) // 1.2 second delay like Netflix
+  }
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+      hoverTimeoutRef.current = null
+    }
+    
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current)
+      controlsTimeoutRef.current = null
+    }
+    
+    leaveTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false)
+      setShowExpandedCard(false)
+      setIsPlaying(false)
+      setShowControls(true)
+      if (videoRef.current) {
+        videoRef.current.pause()
+        videoRef.current.currentTime = 0
+      }
+    }, 300)
+  }
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause()
+        setIsPlaying(false)
+        setShowControls(true) // Show controls when paused
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current)
+          controlsTimeoutRef.current = null
+        }
+      } else {
+        videoRef.current.play().then(() => {
+          setIsPlaying(true)
+          // Hide controls after 2 seconds when playing
+          controlsTimeoutRef.current = setTimeout(() => {
+            setShowControls(false)
+          }, 2000)
+        }).catch(() => {
+          setIsPlaying(false)
+        })
+      }
+    }
+  }
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (videoRef.current) {
+      const newMutedState = !isMuted
+      videoRef.current.muted = newMutedState
+      setIsMuted(newMutedState)
+      
+      // Show controls temporarily when toggling mute
+      setShowControls(true)
+      if (isPlaying) {
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current)
+        }
+        controlsTimeoutRef.current = setTimeout(() => {
+          setShowControls(false)
+        }, 2000)
+      }
+    }
+  }
+
+  const handleVideoLoad = () => {
+    // Video loaded, useEffect will handle the play state
+  }
+
+  const handleMouseMoveOnVideo = () => {
+    // Show controls when mouse moves over video
+    setShowControls(true)
+    
+    // If video is playing, hide controls again after 2 seconds
+    if (isPlaying) {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current)
+      }
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false)
+      }, 2000)
+    }
+  }
+
+  // Effect to handle video state changes when showExpandedCard changes
+  useEffect(() => {
+    if (showExpandedCard && videoRef.current && film.trailerUrl) {
+      const video = videoRef.current
+      video.muted = isMuted
+      
+      // Add event listeners to sync state with video events
+      const handlePlay = () => {
+        setIsPlaying(true)
+        // Hide controls after 2 seconds when video starts playing
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current)
+        }
+        controlsTimeoutRef.current = setTimeout(() => {
+          setShowControls(false)
+        }, 2000)
+      }
+      const handlePause = () => {
+        setIsPlaying(false)
+        setShowControls(true) // Always show controls when paused
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current)
+          controlsTimeoutRef.current = null
+        }
+      }
+      const handleEnded = () => {
+        setIsPlaying(false)
+        setShowControls(true) // Show controls when video ends
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current)
+          controlsTimeoutRef.current = null
+        }
+      }
+      
+      video.addEventListener('play', handlePlay)
+      video.addEventListener('pause', handlePause)
+      video.addEventListener('ended', handleEnded)
+      
+      // Start playing if needed
+      if (isPlaying) {
+        video.play().catch(() => {
+          setIsPlaying(false)
+        })
+      }
+      
+      // Cleanup
+      return () => {
+        video.removeEventListener('play', handlePlay)
+        video.removeEventListener('pause', handlePause)
+        video.removeEventListener('ended', handleEnded)
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current)
+          controlsTimeoutRef.current = null
+        }
+      }
+    }
+  }, [showExpandedCard, film.trailerUrl, isMuted])
+  
+  // Separate effect for play state changes
+  useEffect(() => {
+    if (showExpandedCard && videoRef.current && film.trailerUrl) {
+      if (isPlaying && videoRef.current.paused) {
+        videoRef.current.play().catch(() => {
+          setIsPlaying(false)
+        })
+      } else if (!isPlaying && !videoRef.current.paused) {
+        videoRef.current.pause()
+      }
+    }
+  }, [isPlaying, showExpandedCard, film.trailerUrl])
+
+  // Cleanup effect for all timeouts
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
+      if (leaveTimeoutRef.current) {
+        clearTimeout(leaveTimeoutRef.current)
+      }
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <div
-      className="relative group cursor-pointer transition-all duration-500 hover:scale-105"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={() => onFilmClick(film)}
+      className={`relative cursor-pointer transition-all duration-500 ${
+        showExpandedCard ? 'z-50' : 'z-10'
+      }`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ transformOrigin: 'center center' }}
     >
-      <div className="relative aspect-[2/3] w-56 rounded-xl overflow-hidden shadow-lg">
-        {/* Main image */}
+      {/* Normal card */}
+      <div className={`relative aspect-[2/3] w-56 rounded-xl overflow-hidden shadow-lg transition-all duration-500 ${
+        showExpandedCard ? 'opacity-0' : 'opacity-100 hover:scale-105'
+      }`}>
         <Image 
           src={film.posterUrl || "/placeholder.svg"} 
           alt={film.title} 
@@ -43,10 +256,8 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
           className="object-cover transition-transform duration-500 group-hover:scale-110" 
         />
         
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         
-        {/* Purchase status badge */}
         {isPurchased && (
           <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
             <Crown className="w-3 h-3" />
@@ -54,16 +265,13 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
           </div>
         )}
 
-        {/* Rating badge */}
         <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center space-x-1">
           <Star className="w-3 h-3 text-yellow-400 fill-current" />
           <span>{film.rating}</span>
         </div>
 
-        {/* Hover overlay */}
-        {isHovered && (
+        {isHovered && !showExpandedCard && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4 transition-opacity duration-300">
-            {/* Film info */}
             <div className="space-y-3">
               <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
                 {film.title}
@@ -81,7 +289,6 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
                 {film.synopsis}
               </p>
 
-              {/* Action buttons */}
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center space-x-2">
                   <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
@@ -104,6 +311,138 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
           </div>
         )}
       </div>
+
+      {/* Expanded Netflix-style card */}
+      {showExpandedCard && (
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-80 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700 z-50 transition-all duration-500">
+          {/* Video/Poster section */}
+          <div className="relative aspect-video bg-black">
+            {film.trailerUrl ? (
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                muted={isMuted}
+                loop
+                onLoadedData={handleVideoLoad}
+                playsInline
+              >
+                <source src={getVideoUrl(film.trailerUrl)} type="video/mp4" />
+              </video>
+            ) : (
+              <Image 
+                src={film.posterUrl || "/placeholder.svg"} 
+                alt={film.title} 
+                fill 
+                className="object-cover" 
+              />
+            )}
+
+            {/* Video controls overlay */}
+            <div 
+              className="absolute inset-0"
+              onMouseMove={handleMouseMoveOnVideo}
+            >
+              {/* Play/Pause button in center */}
+              {film.trailerUrl && showControls && (
+                <button
+                  onClick={togglePlay}
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 bg-black/70 rounded-full hover:bg-black/90 transition-all duration-300 backdrop-blur-sm"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-6 h-6 text-white" />
+                  ) : (
+                    <Play className="w-6 h-6 text-white ml-1" />
+                  )}
+                </button>
+              )}
+
+              {/* Mute/Unmute button in top right */}
+              {film.trailerUrl && showControls && (
+                <button
+                  onClick={toggleMute}
+                  className="absolute top-3 right-3 p-2 bg-black/70 rounded-full hover:bg-black/90 transition-all duration-300 backdrop-blur-sm"
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-4 h-4 text-white" />
+                  ) : (
+                    <Volume2 className="w-4 h-4 text-white" />
+                  )}
+                </button>
+              )}
+
+              {/* Gradient overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </div>
+          </div>
+
+          {/* Film info section */}
+          <div className="p-4 space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="text-white font-bold text-lg mb-2 line-clamp-1">
+                  {film.title}
+                </h3>
+                
+                <div className="flex items-center space-x-3 text-sm text-gray-300 mb-3">
+                  <div className="flex items-center space-x-1">
+                    <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                    <span>{film.rating}</span>
+                  </div>
+                  <span>{film.releaseYear}</span>
+                  <span className="text-purple-300">{film.genre}</span>
+                  <div className="flex items-center space-x-1">
+                    <Clock className="w-3 h-3" />
+                    <span>{film.duration}min</span>
+                  </div>
+                </div>
+              </div>
+
+              {!isPurchased && (
+                <div className="text-right ml-3">
+                  <div className="text-green-400 font-bold text-lg">
+                    R$ {film.price.toFixed(2)}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <p className="text-gray-300 text-sm line-clamp-3 leading-relaxed mb-4">
+              {film.synopsis}
+            </p>
+
+            {/* Action buttons */}
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onFilmClick(film)
+                }}
+                className="flex items-center space-x-2 bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors font-medium text-sm"
+              >
+                <Play className="w-4 h-4" />
+                <span>Assistir</span>
+              </button>
+
+              <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
+                <Plus className="w-4 h-4 text-white" />
+              </button>
+
+              <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
+                <Info className="w-4 h-4 text-white" />
+              </button>
+
+              {isPurchased && (
+                <div className="ml-auto">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                    <Crown className="w-3 h-3" />
+                    <span>POSSUI</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -156,7 +495,7 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
       </div>
 
       {/* Films container */}
-      <div className="relative group px-4">
+      <div className="relative group px-4 py-8">
         {/* Navigation buttons */}
         <button
           onClick={() => scroll("left")}
@@ -175,7 +514,7 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
         {/* Films scroll container */}
         <div
           ref={scrollContainerRef}
-          className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+          className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16 px-8"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {films.map((film) => (

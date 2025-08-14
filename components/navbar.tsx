@@ -101,3 +101,40 @@ export default function Navbar() {
     </nav>
   )
 }
+
+
+// const [leaveTimeout, setLeaveTimeout] = useState<NodeJS.Timeout | null>(null)
+
+//   const handleMouseEnter = () => {
+//     setIsHovered(true)
+
+//     // Cancelar timeout de saída se existir
+//     if (leaveTimeout) {
+//       clearTimeout(leaveTimeout)
+//       setLeaveTimeout(null)
+//     }
+    
+//     // Delay trailer display like Netflix
+//     const timeout = setTimeout(() => {
+//       if (film.trailerUrl) {
+//         setShowTrailer(true)
+//       }
+//     }, 1000) // 1 second delay
+    
+//     setHoverTimeout(timeout)
+//   }
+
+//   const handleMouseLeave = () => {
+//     if (hoverTimeout) {
+//       clearTimeout(hoverTimeout)
+//       setHoverTimeout(null)
+//     }
+
+//     // Delay para evitar efeito bugado ao sair do trailer
+//     const timeout = setTimeout(() => {
+//       setIsHovered(false)
+//       setShowTrailer(false)
+//     }, 300) // 300ms delay para suavizar a transição
+    
+//     setLeaveTimeout(timeout)
+//   }
