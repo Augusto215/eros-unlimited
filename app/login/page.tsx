@@ -21,6 +21,7 @@ export default function Login() {
 
     try {
       const user = await login(email, password)
+      
       if (user) {
         router.push("/")
       } else {

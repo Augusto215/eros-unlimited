@@ -28,6 +28,33 @@ export default function Navbar() {
     }
 
     loadUser()
+
+    // Listen for storage changes (when user logs in from another tab or component)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'eros_user') {
+        loadUser()
+      }
+    }
+
+    // Listen for custom login event
+    const handleLoginEvent = () => {
+      loadUser()
+    }
+
+    // Listen for custom logout event
+    const handleLogoutEvent = () => {
+      setUser(null)
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('user-login', handleLoginEvent)
+    window.addEventListener('user-logout', handleLogoutEvent)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('user-login', handleLoginEvent)
+      window.removeEventListener('user-logout', handleLogoutEvent)
+    }
   }, [])
 
   const handleLogout = async () => {
@@ -71,6 +98,12 @@ export default function Navbar() {
             <Link href="/releases" className={getLinkClasses("/releases")}>
               Releases
             </Link>
+
+            { user && (
+              <Link href="/my-movies" className={getLinkClasses("/my-movies")}>
+                My movies
+              </Link>
+            )}
           </div>
         </div>
 
@@ -83,6 +116,7 @@ export default function Navbar() {
                 <User className="w-6 h-6" />
                 <span className="hidden md:inline">{user.name}</span>
               </Link>
+
               <button 
                 onClick={handleLogout} 
                 disabled={isLoggingOut}

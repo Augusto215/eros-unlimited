@@ -78,6 +78,12 @@ export const login = async (email: string, password: string): Promise<Client | n
       }
 
       localStorage.setItem('eros_user', JSON.stringify(client))
+      
+      // Dispatch custom event to notify components about login
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('user-login'))
+      }
+      
       return client
     }
 
@@ -98,6 +104,11 @@ export const login = async (email: string, password: string): Promise<Client | n
 
     // Store in localStorage for persistence
     localStorage.setItem('eros_user', JSON.stringify(client))
+    
+    // Dispatch custom event to notify components about login
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('user-login'))
+    }
     
     return client
     
@@ -167,6 +178,11 @@ export const register = async (name: string, email: string, password: string): P
     // Store in localStorage
     localStorage.setItem('eros_user', JSON.stringify(client))
     
+    // Dispatch custom event to notify components about login
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('user-login'))
+    }
+    
     return client
   } catch (error) {
     console.error('Registration error:', error)
@@ -179,10 +195,20 @@ export const logout = async (): Promise<void> => {
   try {
     await supabase.auth.signOut()
     localStorage.removeItem('eros_user')
+    
+    // Dispatch custom event to notify components about logout
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('user-logout'))
+    }
   } catch (error) {
     console.error('Logout error:', error)
     // Even if Supabase logout fails, remove local data
     localStorage.removeItem('eros_user')
+    
+    // Still dispatch the event
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('user-logout'))
+    }
   }
 }
 
