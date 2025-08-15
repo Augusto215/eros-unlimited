@@ -78,6 +78,13 @@ export default function Navbar() {
     }`
   }
 
+  const getLinkUsers = (href: string) => {
+    const isActive = pathname === href
+    return `flex items-center space-x-2 text-white/80 hover:text-white transition-colors ${
+      isActive ? 'font-bold text-white border-b-2 border-pink-400' : ''
+    }`
+  }
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -112,7 +119,7 @@ export default function Navbar() {
             <div className="text-white/80 text-sm">...</div>
           ) : user ? (
             <div className="flex items-center space-x-2">
-              <Link href={`/users/${user.id}`} className="flex items-center space-x-2 text-white/80 hover:text-white">
+              <Link href={`/users/${user.id}`} className={getLinkUsers(`/users/${user.id}`)}>
                 <User className="w-6 h-6" />
                 <span className="hidden md:inline">{user.name}</span>
               </Link>

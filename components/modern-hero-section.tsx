@@ -182,14 +182,14 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
             <div className="relative lg:block hidden">
               <div className="relative">
                 {/* Main poster with enhanced effects */}
-                <div className="relative w-96 h-96 mx-auto">
+                <div className="relative w-96 aspect-[2/3] mx-auto">
                   <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-2xl blur-xl animate-pulse" />
                   <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
                     <Image
                       src={film.posterUrl || "/placeholder.svg"}
                       alt={film.title}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   </div>

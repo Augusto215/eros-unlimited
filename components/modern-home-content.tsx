@@ -246,7 +246,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
           src={film.posterUrl || "/placeholder.svg"} 
           alt={film.title} 
           fill 
-          className="object-cover transition-transform duration-500 group-hover:scale-110" 
+          className="object-contain bg-black transition-transform duration-500 group-hover:scale-110" 
         />
         
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
