@@ -39,9 +39,9 @@ export const login = async (email: string, password: string): Promise<Client | n
 
     console.log('Authenticated user ID:', authData.user.id)
 
-    // Get user profile from clients table
+    // Get user profile from users table
     const { data: clientData, error: clientError } = await supabase
-      .from('clients')
+      .from('users')
       .select('id, name, email, role, created_at')
       .eq('id', authData.user.id)
       .maybeSingle() // Use maybeSingle instead of single to avoid errors
@@ -53,7 +53,7 @@ export const login = async (email: string, password: string): Promise<Client | n
       console.log('No client found, creating new client profile...')
       
       const { data: newClientData, error: createError } = await supabase
-        .from('clients')
+        .from('users')
         .insert({
           id: authData.user.id,
           name: authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User',
@@ -133,9 +133,9 @@ export const register = async (name: string, email: string, password: string): P
     // Wait for auth to complete
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    // Create client profile
+    // Create user profile
     const { data: clientData, error: clientError } = await supabase
-      .from('clients')
+      .from('users')
       .insert({
         id: authData.user.id,
         name,
@@ -204,7 +204,7 @@ export const initializeAuth = async (): Promise<Client | null> => {
 
     // Fetch fresh user data
     const { data: clientData, error } = await supabase
-      .from('clients')
+      .from('users')
       .select('id, name, email, role, created_at')
       .eq('id', session.user.id)
       .maybeSingle()

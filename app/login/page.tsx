@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { login } from "@/lib/auth"
-import { Heart, Mail, Lock, Sparkles, Rainbow, Star } from "lucide-react"
+import { Heart, Mail, Lock, Sparkles, Rainbow, Star, Eye, EyeOff } from "lucide-react"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -33,6 +33,8 @@ export default function Login() {
       setLoading(false)
     }
   }
+
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 relative overflow-hidden">
@@ -123,7 +125,7 @@ export default function Login() {
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300 pl-12"
@@ -132,6 +134,18 @@ export default function Login() {
                     disabled={loading}
                   />
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -179,7 +193,7 @@ export default function Login() {
             {/* Test Credentials */}
             <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-400/30 backdrop-blur-sm">
               <p className="text-blue-300 text-sm text-center font-medium">
-                🧪 Teste: joao@email.com / 123456
+                🧪 Teste: joaoteste@gmail.com / 123456
               </p>
             </div>
           </div>

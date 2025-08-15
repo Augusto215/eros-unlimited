@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Play, Plus, Info, Star, Clock, Calendar, Sparkles } from "lucide-react"
+import { Play, Plus, Info, Star, Clock, Calendar, Sparkles, ShoppingBag} from "lucide-react"
 import type { Film } from "@/lib/types"
 import { getCurrentUser } from "@/lib/auth"
 import Image from "next/image"
@@ -151,8 +151,8 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                   onClick={onPlayClick}
                   className="group flex items-center space-x-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-pink-500/25"
                 >
-                  <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  <span>Assistir Agora</span>
+                  <ShoppingBag className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  <span>Comprar agora</span>
                 </button>
 
                 <button style={ { cursor: 'pointer'}} className="group flex items-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition-all duration-300 border border-white/20">

@@ -414,8 +414,8 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
                 }}
                 className="flex items-center space-x-2 bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors font-medium text-sm"
               >
-                <Play className="w-4 h-4" />
-                <span>Assistir</span>
+                <ShoppingBag className="w-4 h-4" />
+                <span>Comprar</span>
               </button>
 
               <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
