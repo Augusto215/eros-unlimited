@@ -20,10 +20,11 @@ interface FilmRowProps {
   accentColor?: string
 }
 
-function ModernFilmCard({ film, isPurchased, onFilmClick }: {
+function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   film: Film
   isPurchased: boolean
   onFilmClick: (film: Film) => void
+  onExpandedChange?: (expanded: boolean) => void
 }) {
   const [isHovered, setIsHovered] = useState(false)
   const [showExpandedCard, setShowExpandedCard] = useState(false)
@@ -62,6 +63,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
     // Show expanded card after delay
     hoverTimeoutRef.current = setTimeout(() => {
       setShowExpandedCard(true)
+      onExpandedChange?.(true)
     }, 1200) // 1.2 second delay like Netflix
   }
 
@@ -79,6 +81,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
     leaveTimeoutRef.current = setTimeout(() => {
       setIsHovered(false)
       setShowExpandedCard(false)
+      onExpandedChange?.(false)
       setIsPlaying(false)
       setShowControls(true)
       setVideoLoaded(false)
@@ -262,7 +265,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
           src={film.posterUrl || "/placeholder.svg"} 
           alt={film.title} 
           fill 
-          className="object-contain bg-black transition-transform duration-500 group-hover:scale-110" 
+          className="object-contain bg-black transition-transform duration-500 hover:scale-110" 
         />
         
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
@@ -460,13 +463,13 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
                 <span>Comprar</span>
               </button>
 
-              <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
+              {/* <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
                 <Plus className="w-4 h-4 text-white" />
-              </button>
+              </button> */}
 
-              <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
+              {/* <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
                 <Info className="w-4 h-4 text-white" />
-              </button>
+              </button> */}
 
               {isPurchased && (
                 <div className="ml-auto">
@@ -485,21 +488,21 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
 }
 
 function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, accentColor = "pink" }: FilmRowProps) {
-  const [scrollPosition, setScrollPosition] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [hasExpandedCard, setHasExpandedCard] = useState(false)
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
       const scrollAmount = 400
+      const currentScroll = scrollContainerRef.current.scrollLeft
       const newPosition = direction === "left" 
-        ? scrollPosition - scrollAmount 
-        : scrollPosition + scrollAmount
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount
       
       scrollContainerRef.current.scrollTo({
         left: newPosition,
         behavior: "smooth",
       })
-      setScrollPosition(newPosition)
     }
   }
 
@@ -524,7 +527,7 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
             {title}
           </h2>
           <div className={`h-1 w-16 bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} rounded-full`} />
-        </div>x
+        </div>
       </div>
 
       {/* Films container */}
@@ -532,22 +535,29 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
         {/* Navigation buttons */}
         <button
           onClick={() => scroll("left")}
-          className="absolute left-6 top-1/2 -translate-y-1/2 z-10 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/90 hover:scale-110"
+          className={`absolute left-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
+            hasExpandedCard ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
+          }`}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         
         <button
           onClick={() => scroll("right")}
-          className="absolute right-6 top-1/2 -translate-y-1/2 z-10 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/90 hover:scale-110"
+          className={`absolute right-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
+            hasExpandedCard ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
+          }`}
         >
           <ChevronRight className="w-5 h-5" />
         </button>
 
+        {/* Extended hover area for better UX */}
+        <div className="absolute inset-0 z-10 pointer-events-none" />
+
         {/* Films scroll container */}
         <div
           ref={scrollContainerRef}
-          className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16"
+          className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16 relative z-10"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {/* Padding esquerdo */}
@@ -558,6 +568,7 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
               film={film}
               isPurchased={purchasedFilmIds.includes(film.id)}
               onFilmClick={onFilmClick}
+              onExpandedChange={setHasExpandedCard}
             />
           ))}
           {/* Padding direito */}

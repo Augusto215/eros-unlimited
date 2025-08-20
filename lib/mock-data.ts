@@ -65,7 +65,7 @@ export const mockFilms: Film[] = [
     description: "Uma comédia de ação sobre dois presidentes improváveis.",
     synopsis: "Dois líderes mundiais precisam trabalhar juntos para salvar o mundo de uma conspiração internacional.",
     price: 3.99,
-    posterUrl: "https://drive.google.com/uc?id=COLE_SEU_ID_DO_POSTER_AQUI",
+    posterUrl: "https://drive.google.com/uc?id=1k1GpkwuaiExDUo-Dr_Nb70g2L6SCtxrG",
     trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
     videoUrl: "https://drive.google.com/uc?export=download&id=COLE_SEU_ID_DO_FILME_AQUI",
     genre: "Romac",
@@ -73,6 +73,20 @@ export const mockFilms: Film[] = [
     releaseYear: 2017,
     rating: 3.8,
   },
+  {
+    id: "6",
+    title: "Heads of State",
+    description: "Uma comédia de ação sobre dois presidentes improváveis.",
+    synopsis: "Dois líderes mundiais precisam trabalhar juntos para salvar o mundo de uma conspiração internacional.",
+    price: 3.99,
+    posterUrl: "https://drive.google.com/uc?id=COLE_SEU_ID_DO_POSTER_AQUI",
+    trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    videoUrl: "https://drive.google.com/uc?export=download&id=COLE_SEU_ID_DO_FILME_AQUI",
+    genre: "Romac",
+    duration: 17,
+    releaseYear: 2017,
+    rating: 3.8,
+  }
 ]
 
 export const mockClients: Client[] = [

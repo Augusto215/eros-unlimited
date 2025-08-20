@@ -52,7 +52,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 src={film.posterUrl || "/placeholder.svg"}
                 alt={film.title}
                 fill
-                className="object-cover"
+                className="object-contain"
               />
               {/* Rainbow gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-purple-900/30 to-transparent" />
@@ -177,10 +177,10 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 </button>
                 
                 {/* Wishlist Button */}
-                <button className="flex items-center justify-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                {/* <button className="flex items-center justify-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
                   <Heart className="w-6 h-6 text-pink-400" />
                   <span>Lista de Desejos</span>
-                </button>
+                </button> */}
               </>
             )}
           </div>
