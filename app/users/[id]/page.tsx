@@ -238,7 +238,7 @@ export default function UserProfile() {
               <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Gift className="w-6 h-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-white mb-1">R$ {totalSpent.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-white mb-1">USD {totalSpent.toFixed(2)}</div>
               <div className="text-green-300 text-sm">Total Investido</div>
             </div>
 

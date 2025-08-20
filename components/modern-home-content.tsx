@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react"
 import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles, Pause, Volume2, VolumeX, Plus, Info, ChevronDown, ChevronUp } from "lucide-react"
+import { useFilmSynopsisTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
 
@@ -26,6 +27,10 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   onFilmClick: (film: Film) => void
   onExpandedChange?: (expanded: boolean) => void
 }) {
+  const filmSynopsis = useFilmSynopsisTranslation()
+  const filmTitle = useFilmTitleTranslation()
+  const filmGenre = useFilmGenreTranslation()
+  const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const [showExpandedCard, setShowExpandedCard] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -286,19 +291,19 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4 transition-opacity duration-300">
             <div className="space-y-3">
               <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
-                {film.title}
+                {filmTitle.getTitle(film.id, film.title)}
               </h3>
               
               <div className="flex items-center space-x-3 text-sm">
-                <span className="text-purple-300 font-medium">{film.genre}</span>
+                <span className="text-purple-300 font-medium">{filmGenre.getGenre(film.id, film.genre)}</span>
                 <div className="flex items-center space-x-1 text-gray-300">
                   <Clock className="w-3 h-3" />
-                  <span>{film.duration}min</span>
+                  <span>{film.duration} {t('movies.minutes')}</span>
                 </div>
               </div>
 
               <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-                {film.synopsis}
+                {filmSynopsis.getSynopsis(film.id, film.synopsis)}
               </p>
 
               <div className="flex items-center justify-between pt-2">
@@ -314,7 +319,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                 {!isPurchased && (
                   <div className="text-right">
                     <div className="text-green-400 font-bold text-lg">
-                      R$ {film.price.toFixed(2)}
+                      USD {film.price.toFixed(2)}
                     </div>
                   </div>
                 )}
@@ -394,7 +399,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className="text-white font-bold text-lg mb-2 line-clamp-1">
-                  {film.title}
+                  {filmTitle.getTitle(film.id, film.title)}
                 </h3>
                 
                 <div className="flex items-center space-x-3 text-sm text-gray-300 mb-3">
@@ -403,10 +408,10 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                     <span>{film.rating}</span>
                   </div>
                   <span>{film.releaseYear}</span>
-                  <span className="text-purple-300">{film.genre}</span>
+                  <span className="text-purple-300">{filmGenre.getGenre(film.id, film.genre)}</span>
                   <div className="flex items-center space-x-1">
                     <Clock className="w-3 h-3" />
-                    <span>{film.duration}min</span>
+                    <span>{film.duration} {t('movies.minutes')}</span>
                   </div>
                 </div>
               </div>
@@ -415,7 +420,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             {!isPurchased && (
                 <div className="text-left">
                   <div className="text-green-400 font-bold text-lg">
-                    R$ {film.price.toFixed(2)}
+                    USD {film.price.toFixed(2)}
                   </div>
                 </div>
             )}
@@ -427,7 +432,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                   isExpanded ? '' : 'line-clamp-3'
                 }`}
               >
-                {film.synopsis}
+                {filmSynopsis.getSynopsis(film.id, film.synopsis)}
               </p>
               
               {showReadMore && (
@@ -437,12 +442,12 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                 >
                   {isExpanded ? (
                     <>
-                      <span>Ler menos</span>
+                      <span>{t('movies.readLess')}</span>
                       <ChevronUp className="w-3 h-3" />
                     </>
                   ) : (
                     <>
-                      <span>Ler mais</span>
+                      <span>{t('movies.readMore')}</span>
                       <ChevronDown className="w-3 h-3" />
                     </>
                   )}
@@ -460,7 +465,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                 className="flex items-center space-x-2 bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors font-medium text-sm"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Comprar</span>
+                <span>{t('movies.buy')}</span>
               </button>
 
               {/* <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
@@ -580,6 +585,8 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
 }
 
 export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds }: ModernHomeContentProps) {
+  const { t } = useTranslation()
+  
   if (films.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-pink-900/20 flex items-center justify-center">
@@ -587,8 +594,8 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
           <div className="w-32 h-32 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
             <FilmIcon className="w-16 h-16 text-pink-400" />
           </div>
-          <h2 className="text-white text-2xl font-bold mb-2">Biblioteca em Construção</h2>
-          <p className="text-gray-400">Nenhum filme disponível no momento</p>
+          <h2 className="text-white text-2xl font-bold mb-2">{t('films.libraryUnderConstruction')}</h2>
+          <p className="text-gray-400">{t('films.noMoviesAvailable')}</p>
         </div>
       </div>
     )
@@ -614,11 +621,11 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
-                  Catálogo EROS
+                  {t('movies.catalog')}
                 </span>
               </h1>
               <p className="text-gray-200 text-lg max-w-2xl mx-auto">
-                Descubra uma seleção exclusiva de filmes premium para uma experiência cinematográfica única
+                {t('movies.catalogDescription')}
               </p>
             </div>
           </div>
@@ -626,7 +633,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
           {/* Purchased Films Section - Only show if user has purchased films */}
           {purchasedFilms.length > 0 && (
             <ModernFilmRow
-              title="Meus Filmes"
+              title={t('films.myMovies')}
               films={purchasedFilms}
               purchasedFilmIds={purchasedFilmIds}
               onFilmClick={onFilmClick}
@@ -638,7 +645,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
           {/* Available Films Section - Show all films if no purchases, or only available if user has purchases */}
           {(purchasedFilms.length === 0 ? films : availableFilms).length > 0 && (
             <ModernFilmRow
-              title={purchasedFilms.length === 0 ? "Catálogo de Filmes" : "Filmes Disponíveis"}
+              title={purchasedFilms.length === 0 ? t('movies.movieCatalog') : t('movies.availableMovies')}
               films={purchasedFilms.length === 0 ? films : availableFilms}
               purchasedFilmIds={purchasedFilmIds}
               onFilmClick={onFilmClick}
@@ -650,7 +657,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
           {/* Recommended Section - Only show if there are enough films and user has purchases */}
           {recommendedFilms.length > 3 && purchasedFilms.length > 0 && (
             <ModernFilmRow
-              title="Recomendados para Você"
+              title={t('films.recommendedForYou')}
               films={recommendedFilms}
               purchasedFilmIds={purchasedFilmIds}
               onFilmClick={onFilmClick}
@@ -662,7 +669,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
           {/* Trending Section - Only show if there are enough films and user has purchases */}
           {films.length > 4 && purchasedFilms.length > 0 && (
             <ModernFilmRow
-              title="Em Alta"
+              title={t('films.trending')}
               films={films.slice(1, 7)} // Filmes do índice 1 ao 6
               purchasedFilmIds={purchasedFilmIds}
               onFilmClick={onFilmClick}

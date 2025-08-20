@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { X, Play, Star, Heart, Crown, Sparkles, Calendar, Clock, Film } from "lucide-react"
+import { X, Play, Star, Clock, Calendar, Film, Heart, Crown, Sparkles } from "lucide-react"
+import { useFilmSynopsisTranslation, useMoviesTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film as FilmType } from "@/lib/types"
 import Image from "next/image"
 
@@ -15,6 +16,11 @@ interface FilmModalProps {
 }
 
 export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurchase, onPlay }: FilmModalProps) {
+  const movies = useMoviesTranslation()
+  const filmSynopsis = useFilmSynopsisTranslation()
+  const filmTitle = useFilmTitleTranslation()
+  const filmGenre = useFilmGenreTranslation()
+  const { t } = useTranslation()
   const [isPlaying, setIsPlaying] = useState(false)
 
   if (!isOpen || !film) return null
@@ -80,7 +86,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
           {isPurchased && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-full text-sm font-bold flex items-center space-x-2 backdrop-blur-sm border border-green-400/30">
               <Crown className="w-4 h-4" />
-              <span>VOCÊ POSSUI ESTE FILME</span>
+              <span>{t('movies.youOwnThisMovie')}</span>
             </div>
           )}
         </div>
@@ -92,7 +98,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
             <div className="flex-1">
               <h1 className="text-4xl lg:text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                  {film.title}
+                  {filmTitle.getTitle(film.id, film.title)}
                 </span>
               </h1>
               
@@ -105,7 +111,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 
                 <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
                   <Clock className="w-4 h-4 text-green-400" />
-                  <span className="text-green-300 font-medium">{film.duration} min</span>
+                  <span className="text-green-300 font-medium">{film.duration} {t('movies.minutes')}</span>
                 </div>
                 
                 <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
@@ -114,7 +120,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 </div>
                 
                 <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-400/30">
-                  <span className="text-purple-300 font-medium">{film.genre}</span>
+                  <span className="text-purple-300 font-medium">{filmGenre.getGenre(film.id, film.genre)}</span>
                 </div>
               </div>
             </div>
@@ -125,10 +131,10 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center">
                   <div className="flex items-center justify-center space-x-2 mb-2">
                     <Sparkles className="w-5 h-5 text-yellow-400" />
-                    <span className="text-gray-300 text-sm">Preço especial</span>
+                    <span className="text-gray-300 text-sm">{t('movies.specialPrice')}</span>
                   </div>
                   <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                    R$ {film.price.toFixed(2)}
+                    USD {film.price.toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -139,10 +145,10 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
           <div className="mb-8">
             <h3 className="text-white text-xl font-semibold mb-4 flex items-center">
               <Film className="w-5 h-5 mr-2 text-purple-400" />
-              Sinopse
+              {movies.synopsis}
             </h3>
             <p className="text-gray-300 text-lg leading-relaxed bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              {film.synopsis}
+              {filmSynopsis.getSynopsis(film.id, film.synopsis)}
             </p>
           </div>
 
@@ -156,13 +162,13 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   className="flex-1 flex items-center justify-center space-x-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-pink-500/25"
                 >
                   <Play className="w-6 h-6" />
-                  <span style={{ cursor: 'pointer' }}>Assistir Agora</span>
+                  <span style={{ cursor: 'pointer' }}>{t('movies.watchNowButton')}</span>
                 </button>
                 
                 {/* Add to Favorites */}
                 <button className="flex items-center justify-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
                   <Heart className="w-6 h-6 text-red-400" />
-                  <span>Favoritar</span>
+                  <span>{t('movies.favorite')}</span>
                 </button>
               </>
             ) : (
@@ -173,7 +179,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   className="flex-1 flex items-center justify-center space-x-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/25"
                 >
                   <Crown className="w-6 h-6" />
-                  <span>Comprar por R$ {film.price.toFixed(2)}</span>
+                  <span>{t('movies.buyFor')} USD {film.price.toFixed(2)}</span>
                 </button>
                 
                 {/* Wishlist Button */}
@@ -190,7 +196,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
             <div className="mt-6 flex items-center justify-center space-x-2 p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-xl backdrop-blur-sm">
               <Sparkles className="w-5 h-5 text-blue-400" />
               <span className="text-blue-300 text-sm font-medium">
-                ✨ Compra segura • Acesso vitalício • Suporte 24/7
+                ✨ {t('movies.securePayment')}
               </span>
             </div>
           )}

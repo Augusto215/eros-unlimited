@@ -152,11 +152,11 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
             <div className="bg-white/10 backdrop-blur-sm p-5 rounded-xl border border-white/20">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-gray-300">Subtotal:</span>
-                <span className="text-white font-medium">R$ {film.price.toFixed(2)}</span>
+                <span className="text-white font-medium">USD {film.price.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center mb-3">
                 <span className="text-gray-300">Taxa Pride Support:</span>
-                <span className="text-green-400 font-medium">R$ 0,00</span>
+                <span className="text-green-400 font-medium">USD 0,00</span>
               </div>
               <hr className="border-white/20 my-3" />
               <div className="flex justify-between items-center">
@@ -165,7 +165,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                   Total:
                 </span>
                 <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                  R$ {film.price.toFixed(2)}
+                  USD {film.price.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -228,7 +228,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-300">Total a pagar:</span>
                       <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                        R$ {film.price.toFixed(2)}
+                        USD {film.price.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 ) : (
                   <>
                     <Wallet className="w-6 h-6" />
-                    <span>Pagar com PayPal - R$ {film.price.toFixed(2)}</span>
+                    <span>Pagar com PayPal - USD {film.price.toFixed(2)}</span>
                     <Heart className="w-5 h-5 text-pink-300" />
                   </>
                 )}

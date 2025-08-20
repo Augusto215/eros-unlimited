@@ -407,7 +407,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <DollarSign className="w-4 h-4 mr-2 text-emerald-400" />
-                  Preço (R$) * <span className="text-gray-500 ml-2">(0-9999.99)</span>
+                  Preço (USD) * <span className="text-gray-500 ml-2">(0-9999.99)</span>
                 </label>
                 <input
                   type="number"

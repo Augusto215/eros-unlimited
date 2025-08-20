@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Play, Plus, Info } from "lucide-react"
+import { useFilmSynopsisTranslation, useFilmTitleTranslation, useFilmGenreTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import AdminOnly from "@/components/admin-only"
 import Image from "next/image"
@@ -13,6 +14,9 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ film, onPlayClick, onAdminClick }: HeroSectionProps) {
+  const filmSynopsis = useFilmSynopsisTranslation()
+  const filmTitle = useFilmTitleTranslation()
+  const filmGenre = useFilmGenreTranslation()
   const [showVideo, setShowVideo] = useState(false)
 
   useEffect(() => {
@@ -50,8 +54,8 @@ export default function HeroSection({ film, onPlayClick, onAdminClick }: HeroSec
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">{film.title}</h1>
-        <p className="text-lg text-white/90 mb-6 line-clamp-3">{film.synopsis}</p>
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">{filmTitle.getTitle(film.id, film.title)}</h1>
+        <p className="text-lg text-white/90 mb-6 line-clamp-3">{filmSynopsis.getSynopsis(film.id, film.synopsis)}</p>
 
         <div className="flex items-center space-x-4">
           <button

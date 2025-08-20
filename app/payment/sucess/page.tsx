@@ -1,9 +1,12 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { usePaymentTranslation, useCommonTranslation } from '@/hooks/useTranslation'
 import { CheckCircle, Loader2, Heart, Crown, Star, X } from 'lucide-react'
 
 export default function PaymentSuccess() {
+  const payment = usePaymentTranslation()
+  const common = useCommonTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(true)
@@ -92,11 +95,11 @@ export default function PaymentSuccess() {
             </div>
             <h1 className="text-2xl font-bold text-white mb-4">
               <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Processando Pagamento...
+                {payment.processing}
               </span>
             </h1>
             <p className="text-gray-300">
-              Aguarde enquanto confirmamos seu pagamento PayPal
+              Aguarde enquanto confirmamos sua transação...
             </p>
           </>
         ) : error ? (
@@ -104,13 +107,13 @@ export default function PaymentSuccess() {
             <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <X className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-red-400 mb-4">Erro no Pagamento</h1>
+            <h1 className="text-2xl font-bold text-red-400 mb-4">{common.error}</h1>
             <p className="text-gray-300 mb-6">{error}</p>
             <button
               onClick={() => router.push('/')}
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
             >
-              Voltar ao Início
+              {common.backToHome}
             </button>
           </>
         ) : (
@@ -120,11 +123,11 @@ export default function PaymentSuccess() {
             </div>
             <h1 className="text-3xl font-bold text-white mb-4">
               <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                Pagamento Aprovado!
+                {payment.success}
               </span>
             </h1>
             <p className="text-gray-300 mb-6">
-              Seu filme foi adquirido com sucesso! 🎉
+              Você adquiriu o filme com sucesso!
             </p>
             <p className="text-sm text-gray-400 mb-6">
               Redirecionando em alguns segundos...

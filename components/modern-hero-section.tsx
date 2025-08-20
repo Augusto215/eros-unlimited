@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Play, Plus, Info, Star, Clock, Calendar, Sparkles, ShoppingBag} from "lucide-react"
+import { useMoviesTranslation, useFilmSynopsisTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import { getCurrentUser } from "@/lib/auth"
 import Image from "next/image"
@@ -13,6 +14,11 @@ interface ModernHeroSectionProps {
 }
 
 export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: ModernHeroSectionProps) {
+  const movies = useMoviesTranslation()
+  const filmSynopsis = useFilmSynopsisTranslation()
+  const filmTitle = useFilmTitleTranslation()
+  const filmGenre = useFilmGenreTranslation()
+  const { t } = useTranslation()
   const [showVideo, setShowVideo] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -97,7 +103,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2 bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm border border-pink-500/30 rounded-full px-4 py-2">
                   <Sparkles className="w-4 h-4 text-pink-400" />
-                  <span className="text-pink-400 font-semibold text-sm">EM DESTAQUE</span>
+                  <span className="text-pink-400 font-semibold text-sm">{t('movies.featured')}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -109,7 +115,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
               <div>
                 <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
                   <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
-                    {film.title}
+                    {filmTitle.getTitle(film.id, film.title)}
                   </span>
                 </h1>
                 
@@ -121,25 +127,25 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                   </div>
                   <div className="flex items-center space-x-2">
                     <Clock className="w-4 h-4 text-pink-400" />
-                    <span>{film.duration} min</span>
+                    <span>{film.duration} {t('movies.minutes')}</span>
                   </div>
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-3 py-1 rounded-full border border-purple-500/30">
-                    <span className="text-purple-300 font-medium">{film.genre}</span>
+                    <span className="text-purple-300 font-medium">{filmGenre.getGenre(film.id, film.genre)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Synopsis */}
               <div className="max-w-2xl">
-                <p className="text-lg text-gray-300 leading-relaxed mb-8">
-                  {film.synopsis}
+                <p className="text-lg text-gray-300 leading-relaxed mb-8 text-justify">
+                  {filmSynopsis.getSynopsis(film.id, film.synopsis)}
                 </p>
                 
                 {/* Price */}
                 <div className="flex items-center space-x-4 mb-8">
-                  <span className="text-gray-400">A partir de</span>
+                  <span className="text-gray-400">{t('movies.startingFrom')}</span>
                   <span className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                    R$ {film.price.toFixed(2)}
+                    USD {film.price.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -152,7 +158,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                   className="group flex items-center space-x-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-pink-500/25"
                 >
                   <ShoppingBag className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  <span>Comprar agora</span>
+                  <span>{movies.buy}</span>
                 </button>
 
                 {/* <button style={ { cursor: 'pointer'}} className="group flex items-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition-all duration-300 border border-white/20">
@@ -172,7 +178,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                     className="group flex items-center space-x-3 bg-gradient-to-r from-red-500/80 to-orange-500/80 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 border border-red-500/30"
                   >
                     <Plus className="w-6 h-6 group-hover:rotate-45 transition-transform" />
-                    <span>ADICIONAR FILME</span>
+                    <span>{movies.addNewMovie}</span>
                   </button>
                 )}
               </div>
@@ -203,7 +209,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                 <div className="absolute -bottom-4 -left-4 bg-gradient-to-r from-pink-500/90 to-purple-500/90 backdrop-blur-sm rounded-xl p-4 border border-pink-500/30">
                   <div className="text-white text-center">
                     <div className="text-2xl font-bold">{film.rating}</div>
-                    <div className="text-xs text-gray-200">Avaliação</div>
+                    <div className="text-xs text-gray-200">{t('movies.evaluation')}</div>
                   </div>
                 </div>
 
@@ -233,7 +239,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
           <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
             <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse" />
           </div>
-          <span className="text-white/70 text-sm font-medium">Role para explorar</span>
+          <span className="text-white/70 text-sm font-medium">{t('films.scrollToExplore')}</span>
         </div>
       </div>
     </div>

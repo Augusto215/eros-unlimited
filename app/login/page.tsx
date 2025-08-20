@@ -5,9 +5,11 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { login } from "@/lib/auth"
+import { useAuthTranslation } from "@/hooks/useTranslation"
 import { Heart, Mail, Lock, Sparkles, Rainbow, Star, Eye, EyeOff } from "lucide-react"
 
 export default function Login() {
+  const auth = useAuthTranslation()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -25,11 +27,11 @@ export default function Login() {
       if (user) {
         router.push("/")
       } else {
-        setError("Email ou senha inválidos")
+        setError(auth.invalidCredentials)
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError("Erro ao fazer login. Tente novamente.")
+      setError(auth.loginError)
     } finally {
       setLoading(false)
     }
@@ -87,10 +89,10 @@ export default function Login() {
                 EROS UNLIMITED
               </span>
             </h1>
-            <p className="text-gray-200 text-lg mb-2">Bem-vindo de volta!</p>
+            <p className="text-gray-200 text-lg mb-2">{auth.welcomeBack}</p>
             <div className="flex items-center justify-center space-x-2">
               <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-              <span className="text-sm text-gray-300">Amor é amor • Diversidade é beleza</span>
+              <span className="text-sm text-gray-300">{auth.loveIsLove}</span>
               <Sparkles className="w-4 h-4 text-pink-400 animate-pulse" />
             </div>
           </div>
@@ -102,7 +104,7 @@ export default function Login() {
               <div className="relative">
                 <label className="block text-white text-sm font-medium mb-2 flex items-center">
                   <Mail className="w-4 h-4 mr-2 text-blue-400" />
-                  Email
+                  {auth.email}
                 </label>
                 <div className="relative">
                   <input
@@ -110,7 +112,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300 pl-12"
-                    placeholder="seu@email.com"
+                    placeholder={auth.loginEmailPlaceholder}
                     required
                     disabled={loading}
                   />
@@ -122,7 +124,7 @@ export default function Login() {
               <div className="relative">
                 <label className="block text-white text-sm font-medium mb-2 flex items-center">
                   <Lock className="w-4 h-4 mr-2 text-purple-400" />
-                  Senha
+                  {auth.password}
                 </label>
                 <div className="relative">
                   <input
@@ -130,7 +132,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300 pl-12"
-                    placeholder="••••••••"
+                    placeholder={auth.loginPasswordPlaceholder}
                     required
                     disabled={loading}
                   />
@@ -166,12 +168,12 @@ export default function Login() {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Entrando...</span>
+                    <span>{auth.login}...</span>
                   </>
                 ) : (
                   <>
                     <Heart className="w-5 h-5" />
-                    <span>Entrar com Amor</span>
+                    <span>{auth.signIn}</span>
                   </>
                 )}
               </button>
@@ -180,14 +182,14 @@ export default function Login() {
             {/* Register Link */}
             <div className="mt-8 text-center">
               <p className="text-gray-300 mb-4">
-                Ainda não faz parte da nossa família?
+                {auth.dontHaveAccount}
               </p>
               <Link 
                 href="/register" 
                 className="inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-6 py-3 rounded-xl font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <Star className="w-4 h-4" />
-                <span>Juntar-se à Comunidade</span>
+                <span>{auth.signUp}</span>
               </Link>
             </div>
 
@@ -202,7 +204,7 @@ export default function Login() {
           {/* Footer Message */}
           <div className="text-center mt-8">
             <p className="text-gray-300 text-sm">
-              ✨ Criado com amor para celebrar a diversidade ✨
+              ✨ {auth.createdWithLove} ✨
             </p>
             <div className="flex justify-center space-x-1 mt-2">
               {['🏳️‍🌈', '🏳️‍⚧️', '❤️', '🧡', '💛', '💚', '💙', '💜'].map((emoji, i) => (

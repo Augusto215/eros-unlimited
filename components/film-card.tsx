@@ -43,7 +43,7 @@ export default function FilmCard({ film, isPurchased, onFilmClick }: FilmCardPro
 
             {!isPurchased && (
               <div className="mt-2">
-                <span className="text-green-400 text-xs font-semibold">R$ {film.price.toFixed(2)}</span>
+                <span className="text-green-400 text-xs font-semibold">USD {film.price.toFixed(2)}</span>
               </div>
             )}
 

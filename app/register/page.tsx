@@ -5,9 +5,11 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { register } from "@/lib/auth"
+import { useAuthTranslation } from "@/hooks/useTranslation"
 import { Heart, Mail, Lock, User, Sparkles, Rainbow, Star, Crown, Eye, EyeOff } from "lucide-react"
 
 export default function Register() {
+  const auth = useAuthTranslation()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -22,13 +24,13 @@ export default function Register() {
     setLoading(true)
 
     if (password !== confirmPassword) {
-      setError("As senhas não coincidem")
+      setError(auth.passwordMismatch)
       setLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres")
+      setError(auth.passwordMinLength)
       setLoading(false)
       return
     }
@@ -40,7 +42,7 @@ export default function Register() {
       }
     } catch (error: any) {
       console.error('Registration error:', error)
-      setError(error.message || "Erro ao criar conta. Tente novamente.")
+      setError(error.message || auth.registerError)
     } finally {
       setLoading(false)
     }
@@ -104,13 +106,13 @@ export default function Register() {
             
             <h1 className="text-4xl font-bold mb-3">
               <span className="bg-gradient-to-r from-cyan-400 via-purple-400 via-pink-400 via-yellow-400 to-green-400 bg-clip-text text-transparent animate-pulse">
-                Junte-se à Família
+                {auth.joinTheFamily}
               </span>
             </h1>
-            <p className="text-gray-200 text-lg mb-2">Crie sua conta e faça parte da nossa comunidade</p>
+            <p className="text-gray-200 text-lg mb-2">{auth.createAccountAndJoin}</p>
             <div className="flex items-center justify-center space-x-2">
               <Heart className="w-4 h-4 text-red-400 animate-pulse" />
-              <span className="text-sm text-gray-300">Diversidade • Inclusão • Amor</span>
+              <span className="text-sm text-gray-300">{auth.diversityInclusionLove}</span>
               <Heart className="w-4 h-4 text-pink-400 animate-pulse" />
             </div>
           </div>
@@ -122,7 +124,7 @@ export default function Register() {
               <div className="relative">
                 <label className="block text-white text-sm font-medium mb-2 flex items-center">
                   <User className="w-4 h-4 mr-2 text-cyan-400" />
-                  Nome Completo
+                  {auth.fullName}
                 </label>
                 <div className="relative">
                   <input
@@ -130,7 +132,7 @@ export default function Register() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 pl-12"
-                    placeholder="Seu nome completo"
+                    placeholder={auth.fullNamePlaceholder}
                     required
                     disabled={loading}
                   />
@@ -142,7 +144,7 @@ export default function Register() {
               <div className="relative">
                 <label className="block text-white text-sm font-medium mb-2 flex items-center">
                   <Mail className="w-4 h-4 mr-2 text-blue-400" />
-                  Email
+                  {auth.email}
                 </label>
                 <div className="relative">
                   <input
@@ -150,7 +152,7 @@ export default function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300 pl-12"
-                    placeholder="seu@email.com"
+                    placeholder={auth.emailPlaceholder}
                     required
                     disabled={loading}
                   />
@@ -162,7 +164,7 @@ export default function Register() {
               <div className="relative">
                 <label className="block text-white text-sm font-medium mb-2 flex items-center">
                   <Lock className="w-4 h-4 mr-2 text-purple-400" />
-                  Senha
+                  {auth.password}
                 </label>
                 <div className="relative">
                   <input
@@ -170,7 +172,7 @@ export default function Register() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300 pl-12"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={auth.passwordPlaceholder}
                     required
                     disabled={loading}
                   />
@@ -194,7 +196,7 @@ export default function Register() {
               <div className="relative">
                 <label className="block text-white text-sm font-medium mb-2 flex items-center">
                   <Lock className="w-4 h-4 mr-2 text-pink-400" />
-                  Confirmar Senha
+                  {auth.confirmPassword}
                 </label>
                 <div className="relative">
                   <input
@@ -202,7 +204,7 @@ export default function Register() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300 pl-12"
-                    placeholder="Confirme sua senha"
+                    placeholder={auth.confirmPasswordPlaceholder}
                     required
                     disabled={loading}
                   />
@@ -238,12 +240,12 @@ export default function Register() {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Criando conta...</span>
+                    <span>{auth.creatingAccount}</span>
                   </>
                 ) : (
                   <>
                     <Crown className="w-5 h-5" />
-                    <span>Criar Minha Conta</span>
+                    <span>{auth.createMyAccount}</span>
                   </>
                 )}
               </button>
@@ -252,14 +254,14 @@ export default function Register() {
             {/* Login Link */}
             <div className="mt-8 text-center">
               <p className="text-gray-300 mb-4">
-                Já faz parte da família?
+                {auth.alreadyPartOfFamily}
               </p>
               <Link 
                 href="/login" 
                 className="inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-6 py-3 rounded-xl font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <Heart className="w-4 h-4" />
-                <span>Fazer Login</span>
+                <span>{auth.makeLogin}</span>
               </Link>
             </div>
           </div>
@@ -267,7 +269,7 @@ export default function Register() {
           {/* Footer Message */}
           <div className="text-center mt-8">
             <p className="text-gray-300 text-sm mb-3">
-              🌈 Celebrando o amor em todas as suas formas 🌈
+              🌈 {auth.celebratingLove} 🌈
             </p>
             <div className="flex justify-center space-x-1">
               {['❤️', '🧡', '💛', '💚', '💙', '💜', '🤍', '🖤', '🤎'].map((emoji, i) => (

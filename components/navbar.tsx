@@ -5,9 +5,12 @@ import { User } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { getCurrentUser, logout } from "@/lib/auth"
+import { useTranslation } from "@/lib/i18n-provider"
+import LanguageSelector from "./language-selector"
 import type { Client } from "@/lib/auth"
 
 export default function Navbar() {
+  const { t } = useTranslation()
   const [user, setUser] = useState<Client | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -94,27 +97,29 @@ export default function Navbar() {
           </Link>
           <div className="hidden md:flex space-x-6">
             <Link href="/" className={getLinkClasses("/")}>
-              Home
+              {t('navbar.home')}
             </Link>
             <Link href="/about" className={getLinkClasses("/about")}>
-              About
+              {t('navbar.about')}
             </Link>
             <Link href="/partner" className={getLinkClasses("/partner")}>
-              Partner
+              {t('navbar.partner')}
             </Link>
             <Link href="/releases" className={getLinkClasses("/releases")}>
-              Releases
+              {t('navbar.releases')}
             </Link>
 
             { user && (
               <Link href="/my-movies" className={getLinkClasses("/my-movies")}>
-                My movies
+                {t('navbar.myMovies')}
               </Link>
             )}
           </div>
         </div>
 
         <div className="flex items-center space-x-4">
+          <LanguageSelector />
+          
           {!mounted ? (
             <div className="text-white/80 text-sm">...</div>
           ) : user ? (
@@ -129,12 +134,12 @@ export default function Navbar() {
                 disabled={isLoggingOut}
                 className="text-white/80 hover:text-white text-sm disabled:opacity-50"
               >
-                {isLoggingOut ? "Saindo..." : "Sair"}
+                {isLoggingOut ? t('navbar.loggingOut') : t('navbar.logout')}
               </button>
             </div>
           ) : (
             <Link href="/login" className="text-white/80 hover:text-white">
-              Login
+              {t('navbar.login')}
             </Link>
           )}
         </div>
