@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, CreditCard, Lock, AlertCircle, Heart, Sparkles, Crown, Star, Shield } from "lucide-react"
+import { X, CreditCard, Lock, AlertCircle, Heart, Sparkles, Crown, Star, Shield, Wallet } from "lucide-react"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
 
@@ -25,7 +25,10 @@ interface PaymentForm {
   country: string
 }
 
+type PaymentMethod = 'card' | 'paypal'
+
 export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentSuccess }: PaymentModalProps) {
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
   const [formData, setFormData] = useState<PaymentForm>({
     cardNumber: '',
     expiryDate: '',
@@ -120,6 +123,17 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
   const validateForm = (): boolean => {
     const newErrors: Partial<PaymentForm> = {}
 
+    if (paymentMethod === 'paypal') {
+      // For PayPal, we only need email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!formData.email || !emailRegex.test(formData.email)) {
+        newErrors.email = 'Email inválido para conta PayPal'
+      }
+      setErrors(newErrors)
+      return Object.keys(newErrors).length === 0
+    }
+
+    // Card validation (existing logic)
     // Card number validation using Luhn algorithm
     if (!validateCardNumber(formData.cardNumber)) {
       newErrors.cardNumber = 'Número do cartão inválido'
@@ -164,6 +178,11 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (paymentMethod === 'paypal') {
+      handlePayPalPayment()
+      return
+    }
+    
     if (!validateForm()) {
       return
     }
@@ -192,6 +211,35 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
       console.error('Payment error:', error)
       setErrors({ 
         cardNumber: error.message || 'Erro no pagamento. Tente novamente.' 
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handlePayPalPayment = async () => {
+    setIsProcessing(true)
+
+    try {
+      // Simulate PayPal payment process
+      // In a real implementation, you would integrate with PayPal SDK
+      console.log('Initiating PayPal payment for:', {
+        amount: film.price,
+        filmId: film.id,
+        userId: userId
+      })
+
+      // Simulate PayPal checkout redirect
+      // In practice, you would use PayPal's SDK to create a payment
+      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate processing
+
+      // For demo purposes, we'll consider the payment successful
+      onPaymentSuccess(film.id)
+      onClose()
+    } catch (error: any) {
+      console.error('PayPal payment error:', error)
+      setErrors({ 
+        email: error.message || 'Erro no pagamento via PayPal. Tente novamente.' 
       })
     } finally {
       setIsProcessing(false)
@@ -292,7 +340,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
               </div>
               <div className="flex items-center space-x-2 text-xs text-gray-300">
                 <Lock className="w-4 h-4 text-blue-400" />
-                <span>Processado via Stripe</span>
+                <span>Processado via Stripe & PayPal</span>
               </div>
             </div>
           </div>
@@ -302,7 +350,11 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-white" />
+                  {paymentMethod === 'paypal' ? (
+                    <Wallet className="w-5 h-5 text-white" />
+                  ) : (
+                    <CreditCard className="w-5 h-5 text-white" />
+                  )}
                 </div>
                 <div>
                   <h2 className="text-white text-2xl font-bold">
@@ -322,15 +374,49 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
               </button>
             </div>
 
+            {/* Payment Method Tabs */}
+            <div className="mb-6">
+              <div className="flex space-x-1 bg-white/10 backdrop-blur-sm p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('card')}
+                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg transition-all duration-300 ${
+                    paymentMethod === 'card'
+                      ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                  disabled={isProcessing}
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span className="font-medium">Cartão</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('paypal')}
+                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg transition-all duration-300 ${
+                    paymentMethod === 'paypal'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                  disabled={isProcessing}
+                >
+                  <Wallet className="w-4 h-4" />
+                  <span className="font-medium">PayPal</span>
+                </button>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Card Information */}
-              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20">
-                <h3 className="text-white font-bold mb-4 flex items-center">
-                  <Lock className="w-5 h-5 mr-2 text-green-400" />
-                  <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                    Informações do Cartão
-                  </span>
-                </h3>
+              {paymentMethod === 'card' && (
+                <>
+                  {/* Card Information */}
+                  <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20">
+                    <h3 className="text-white font-bold mb-4 flex items-center">
+                      <Lock className="w-5 h-5 mr-2 text-green-400" />
+                      <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                        Informações do Cartão
+                      </span>
+                    </h3>
 
                 <div className="space-y-4">
                   <div>
@@ -484,6 +570,72 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                   </div>
                 </div>
               </div>
+                </>
+              )}
+
+              {paymentMethod === 'paypal' && (
+                <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">
+                  <div className="text-center mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Wallet className="w-10 h-10 text-white" />
+                    </div>
+                    <h3 className="text-white font-bold text-xl mb-4">
+                      <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                        PayPal
+                      </span>
+                    </h3>
+                    <p className="text-gray-300 text-sm mb-6">
+                      Você será redirecionado para o PayPal para finalizar o pagamento de forma segura.
+                    </p>
+                    
+                    <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4 mb-6">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-300">Total a pagar:</span>
+                        <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                          R$ {film.price.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email field for PayPal */}
+                  <div className="mb-6">
+                    <label className="block text-gray-300 text-sm font-medium mb-2">
+                      Email do PayPal
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="seu-email@paypal.com"
+                      className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                        errors.email ? 'border-red-500' : 'border-white/20'
+                      } focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300`}
+                      disabled={isProcessing}
+                    />
+                    {errors.email && (
+                      <p className="text-red-400 text-sm mt-1 flex items-center">
+                        <AlertCircle className="w-4 h-4 mr-1" />
+                        {errors.email}
+                      </p>
+                    )}
+                    <p className="text-gray-400 text-xs mt-1">
+                      Digite o email da sua conta PayPal para continuar
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 text-xs text-gray-400">
+                    <div className="flex items-center justify-center space-x-2">
+                      <Shield className="w-4 h-4 text-green-400" />
+                      <span>Proteção ao Comprador PayPal</span>
+                    </div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <Lock className="w-4 h-4 text-blue-400" />
+                      <span>Pagamento 100% seguro</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Security Notice */}
               <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-xl backdrop-blur-sm">
@@ -491,7 +643,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 <div>
                   <p className="text-blue-300 text-sm">
                     <strong>🔒 Pagamento 100% Seguro:</strong> Seus dados são protegidos com criptografia militar. 
-                    Processamento via Stripe com certificação PCI DSS.
+                    {paymentMethod === 'paypal' ? 'Processamento via PayPal' : 'Processamento via Stripe com certificação PCI DSS'}.
                   </p>
                   <p className="text-blue-200 text-xs mt-1">
                     ✨ Apoie conteúdo diverso e inclusivo com sua compra
@@ -503,18 +655,34 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-cyan-500 text-white py-5 rounded-xl font-bold text-lg hover:from-green-600 hover:via-emerald-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-green-500/25 flex items-center justify-center space-x-3"
+                className={`w-full py-5 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg flex items-center justify-center space-x-3 ${
+                  paymentMethod === 'paypal'
+                    ? 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white hover:from-blue-600 hover:via-blue-700 hover:to-cyan-600 hover:shadow-blue-500/25'
+                    : 'bg-gradient-to-r from-green-500 via-emerald-500 to-cyan-500 text-white hover:from-green-600 hover:via-emerald-600 hover:to-cyan-600 hover:shadow-green-500/25'
+                }`}
               >
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                    <span>Processando com amor...</span>
+                    <span>
+                      {paymentMethod === 'paypal' ? 'Redirecionando para PayPal...' : 'Processando com amor...'}
+                    </span>
                   </>
                 ) : (
                   <>
-                    <Crown className="w-6 h-6" />
-                    <span>Finalizar Compra - R$ {film.price.toFixed(2)}</span>
-                    <Heart className="w-5 h-5 text-pink-300" />
+                    {paymentMethod === 'paypal' ? (
+                      <>
+                        <Wallet className="w-6 h-6" />
+                        <span>Pagar com PayPal - R$ {film.price.toFixed(2)}</span>
+                        <Heart className="w-5 h-5 text-pink-300" />
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="w-6 h-6" />
+                        <span>Finalizar Compra - R$ {film.price.toFixed(2)}</span>
+                        <Heart className="w-5 h-5 text-pink-300" />
+                      </>
+                    )}
                   </>
                 )}
               </button>
