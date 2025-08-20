@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles, Pause, Volume2, VolumeX, Plus, Info } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles, Pause, Volume2, VolumeX, Plus, Info, ChevronDown, ChevronUp } from "lucide-react"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
 
@@ -35,6 +35,10 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [showReadMore, setShowReadMore] = useState(false)
+  const synopsisRef = useRef<HTMLParagraphElement>(null)
 
   // Convert Google Drive link for video element
   const getVideoUrl = (url: string) => {
@@ -229,6 +233,18 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
     }
   }, [])
 
+  useEffect(() => {
+    if (synopsisRef.current) {
+      const element = synopsisRef.current
+      const isOverflowing = element.scrollHeight > element.clientHeight
+      setShowReadMore(isOverflowing)
+    }
+  }, [film.synopsis, showExpandedCard])
+
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded)
+  }
+
   return (
     <div
       className={`relative cursor-pointer transition-all duration-500 ${
@@ -391,19 +407,45 @@ function ModernFilmCard({ film, isPurchased, onFilmClick }: {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {!isPurchased && (
-                <div className="text-right ml-3">
+            {!isPurchased && (
+                <div className="text-left">
                   <div className="text-green-400 font-bold text-lg">
                     R$ {film.price.toFixed(2)}
                   </div>
                 </div>
+            )}
+
+            <div className="relative">
+              <p 
+                ref={synopsisRef}
+                className={`text-gray-300 text-sm leading-relaxed transition-all duration-300 mb-4 text-justify ${
+                  isExpanded ? '' : 'line-clamp-3'
+                }`}
+              >
+                {film.synopsis}
+              </p>
+              
+              {showReadMore && (
+                <button
+                  onClick={toggleExpanded}
+                  className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-200 mb-4 text-justify"
+                >
+                  {isExpanded ? (
+                    <>
+                      <span>Ler menos</span>
+                      <ChevronUp className="w-3 h-3" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Ler mais</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </>
+                  )}
+                </button>
               )}
             </div>
-
-            <p className="text-gray-300 text-sm line-clamp-3 leading-relaxed mb-4">
-              {film.synopsis}
-            </p>
 
             {/* Action buttons */}
             <div className="flex items-center space-x-2">
@@ -482,11 +524,7 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
             {title}
           </h2>
           <div className={`h-1 w-16 bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} rounded-full`} />
-        </div>
-        
-        <button className="text-gray-400 hover:text-white transition-colors text-sm font-medium">
-          Ver todos
-        </button>
+        </div>x
       </div>
 
       {/* Films container */}
@@ -494,14 +532,14 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
         {/* Navigation buttons */}
         <button
           onClick={() => scroll("left")}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/90 hover:scale-110"
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-10 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/90 hover:scale-110"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         
         <button
           onClick={() => scroll("right")}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/90 hover:scale-110"
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-10 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/90 hover:scale-110"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -509,9 +547,11 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
         {/* Films scroll container */}
         <div
           ref={scrollContainerRef}
-          className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16 px-8"
+          className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
+          {/* Padding esquerdo */}
+          <div className="w-8 flex-shrink-0"></div>
           {films.map((film) => (
             <ModernFilmCard
               key={film.id}
@@ -520,6 +560,8 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
               onFilmClick={onFilmClick}
             />
           ))}
+          {/* Padding direito */}
+          <div className="w-8 flex-shrink-0"></div>
         </div>
       </div>
     </div>
@@ -564,7 +606,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
                   Catálogo EROS
                 </span>
               </h1>
-              <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+              <p className="text-gray-200 text-lg max-w-2xl mx-auto">
                 Descubra uma seleção exclusiva de filmes premium para uma experiência cinematográfica única
               </p>
             </div>
