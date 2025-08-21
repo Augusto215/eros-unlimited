@@ -132,7 +132,7 @@ export default function Navbar() {
               <button 
                 onClick={handleLogout} 
                 disabled={isLoggingOut}
-                className="text-white/80 hover:text-white text-sm disabled:opacity-50"
+                className="ml-6 text-white/80 hover:text-white text-sm disabled:opacity-50"
               >
                 {isLoggingOut ? t('navbar.loggingOut') : t('navbar.logout')}
               </button>

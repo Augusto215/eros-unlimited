@@ -3,9 +3,14 @@
 import { useState, useEffect } from "react"
 import { Mail, Phone, Camera, Heart, Users, Sparkles, Film, Star, ArrowRight, Send, Play } from "lucide-react"
 import Image from "next/image"
+import { usePartnerTranslation, useCommonTranslation } from "@/hooks/useTranslation"
 
 export default function Partner() {
+  const partner = usePartnerTranslation()
+  const common = useCommonTranslation()
   const [hoveredImage, setHoveredImage] = useState<number | null>(null)
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,51 +25,51 @@ export default function Partner() {
   const partnershipBenefits = [
     {
       icon: <Film className="w-8 h-8" />,
-      title: "Creative Freedom",
-      description: "Express your artistic vision without limitations or censorship"
+      title: partner.creativeFreedom,
+      description: partner.creativeFreedomDesc
     },
     {
       icon: <Users className="w-8 h-8" />,
-      title: "Global Audience",
-      description: "Reach LGBTQ+ communities and indie film lovers worldwide"
+      title: partner.globalAudience,
+      description: partner.globalAudienceDesc
     },
     {
       icon: <Star className="w-8 h-8" />,
-      title: "Festival Network",
-      description: "Access to our established network of international film festivals"
+      title: partner.festivalNetwork,
+      description: partner.festivalNetworkDesc
     },
     {
       icon: <Heart className="w-8 h-8" />,
-      title: "Passionate Community",
-      description: "Connect with artists who share your vision for inclusive storytelling"
+      title: partner.passionateCommunity,
+      description: partner.passionateCommunityDesc
     }
   ]
 
   const partnerImages = [
     {
       id: 1,
-      category: "Behind the Scenes",
-      description: "Creative process in action"
+      category: partner.behindScenes,
+      description: partner.behindScenesDesc
     },
     {
       id: 2,
-      category: "Festival Moments", 
-      description: "Celebrating diversity together"
+      category: partner.festivalMoments, 
+      description: partner.festivalMomentsDesc
     },
     {
       id: 3,
-      category: "Community Events",
-      description: "Building bridges through art"
+      category: partner.communityEvents,
+      description: partner.communityEventsDesc
     },
     {
       id: 4,
-      category: "Artistic Vision",
-      description: "Bringing stories to life"
+      category: partner.artisticVision,
+      description: partner.artisticVisionDesc
     },
     {
       id: 5,
-      category: "Collaboration",
-      description: "Creating magic together"
+      category: partner.collaboration,
+      description: partner.collaborationDesc
     }
   ]
 
@@ -75,10 +80,75 @@ export default function Partner() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    console.log('Partnership inquiry submitted:', formData)
+    
+    // Validação básica
+    if (!formData.name || !formData.email || !formData.description) {
+      setSubmitError(partner.fillRequiredFields)
+      setSubmitMessage(null)
+      return
+    }
+
+    // Criar o corpo do email
+    const emailSubject = `Nova Consulta de Parceria - ${formData.name}`
+    
+    const emailBody = `
+Nova Consulta de Parceria - Eros Unlimited
+
+INFORMAÇÕES DO CONTATO:
+- Nome: ${formData.name}
+- Email: ${formData.email}
+${formData.phone ? `- Telefone: ${formData.phone}` : ''}
+
+INFORMAÇÕES DO PROJETO:
+${formData.filmTitle ? `- Título do Filme: ${formData.filmTitle}` : ''}
+${formData.genre ? `- Gênero: ${formData.genre}` : ''}
+${formData.budget ? `- Orçamento: ${formData.budget}` : ''}
+${formData.timeline ? `- Cronograma: ${formData.timeline}` : ''}
+
+DESCRIÇÃO DO PROJETO:
+${formData.description}
+
+---
+Esta mensagem foi enviada através do formulário de parceria do site Eros Unlimited.
+Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+    `.trim()
+
+    // Criar URL mailto
+    const mailtoUrl = `mailto:erosunlimitedart@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
+
+    try {
+      // Abrir cliente de email
+      window.location.href = mailtoUrl
+      
+      // Mostrar mensagem de sucesso
+      setSubmitMessage(partner.inquirySentSuccess)
+      setSubmitError(null)
+      
+      // Limpar formulário após 2 segundos
+      setTimeout(() => {
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          filmTitle: '',
+          genre: '',
+          description: '',
+          budget: '',
+          timeline: ''
+        })
+      }, 2000)
+      
+      // Remover mensagem de sucesso após 3 segundos
+      setTimeout(() => {
+        setSubmitMessage(null)
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Erro ao abrir cliente de email:', error)
+      setSubmitError(partner.inquiryError)
+    }
   }
 
   return (
@@ -92,15 +162,14 @@ export default function Partner() {
         
         <div className="relative z-10 text-center max-w-6xl mx-auto px-4 pt-20">
           <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-            PARTNER WITH US
+            {partner.heroTitle}
           </h1>
           <p className="text-2xl md:text-3xl mb-8 text-gray-200 font-light">
-            Create • Collaborate • Celebrate
+            {partner.heroSubtitle}
           </p>
           <div className="w-32 h-1 bg-gradient-to-r from-red-500 to-purple-500 mx-auto mb-8 rounded-full" />
           <p className="text-lg text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            Join our vision of creating a dream place where independent artists can expose their creativity, 
-            share their films and succeed faster than an arrow crossing a heart.
+            {partner.heroText}
           </p>
         </div>
 
@@ -116,29 +185,26 @@ export default function Partner() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold mb-8 bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
-              Our Partnership Vision
+              {partner.partnershipVisionTitle}
             </h2>
             <div className="max-w-4xl mx-auto">
               <p className="text-xl text-gray-300 leading-relaxed mb-8">
-                We are looking for <span className="text-red-400 font-semibold">independent directors and producers</span> who are willing to share their amazing 
-                LGBTQ+ themed films and be able to sell them online with our on demand platform.
+                {partner.visionText1} <span className="text-red-400 font-semibold">{partner.visionText2}</span> {partner.visionText3}
               </p>
               <p className="text-lg text-gray-400 leading-relaxed">
-                If you have a <span className="text-pink-400 font-semibold">daring, sexy, underground, innovative, sensual, experimental, uniquely bizarre, 
-                ambiguous, androgynous</span> film that depicts the lives of interesting and unconventional characters - we want to hear from you!
+                {partner.visionText4} <span className="text-pink-400 font-semibold">{partner.visionText5}</span> {partner.visionText6}
               </p>
             </div>
           </div>
 
           {/* Call to Action Box */}
           <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 rounded-2xl p-8 border border-red-500/20 text-center">
-            <h3 className="text-3xl font-bold mb-4 text-red-400">Your Film Matters to Us</h3>
+            <h3 className="text-3xl font-bold mb-4 text-red-400">{partner.yourFilmMatters}</h3>
             <p className="text-xl text-gray-300 mb-6">
-              You can sell it, rent it and create your own audience as anything can happen if you believe in our art. 
-              <span className="text-pink-400 font-semibold"> We believe in You.</span>
+              {partner.filmMattersText1} <span className="text-pink-400 font-semibold">{partner.filmMattersText2}</span>
             </p>
             <p className="text-lg text-gray-400">
-              So don't be shy and give it a try. Eros on demand has a vision, and your new movie can be part of this dream.
+              {partner.filmMattersText3}
             </p>
           </div>
         </div>
@@ -148,7 +214,7 @@ export default function Partner() {
       <section className="py-24 bg-gradient-to-br from-red-900/20 to-purple-900/20">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-            Why Partner With Us?
+            {partner.whyPartnerWithUs}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -172,7 +238,7 @@ export default function Partner() {
       <section className="py-24 bg-black">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            Partnership in Action
+            {partner.partnershipInActionTitle}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -206,7 +272,7 @@ export default function Partner() {
 
           <div className="text-center mt-12">
             <p className="text-gray-400 text-lg">
-              Join our community of creative partners and see your vision come to life
+              {partner.joinCommunityText}
             </p>
           </div>
         </div>
@@ -220,12 +286,12 @@ export default function Partner() {
             {/* Contact Information */}
             <div>
               <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
-                Let's Collaborate
+                {partner.letsCollaborate}
               </h2>
               
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-4">Contact us to collaborate:</h3>
+                  <h3 className="text-2xl font-bold text-white mb-4">{partner.contactToCollaborate}</h3>
                   
                   <div className="space-y-4">
                     <div className="flex items-center space-x-4">
@@ -233,7 +299,7 @@ export default function Partner() {
                         <Mail className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-gray-400 text-sm">Email</p>
+                        <p className="text-gray-400 text-sm">{partner.email}</p>
                         <a href="mailto:erosunlimitedart@gmail.com" className="text-red-400 font-semibold text-lg hover:text-pink-400 transition-colors">
                           erosunlimitedart@gmail.com
                         </a>
@@ -245,7 +311,7 @@ export default function Partner() {
                         <Phone className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-gray-400 text-sm">Phone</p>
+                        <p className="text-gray-400 text-sm">{partner.phone}</p>
                         <a href="tel:+13233837144" className="text-pink-400 font-semibold text-lg hover:text-purple-400 transition-colors">
                           323 383 71 44
                         </a>
@@ -255,10 +321,9 @@ export default function Partner() {
                 </div>
 
                 <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 p-6 rounded-xl border border-red-500/20">
-                  <h4 className="text-xl font-bold text-red-400 mb-3">Ready to Start?</h4>
+                  <h4 className="text-xl font-bold text-red-400 mb-3">{partner.readyToStart}</h4>
                   <p className="text-gray-300 leading-relaxed">
-                    Send us your film details, portfolio, or just a message about your project. 
-                    We're excited to learn about your creative vision and explore how we can work together.
+                    {partner.readyToStartText}
                   </p>
                 </div>
               </div>
@@ -267,12 +332,12 @@ export default function Partner() {
             {/* Partnership Inquiry Form */}
             <div>
               <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-8 border border-purple-500/20">
-                <h3 className="text-2xl font-bold text-purple-400 mb-6">Partnership Inquiry</h3>
+                <h3 className="text-2xl font-bold text-purple-400 mb-6">{partner.partnershipInquiry}</h3>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-gray-300 text-sm font-medium mb-2">Name *</label>
+                      <label className="block text-gray-300 text-sm font-medium mb-2">{partner.name} *</label>
                       <input
                         type="text"
                         value={formData.name}
@@ -282,7 +347,7 @@ export default function Partner() {
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 text-sm font-medium mb-2">Email *</label>
+                      <label className="block text-gray-300 text-sm font-medium mb-2">{partner.email} *</label>
                       <input
                         type="email"
                         value={formData.email}
@@ -295,7 +360,7 @@ export default function Partner() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-gray-300 text-sm font-medium mb-2">Phone</label>
+                      <label className="block text-gray-300 text-sm font-medium mb-2">{partner.phone}</label>
                       <input
                         type="tel"
                         value={formData.phone}
@@ -304,7 +369,7 @@ export default function Partner() {
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 text-sm font-medium mb-2">Film Title</label>
+                      <label className="block text-gray-300 text-sm font-medium mb-2">{partner.filmTitle}</label>
                       <input
                         type="text"
                         value={formData.filmTitle}
@@ -316,33 +381,33 @@ export default function Partner() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-gray-300 text-sm font-medium mb-2">Genre</label>
+                      <label className="block text-gray-300 text-sm font-medium mb-2">{partner.genre}</label>
                       <input
                         type="text"
                         value={formData.genre}
                         onChange={(e) => handleInputChange('genre', e.target.value)}
-                        placeholder="e.g., LGBTQ+ Drama, Experimental"
+                        placeholder={partner.genrePlaceholder}
                         className="w-full p-3 bg-gray-700 text-white rounded-md border border-gray-600 focus:border-red-500 focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 text-sm font-medium mb-2">Budget Range</label>
+                      <label className="block text-gray-300 text-sm font-medium mb-2">{partner.budgetRange}</label>
                       <input
                         type="text"
                         value={formData.budget}
                         onChange={(e) => handleInputChange('budget', e.target.value)}
-                        placeholder="e.g., $10k - $50k"
+                        placeholder={partner.budgetPlaceholder}
                         className="w-full p-3 bg-gray-700 text-white rounded-md border border-gray-600 focus:border-red-500 focus:outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 text-sm font-medium mb-2">Project Description *</label>
+                    <label className="block text-gray-300 text-sm font-medium mb-2">{partner.projectDescription} *</label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
-                      placeholder="Tell us about your film, characters, themes, and vision..."
+                      placeholder={partner.projectDescriptionPlaceholder}
                       rows={4}
                       className="w-full p-3 bg-gray-700 text-white rounded-md border border-gray-600 focus:border-red-500 focus:outline-none resize-vertical"
                       required
@@ -350,22 +415,35 @@ export default function Partner() {
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 text-sm font-medium mb-2">Timeline</label>
+                    <label className="block text-gray-300 text-sm font-medium mb-2">{partner.timeline}</label>
                     <input
                       type="text"
                       value={formData.timeline}
                       onChange={(e) => handleInputChange('timeline', e.target.value)}
-                      placeholder="When do you plan to release?"
+                      placeholder={partner.timelinePlaceholder}
                       className="w-full p-3 bg-gray-700 text-white rounded-md border border-gray-600 focus:border-red-500 focus:outline-none"
                     />
                   </div>
 
+                  {/* Mensagens de feedback */}
+                  {submitMessage && (
+                    <div className="bg-green-900/30 border border-green-500/20 text-green-400 p-4 rounded-md">
+                      {submitMessage}
+                    </div>
+                  )}
+                  
+                  {submitError && (
+                    <div className="bg-red-900/30 border border-red-500/20 text-red-400 p-4 rounded-md">
+                      {submitError}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-4 rounded-lg font-semibold hover:from-red-600 hover:to-pink-600 transition-all duration-300 flex items-center justify-center space-x-2"
+                    className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white py-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center space-x-2"
                   >
                     <Send className="w-5 h-5" />
-                    <span>Send Partnership Inquiry</span>
+                    <span>{partner.sendInquiry}</span>
                   </button>
                 </form>
               </div>
@@ -377,9 +455,9 @@ export default function Partner() {
       {/* Bottom CTA */}
       <section className="py-16 bg-gradient-to-r from-red-900/40 via-pink-900/40 to-purple-900/40">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6 text-white">Ready to Change the World Through Film?</h2>
+          <h2 className="text-3xl font-bold mb-6 text-white">{partner.readyToChangeWorld}</h2>
           <p className="text-xl text-gray-300 mb-8">
-            Join us in creating a more inclusive, diverse, and beautiful world through the power of independent cinema.
+            {partner.readyToChangeWorldText}
           </p>
           <div className="flex justify-center space-x-4">
             <span className="text-4xl">🎬</span>

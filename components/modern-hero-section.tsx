@@ -239,7 +239,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
           <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
             <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse" />
           </div>
-          <span className="text-white/70 text-sm font-medium">{t('films.scrollToExplore')}</span>
+          <span className="text-white/70 text-sm font-medium">{t('movies.scrollToExplore')}</span>
         </div>
       </div>
     </div>

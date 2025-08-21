@@ -1,10 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Play, Award, Users, Heart, Globe, Calendar, MapPin, Camera } from "lucide-react"
 import Image from "next/image"
+import { useAboutTranslation } from "@/hooks/useTranslation"
 
 export default function About() {
+  const router = useRouter()
+  const about = useAboutTranslation()
   const [activeSection, setActiveSection] = useState(0)
 
   const awards = [
@@ -23,42 +27,42 @@ export default function About() {
       year: "2015",
       genre: "Video Art, Suspense",
       duration: "14min",
-      description: "Premiere"
+      description: about.premiere
     },
     {
       title: "Homophobic Interlude",
       year: "2016", 
       genre: "Experimental Documentary",
       duration: "17min",
-      description: "Exploring themes of prejudice and acceptance"
+      description: about.exploringThemes
     },
     {
       title: "Scenes of the Apocalypse",
       year: "2016",
       genre: "Experimental Fiction",
       duration: "18min", 
-      description: "A visionary tale of transformation"
+      description: about.visionaryTale
     },
     {
       title: "Delirium",
       year: "2014",
       genre: "Fiction",
       duration: "16min",
-      description: "An intimate journey of self-discovery"
+      description: about.intimateJourney
     },
     {
       title: "Queens",
       year: "2013",
       genre: "Documentary",
       duration: "19min",
-      description: "Celebrating queer identity and resilience"
+      description: about.celebratingIdentity
     },
     {
       title: "FEB - Soldado de Guerra",
       year: "2012",
       genre: "Documentary", 
       duration: "21min",
-      description: "Historical perspective on identity"
+      description: about.historicalPerspective
     }
   ]
 
@@ -80,14 +84,14 @@ export default function About() {
         
         <div className="relative z-10 text-center max-w-6xl mx-auto px-4 pt-20">
           <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-pink-400 via-purple-400 to-orange-400 bg-clip-text text-transparent animate-pulse">
-            EROS UNLIMITED
+            {about.heroTitle}
           </h1>
           <p className="text-2xl md:text-3xl mb-8 text-gray-200 font-light">
-            Enlightening Lives Through Art
+            {about.heroSubtitle}
           </p>
           <div className="w-32 h-1 bg-gradient-to-r from-pink-500 to-purple-500 mx-auto mb-8 rounded-full" />
           <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            "A dream come true, an amazing challenge that comes to life to enlighten the lives of people, places and situations that often don't make it to the main screen."
+            "{about.heroQuote}"
           </p>
         </div>
 
@@ -104,17 +108,14 @@ export default function About() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-5xl font-bold mb-8 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                Our Mission
+                {about.ourMissionTitle}
               </h2>
               <div className="space-y-6 text-gray-300 text-lg leading-relaxed">
                 <p>
-                  Our main objective is to create art in form of films depicting unique characters and themes to satiate 
-                  an increasing desire of the <span className="text-pink-400 font-semibold">LGBTQ+</span> and all independent movies lovers audience.
+                  {about.missionText1} <span className="text-pink-400 font-semibold">LGBTQ+</span> {about.missionText2}
                 </p>
                 <p>
-                  The movies featured on this platform are only able to exist due to the passion, care, love and collective effort of 
-                  independent artists, actors, producers, dear friends and family who share a deep desire of making our planet a 
-                  <span className="text-purple-400 font-semibold"> better, equal and freer place for all peoples.</span>
+                  {about.missionText3} <span className="text-purple-400 font-semibold">{about.missionText4}</span>
                 </p>
               </div>
               
@@ -123,19 +124,19 @@ export default function About() {
                   <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Heart className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-pink-400">Love</h3>
+                  <h3 className="text-xl font-semibold text-pink-400">{about.love}</h3>
                 </div>
                 <div className="text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-purple-400">Unity</h3>
+                  <h3 className="text-xl font-semibold text-purple-400">{about.unity}</h3>
                 </div>
                 <div className="text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Globe className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-blue-400">Freedom</h3>
+                  <h3 className="text-xl font-semibold text-blue-400">{about.freedom}</h3>
                 </div>
               </div>
             </div>
@@ -161,11 +162,9 @@ export default function About() {
       {/* Vision Statement */}
       <section className="py-20 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-8 text-white">Our Vision</h2>
+          <h2 className="text-4xl font-bold mb-8 text-white">{about.ourVisionTitle}</h2>
           <p className="text-xl text-gray-300 leading-relaxed mb-8">
-            "In the arms of Eros Unlimited there is no limit for the imagination, there is no prejudice and also no boundaries, 
-            in here <span className="text-pink-400 font-semibold">ALL genders are embraced and welcome.</span> So open your heart, let the God Eros 
-            show you the way to a new era of forbidden pleasures, hidden mysteries of human sexuality and different kinds of fairy tale love."
+            "{about.visionText1} <span className="text-pink-400 font-semibold">{about.visionText2}</span> {about.visionText3}"
           </p>
           <div className="flex justify-center space-x-4">
             <span className="text-4xl">🌈</span>
@@ -180,7 +179,7 @@ export default function About() {
       <section className="py-24 bg-black">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-            Filmography
+            {about.filmographyTitle}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -207,7 +206,7 @@ export default function About() {
       <section className="py-24 bg-gradient-to-br from-purple-900/30 to-pink-900/30">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-            Recognition & Awards
+            {about.recognitionTitle}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -228,33 +227,31 @@ export default function About() {
       <section className="py-24 bg-black">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-            Director's Biography
+            {about.directorBioTitle}
           </h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
                 <div className="w-4 h-4 bg-cyan-400 rounded-full" />
-                <h3 className="text-2xl font-bold text-cyan-400">Victor Reis Aleixo</h3>
+                <h3 className="text-2xl font-bold text-cyan-400">{about.directorName}</h3>
               </div>
               
               <div className="space-y-4 text-gray-300 text-lg">
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-5 h-5 text-cyan-400" />
-                  <span>Born in 1979, Rio de Janeiro, Brazil</span>
+                  <span>{about.bornIn}</span>
                 </div>
                 
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-5 h-5 text-cyan-400" />
-                  <span>Graduated in Communications - Journalism in 2009</span>
+                  <span>{about.graduated}</span>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-gray-900/80 to-gray-800/80 p-6 rounded-xl border border-cyan-500/20">
                 <p className="text-gray-300 leading-relaxed">
-                  Worked as a television reporter in 2009; "A Demitida" Theather Play director and produced "O travesseiro", 
-                  "João por um Fio" and "Dispare" in 2010; "Nos bailes da Vida" Documentary Scriptwriter and director's assistant 
-                  in 2011 and 2012. Executive Producer and Director of <span className="text-cyan-400 font-semibold">"Eros Unlimited Production"</span> since 2010.
+                  {about.bioText}
                 </p>
               </div>
             </div>
@@ -267,8 +264,8 @@ export default function About() {
                     <div className="w-32 h-32 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
                       <span className="text-4xl">🎭</span>
                     </div>
-                    <p className="text-xl font-bold text-cyan-400">Victor Reis Aleixo</p>
-                    <p className="text-gray-300">Director & Producer</p>
+                    <p className="text-xl font-bold text-cyan-400">{about.directorName}</p>
+                    <p className="text-gray-300">{about.directorProducer}</p>
                   </div>
                 </div>
               </div>
@@ -280,19 +277,21 @@ export default function About() {
       {/* Call to Action */}
       <section className="py-24 bg-gradient-to-r from-pink-900/40 via-purple-900/40 to-blue-900/40">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-8 text-white">Join Our Journey</h2>
+          <h2 className="text-4xl font-bold mb-8 text-white">{about.joinJourneyTitle}</h2>
           <p className="text-xl text-gray-300 mb-12 leading-relaxed">
-            Be part of a movement that celebrates diversity, love, and artistic freedom. 
-            Discover stories that matter, characters that inspire, and films that change perspectives.
+            {about.joinJourneyText}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105">
-              Explore Our Films
+            <button 
+              onClick={() => router.push('/')}
+              className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105"
+            >
+              {about.exploreFilms}
             </button>
-            <button className="px-8 py-4 border-2 border-purple-400 text-purple-400 font-bold rounded-xl hover:bg-purple-400 hover:text-white transition-all duration-300">
-              Contact Us
-            </button>
+            {/* <button className="px-8 py-4 border-2 border-purple-400 text-purple-400 font-bold rounded-xl hover:bg-purple-400 hover:text-white transition-all duration-300">
+              {about.contactUs}
+            </button> */}
           </div>
         </div>
       </section>

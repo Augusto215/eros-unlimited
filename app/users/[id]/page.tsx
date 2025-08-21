@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth"
 import { getUserPurchasedFilms, getMovies } from "@/lib/movies"
+import { useUserProfileTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import { 
   User, 
@@ -33,6 +34,7 @@ interface UserData {
 
 export default function UserProfile() {
   const params = useParams()
+  const profileT = useUserProfileTranslation()
   const [userData, setUserData] = useState<UserData | null>(null)
   const [purchasedFilms, setPurchasedFilms] = useState<Film[]>([])
   const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
@@ -44,11 +46,17 @@ export default function UserProfile() {
       try {
         const user = getCurrentUser()
         if (!user) {
-          setError("Usuário não encontrado")
+          setError(profileT.userNotFound)
           return
         }
 
-        setUserData(user)
+        // Ensure created_at is a string
+        const userWithCreatedAt = {
+          ...user,
+          created_at: user.created_at || new Date().toISOString()
+        }
+
+        setUserData(userWithCreatedAt)
 
         // Load purchased films
         const [purchased, allFilms] = await Promise.all([
@@ -64,7 +72,7 @@ export default function UserProfile() {
 
       } catch (error) {
         console.error('Error loading user data:', error)
-        setError("Erro ao carregar dados do usuário")
+        setError(profileT.errorLoadingData)
       } finally {
         setLoading(false)
       }
@@ -79,7 +87,7 @@ export default function UserProfile() {
         <div className="text-center">
           <div className="w-20 h-20 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
           <h2 className="text-white text-2xl font-bold mb-2 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-            Carregando perfil...
+            {profileT.loading}
           </h2>
         </div>
       </div>
@@ -93,7 +101,7 @@ export default function UserProfile() {
           <div className="w-32 h-32 bg-gradient-to-br from-red-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <User className="w-16 h-16 text-red-400" />
           </div>
-          <h2 className="text-white text-2xl font-bold mb-2">Erro ao carregar perfil</h2>
+          <h2 className="text-white text-2xl font-bold mb-2">{profileT.loadError}</h2>
           <p className="text-gray-400">{error}</p>
         </div>
       </div>
@@ -144,7 +152,7 @@ export default function UserProfile() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen p-6">
+      <div className="relative z-10 min-h-screen p-6 pt-24">
         <div className="max-w-7xl mx-auto">
           
           {/* Header Section */}
@@ -191,7 +199,7 @@ export default function UserProfile() {
                   <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
                     <Calendar className="w-4 h-4 text-blue-400" />
                     <span className="text-blue-300 text-sm">
-                      Membro desde {new Date(userData.created_at).getFullYear()}
+                      {profileT.memberSince} {new Date(userData.created_at).getFullYear()}
                     </span>
                   </div>
                   
@@ -199,12 +207,12 @@ export default function UserProfile() {
                     {userData.role === 'ADMIN' ? (
                       <>
                         <Crown className="w-4 h-4 text-yellow-400" />
-                        <span className="text-yellow-300 text-sm font-medium">Administrador</span>
+                        <span className="text-yellow-300 text-sm font-medium">{profileT.administrator}</span>
                       </>
                     ) : (
                       <>
                         <Star className="w-4 h-4 text-purple-400" />
-                        <span className="text-purple-300 text-sm font-medium">Membro Premium</span>
+                        <span className="text-purple-300 text-sm font-medium">{profileT.premiumMember}</span>
                       </>
                     )}
                   </div>
@@ -214,7 +222,7 @@ export default function UserProfile() {
                 <div className="flex items-center justify-center lg:justify-start space-x-2">
                   <Rainbow className="w-5 h-5 text-yellow-400 animate-pulse" />
                   <span className="text-gray-300 text-sm italic">
-                    "Diversidade é nossa força, amor é nossa linguagem"
+                    {profileT.prideMessage}
                   </span>
                   <Heart className="w-4 h-4 text-pink-400 animate-pulse" />
                 </div>
@@ -230,7 +238,7 @@ export default function UserProfile() {
                 <FilmIcon className="w-6 h-6 text-white" />
               </div>
               <div className="text-2xl font-bold text-white mb-1">{purchasedFilms.length}</div>
-              <div className="text-pink-300 text-sm">Filmes Adquiridos</div>
+              <div className="text-pink-300 text-sm">{profileT.stats.filmsAcquired}</div>
             </div>
 
             {/* Total Spent */}
@@ -239,7 +247,7 @@ export default function UserProfile() {
                 <Gift className="w-6 h-6 text-white" />
               </div>
               <div className="text-2xl font-bold text-white mb-1">USD {totalSpent.toFixed(2)}</div>
-              <div className="text-green-300 text-sm">Total Investido</div>
+              <div className="text-green-300 text-sm">{profileT.stats.totalInvested}</div>
             </div>
 
             {/* Average Rating */}
@@ -248,7 +256,7 @@ export default function UserProfile() {
                 <Star className="w-6 h-6 text-white" />
               </div>
               <div className="text-2xl font-bold text-white mb-1">{averageRating.toFixed(1)}</div>
-              <div className="text-yellow-300 text-sm">Avaliação Média</div>
+              <div className="text-yellow-300 text-sm">{profileT.stats.averageRating}</div>
             </div>
 
             {/* Watch Time */}
@@ -259,7 +267,7 @@ export default function UserProfile() {
               <div className="text-2xl font-bold text-white mb-1">
                 {Math.floor(purchasedFilms.reduce((sum, film) => sum + film.duration, 0) / 60)}h
               </div>
-              <div className="text-blue-300 text-sm">Tempo de Conteúdo</div>
+              <div className="text-blue-300 text-sm">{profileT.stats.contentTime}</div>
             </div>
           </div>
 
@@ -273,17 +281,17 @@ export default function UserProfile() {
                 <div>
                   <h2 className="text-white text-2xl font-bold">
                     <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Minha Coleção
+                      {profileT.collection.title}
                     </span>
                   </h2>
-                  <p className="text-gray-400 text-sm">Seus filmes favoritos</p>
+                  <p className="text-gray-400 text-sm">{profileT.collection.subtitle}</p>
                 </div>
               </div>
               
               <div className="flex items-center space-x-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-4 py-2 rounded-full border border-purple-400/30">
                 <Award className="w-4 h-4 text-purple-400" />
                 <span className="text-purple-300 text-sm font-medium">
-                  {purchasedFilms.length} {purchasedFilms.length === 1 ? 'filme' : 'filmes'}
+                  {purchasedFilms.length} {purchasedFilms.length === 1 ? profileT.collection.filmCount : profileT.collection.filmsCount}
                 </span>
               </div>
             </div>
@@ -304,7 +312,7 @@ export default function UserProfile() {
                       {/* Owned badge */}
                       <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
                         <Crown className="w-3 h-3" />
-                        <span>SEU</span>
+                        <span>{profileT.collection.owned}</span>
                       </div>
 
                       {/* Film info overlay */}
@@ -330,10 +338,10 @@ export default function UserProfile() {
                 <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <FilmIcon className="w-12 h-12 text-purple-400" />
                 </div>
-                <h3 className="text-white text-xl font-bold mb-2">Nenhum filme adquirido ainda</h3>
-                <p className="text-gray-400 mb-6">Explore nosso catálogo e construa sua coleção!</p>
+                <h3 className="text-white text-xl font-bold mb-2">{profileT.collection.noFilms}</h3>
+                <p className="text-gray-400 mb-6">{profileT.collection.noFilmsDescription}</p>
                 <button className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105">
-                  Explorar Filmes
+                  {profileT.collection.exploreFilms}
                 </button>
               </div>
             )}
@@ -349,7 +357,7 @@ export default function UserProfile() {
               ))}
             </div>
             <p className="text-gray-300 text-sm">
-              ✨ Obrigado por fazer parte da nossa comunidade de amor e diversidade ✨
+              {profileT.footerMessage}
             </p>
           </div>
         </div>

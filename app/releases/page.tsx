@@ -1,74 +1,164 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getMovies, getUserPurchasedFilms } from "@/lib/movies"
-import { getCurrentUser } from "@/lib/auth"
+import { useRouter } from "next/navigation"
+import { initializeAuth, getCurrentUser } from "@/lib/auth"
+import { getMovies, getUserPurchasedFilms, purchaseFilm } from "@/lib/movies"
 import type { Film } from "@/lib/types"
+import ModernHeroSection from "@/components/modern-hero-section"
 import ModernHomeContent from "@/components/modern-home-content"
 import FilmModal from "@/components/film-modal"
 import PaymentModal from "@/components/payment-modal"
-import { Calendar, TrendingUp, Sparkles } from "lucide-react"
+import AddFilmModal from "@/components/add-film-modal"
 
-export default function ReleasesPage() {
+export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
-  const [films, setFilms] = useState<Film[]>([])
-  const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [isAddFilmModalOpen, setIsAddFilmModalOpen] = useState(false)
+  const [heroFilm, setHeroFilm] = useState<Film | null>(null)
+  const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
   const [userId, setUserId] = useState('')
+  const [films, setFilms] = useState<Film[]>([])
+  const router = useRouter()
 
   useEffect(() => {
-    const loadData = async () => {
+    const initApp = async () => {
       try {
-        const user = getCurrentUser()
-        const filmsData = await getMovies()
+        // Check authentication (optional for this page)
+        const user = await initializeAuth()
         
         if (user) {
           setUserId(user.id)
-          const purchases = await getUserPurchasedFilms(user.id)
-          setPurchasedFilmIds(purchases)
+          // Load films and user purchases if logged in
+          await loadFilmsData(user.id)
+        } else {
+          // Load only films data if not logged in
+          const filmsData = await getMovies()
+          setFilms(filmsData)
+          
+          if (filmsData.length > 0) {
+            setHeroFilm(filmsData[0]) // Use first film as hero
+          }
         }
-        
-        // Sort films by release year (newest first) for releases page
-        const sortedFilms = filmsData.sort((a, b) => b.releaseYear - a.releaseYear)
-        setFilms(sortedFilms)
       } catch (error) {
-        console.error('Error loading releases data:', error)
-        // Fallback to mock data
+        console.error('Error initializing app:', error)
+        // Still load films even if auth fails
         try {
           const filmsData = await getMovies()
-          const sortedFilms = filmsData.sort((a, b) => b.releaseYear - a.releaseYear)
-          setFilms(sortedFilms)
-        } catch (fallbackError) {
-          console.error('Error loading fallback data:', fallbackError)
+          setFilms(filmsData)
+          
+          if (filmsData.length > 0) {
+            setHeroFilm(filmsData[0])
+          }
+        } catch (filmError) {
+          console.error('Error loading films:', filmError)
         }
       } finally {
         setIsLoading(false)
       }
     }
 
-    loadData()
-  }, [])
+    initApp()
+  }, [router])
+
+  const loadFilmsData = async (userId: string) => {
+    const [filmsData, purchases] = await Promise.all([
+      getMovies(),
+      getUserPurchasedFilms(userId)
+    ])
+
+    setFilms(filmsData)
+    setPurchasedFilmIds(purchases)
+
+    if (filmsData.length > 0) {
+      setHeroFilm(filmsData[0]) // Use first film as hero
+    }
+  }
 
   const handleFilmClick = (film: Film) => {
+    // Check if user is logged in before opening modal
+    if (!userId) {
+      // Redirect to login if not logged in
+      router.push("/login")
+      return
+    }
+    
     setSelectedFilm(film)
     setIsModalOpen(true)
   }
 
+  const handleHeroPlay = () => {
+    if (!heroFilm) return
+    
+    // Check if user is logged in before opening modal
+    if (!userId) {
+      // Redirect to login if not logged in
+      router.push("/login")
+      return
+    }
+    
+    setSelectedFilm(heroFilm)
+    setIsModalOpen(true)
+  }
+
+  const handleAdminClick = () => {
+    // Open add film modal when admin button is clicked
+    setIsAddFilmModalOpen(true)
+  }
+
   const handlePurchaseClick = (filmId: string) => {
+    // Close film modal and open payment modal
     setIsModalOpen(false)
     setIsPaymentModalOpen(true)
   }
 
+  const handlePaymentSuccess = async (filmId: string) => {
+    const user = getCurrentUser()
+    if (!user) return
+
+    try {
+      const success = await purchaseFilm(user.id, filmId)
+      if (success) {
+        setPurchasedFilmIds(prev => [...prev, filmId])
+        setIsPaymentModalOpen(false)
+        
+        // Show success message
+        console.log('Film purchased successfully!')
+        
+        // Optional: Show a success toast/notification here
+      } else {
+        console.error('Failed to purchase film')
+      }
+    } catch (error) {
+      console.error('Error purchasing film:', error)
+    }
+  }
+
+  const handleFilmAdded = async () => {
+    // Reload films data after a new film is added
+    try {
+      const user = getCurrentUser()
+      if (user) {
+        await loadFilmsData(user.id)
+        console.log('Films data reloaded after adding new film')
+      }
+    } catch (error) {
+      console.error('Error reloading films data:', error)
+    }
+  }
+
   const handlePlay = (film: Film) => {
+    // This would typically open a video player
     console.log("Playing film:", film.title)
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 flex items-center justify-center overflow-hidden pt-20">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 flex items-center justify-center overflow-hidden">
         <div className="relative">
+          {/* Animated background elements */}
           <div className="absolute inset-0 w-96 h-96">
             <div className="absolute top-0 left-0 w-32 h-32 bg-pink-500/30 rounded-full blur-xl animate-pulse"></div>
             <div className="absolute top-20 right-0 w-24 h-24 bg-purple-500/30 rounded-full blur-lg animate-bounce"></div>
@@ -80,23 +170,32 @@ export default function ReleasesPage() {
             <h2 className="text-white text-2xl font-bold mb-2 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
               EROS UNLIMITED
             </h2>
-            <p className="text-gray-300 animate-pulse">Carregando lançamentos...</p>
+            <p className="text-gray-300 animate-pulse">Carregando experiência cinematográfica...</p>
           </div>
         </div>
       </div>
     )
   }
 
-  // Get recent releases (last 2 years)
-  const currentYear = new Date().getFullYear()
-  const recentReleases = films.filter(film => film.releaseYear >= currentYear - 1)
-  const upcomingReleases = films.filter(film => film.releaseYear > currentYear)
-  const thisYearReleases = films.filter(film => film.releaseYear === currentYear)
+  if (!heroFilm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-32 h-32 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">🎬</span>
+          </div>
+          <h2 className="text-white text-2xl font-bold mb-2">Biblioteca em Construção</h2>
+          <p className="text-gray-400">Nenhum filme disponível no momento</p>
+        </div>
+      </div>
+    )
+  }
 
+  // Check if selected film is purchased
   const isSelectedFilmPurchased = selectedFilm ? purchasedFilmIds.includes(selectedFilm.id) : false
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-pink-900/20 relative overflow-hidden pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-pink-900/20 relative overflow-hidden">
       {/* Background Animation Elements */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl animate-pulse"></div>
@@ -104,120 +203,34 @@ export default function ReleasesPage() {
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-red-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
-      <div className="relative z-10 pt-8 pb-16">
-        <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
-          <div className="px-4 mb-12">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
-                  Lançamentos
-                </span>
-              </h1>
-              <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-                Descubra os mais novos filmes e próximos lançamentos da nossa coleção exclusiva
-              </p>
-            </div>
-          </div>
+      {/* Animated particles */}
+      <div className="fixed inset-0 pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-pink-400/20 rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
 
-          {/* Recent Releases */}
-          {recentReleases.length > 0 && (
-            <div className="mb-16">
-              <div className="flex items-center space-x-3 mb-6 px-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-400 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-white" />
-                </div>
-                <h2 className="text-white text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                  Lançamentos Recentes
-                </h2>
-                <div className="h-1 w-16 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full" />
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 px-4">
-                {recentReleases.slice(0, 10).map((film) => (
-                  <div key={film.id} className="cursor-pointer group" onClick={() => handleFilmClick(film)}>
-                    <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                      <img 
-                        src={film.posterUrl || "/placeholder.svg"} 
-                        alt={film.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <h3 className="font-bold text-sm mb-1 line-clamp-1">{film.title}</h3>
-                        <p className="text-xs text-gray-300">{film.releaseYear}</p>
-                      </div>
-                      
-                      {/* Year badge */}
-                      <div className="absolute top-3 right-3 bg-pink-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs font-bold">
-                        {film.releaseYear}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* This Year Releases */}
-          {thisYearReleases.length > 0 && (
-            <div className="mb-16">
-              <div className="flex items-center space-x-3 mb-6 px-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-white" />
-                </div>
-                <h2 className="text-white text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                  Lançamentos de {currentYear}
-                </h2>
-                <div className="h-1 w-16 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full" />
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 px-4">
-                {thisYearReleases.slice(0, 10).map((film) => (
-                  <div key={film.id} className="cursor-pointer group" onClick={() => handleFilmClick(film)}>
-                    <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                      <img 
-                        src={film.posterUrl || "/placeholder.svg"} 
-                        alt={film.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <h3 className="font-bold text-sm mb-1 line-clamp-1">{film.title}</h3>
-                        <p className="text-xs text-gray-300">{film.releaseYear}</p>
-                      </div>
-                      
-                      {/* New badge */}
-                      <div className="absolute top-3 right-3 bg-green-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center space-x-1">
-                        <Sparkles className="w-3 h-3" />
-                        <span>NOVO</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* All Films by Year */}
-          <div className="mb-16">
-            <div className="flex items-center space-x-3 mb-6 px-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-white" />
-              </div>
-              <h2 className="text-white text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Todos os Lançamentos
-              </h2>
-              <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full" />
-            </div>
-            
-            <ModernHomeContent 
-              films={films}
-              onFilmClick={handleFilmClick}
-              purchasedFilmIds={purchasedFilmIds}
-            />
-          </div>
-        </div>
+      <div className="relative z-10">
+        <ModernHeroSection 
+          film={heroFilm} 
+          onPlayClick={handleHeroPlay}
+          onAdminClick={handleAdminClick}
+        />
+        
+        <ModernHomeContent 
+          films={films}
+          onFilmClick={handleFilmClick}
+          purchasedFilmIds={purchasedFilmIds}
+        />
       </div>
 
       {/* Film Details Modal */}
@@ -236,10 +249,14 @@ export default function ReleasesPage() {
         isOpen={isPaymentModalOpen}
         userId={userId}
         onClose={() => setIsPaymentModalOpen(false)}
-        onPaymentSuccess={async (filmId: string) => {
-          setPurchasedFilmIds(prev => [...prev, filmId])
-          setIsPaymentModalOpen(false)
-        }}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+
+      {/* Add Film Modal (Admin Only) */}
+      <AddFilmModal
+        isOpen={isAddFilmModalOpen}
+        onClose={() => setIsAddFilmModalOpen(false)}
+        onFilmAdded={handleFilmAdded}
       />
     </div>
   )

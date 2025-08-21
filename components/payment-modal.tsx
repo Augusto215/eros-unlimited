@@ -4,6 +4,7 @@ import { useState } from "react"
 import { X, AlertCircle, Heart, Sparkles, Crown, Star, Shield, Wallet } from "lucide-react"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
+import { usePaymentTranslation, useMoviesTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useCommonTranslation } from "@/hooks/useTranslation"
 
 interface PaymentModalProps {
   film: Film | null
@@ -18,6 +19,12 @@ interface PaymentForm {
 }
 
 export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentSuccess }: PaymentModalProps) {
+  const payment = usePaymentTranslation()
+  const movies = useMoviesTranslation()
+  const common = useCommonTranslation()
+  const { getTitle } = useFilmTitleTranslation()
+  const { getGenre } = useFilmGenreTranslation()
+
   const [formData, setFormData] = useState<PaymentForm>({
     email: ''
   })
@@ -47,7 +54,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!formData.email || !emailRegex.test(formData.email)) {
-      newErrors.email = 'Email inválido para conta PayPal'
+      newErrors.email = payment.invalidEmailPaypal
     }
 
     setErrors(newErrors)
@@ -86,7 +93,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
     } catch (error: any) {
       console.error('PayPal payment error:', error)
       setErrors({ 
-        email: error.message || 'Erro no pagamento via PayPal. Tente novamente.' 
+        email: error.message || `${payment.paymentError}. ${common.tryAgain}.`
       })
       setIsProcessing(false)
     }
@@ -137,32 +144,32 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
               {/* Pride badge */}
               <div className="absolute top-3 left-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
                 <Crown className="w-3 h-3" />
-                <span>PREMIUM</span>
+                <span>{movies.premium}</span>
               </div>
             </div>
             
             <h3 className="text-white text-xl font-bold mb-2">
               <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                {film.title}
+                {getTitle(film.id, film.title)}
               </span>
             </h3>
-            <p className="text-gray-300 text-sm mb-6">{film.genre} • {film.releaseYear}</p>
+            <p className="text-gray-300 text-sm mb-6">{getGenre(film.id, film.genre)} • {film.releaseYear}</p>
             
             {/* Pricing breakdown */}
             <div className="bg-white/10 backdrop-blur-sm p-5 rounded-xl border border-white/20">
               <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-300">Subtotal:</span>
+                <span className="text-gray-300">{payment.subtotal}:</span>
                 <span className="text-white font-medium">USD {film.price.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-300">Taxa Pride Support:</span>
+                <span className="text-gray-300">{payment.prideSupportFee}:</span>
                 <span className="text-green-400 font-medium">USD 0,00</span>
               </div>
               <hr className="border-white/20 my-3" />
               <div className="flex justify-between items-center">
                 <span className="text-white font-bold flex items-center">
                   <Sparkles className="w-4 h-4 mr-2 text-yellow-400" />
-                  Total:
+                  {payment.total}:
                 </span>
                 <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                   USD {film.price.toFixed(2)}
@@ -174,11 +181,11 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
             <div className="mt-6 space-y-2">
               <div className="flex items-center space-x-2 text-xs text-gray-300">
                 <Shield className="w-4 h-4 text-green-400" />
-                <span>Criptografia SSL 256-bit</span>
+                <span>{payment.ssl256Encryption}</span>
               </div>
               <div className="flex items-center space-x-2 text-xs text-gray-300">
                 <Wallet className="w-4 h-4 text-blue-400" />
-                <span>Processado via PayPal</span>
+                <span>{payment.processedViaPaypal}</span>
               </div>
             </div>
           </div>
@@ -193,10 +200,10 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 <div>
                   <h2 className="text-white text-2xl font-bold">
                     <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                      Pagamento via PayPal
+                      {payment.paypalPayment}
                     </span>
                   </h2>
-                  <p className="text-gray-300 text-sm">Pagamento seguro e instantâneo</p>
+                  <p className="text-gray-300 text-sm">{payment.secureInstantPayment}</p>
                 </div>
               </div>
               <button
@@ -221,12 +228,12 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                     </span>
                   </h3>
                   <p className="text-gray-300 text-sm mb-6">
-                    Você será redirecionado para o PayPal para finalizar o pagamento de forma segura.
+                    {payment.redirectMessage}
                   </p>
                   
                   <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4 mb-6">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-300">Total a pagar:</span>
+                      <span className="text-gray-300">{payment.totalToPay}:</span>
                       <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                         USD {film.price.toFixed(2)}
                       </span>
@@ -237,13 +244,13 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 {/* Email field for PayPal */}
                 <div className="mb-6">
                   <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Email do PayPal
+                    {payment.paypalEmail}
                   </label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="seu-email@paypal.com"
+                    placeholder={payment.paypalEmailPlaceholder}
                     className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                       errors.email ? 'border-red-500' : 'border-white/20'
                     } focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300`}
@@ -256,18 +263,18 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                     </p>
                   )}
                   <p className="text-gray-400 text-xs mt-1">
-                    Digite o email da sua conta PayPal para continuar
+                    {payment.enterPaypalEmail}
                   </p>
                 </div>
 
                 <div className="space-y-3 text-xs text-gray-400">
                   <div className="flex items-center justify-center space-x-2">
                     <Shield className="w-4 h-4 text-green-400" />
-                    <span>Proteção ao Comprador PayPal</span>
+                    <span>{payment.paypalBuyerProtection}</span>
                   </div>
                   <div className="flex items-center justify-center space-x-2">
                     <Wallet className="w-4 h-4 text-blue-400" />
-                    <span>Pagamento 100% seguro</span>
+                    <span>{payment.securePayment100}</span>
                   </div>
                 </div>
               </div>
@@ -277,11 +284,10 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 <Shield className="w-6 h-6 text-blue-400 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-blue-300 text-sm">
-                    <strong>🔒 Pagamento 100% Seguro:</strong> Seus dados são protegidos com criptografia militar. 
-                    Processamento via PayPal com proteção total ao comprador.
+                    <strong>{payment.securePaymentNotice}</strong> {payment.militaryEncryption}
                   </p>
                   <p className="text-blue-200 text-xs mt-1">
-                    ✨ Apoie conteúdo diverso e inclusivo com sua compra
+                    {payment.supportDiverseContent}
                   </p>
                 </div>
               </div>
@@ -295,12 +301,12 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                    <span>Redirecionando para PayPal...</span>
+                    <span>{payment.redirectingToPaypal}</span>
                   </>
                 ) : (
                   <>
                     <Wallet className="w-6 h-6" />
-                    <span>Pagar com PayPal - USD {film.price.toFixed(2)}</span>
+                    <span>{payment.payWithPaypal} - USD {film.price.toFixed(2)}</span>
                     <Heart className="w-5 h-5 text-pink-300" />
                   </>
                 )}
@@ -309,23 +315,23 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
 
             {/* PayPal Benefits */}
             <div className="mt-6 bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
-              <h4 className="text-blue-300 font-medium mb-3 text-center">Vantagens do PayPal</h4>
+              <h4 className="text-blue-300 font-medium mb-3 text-center">{payment.paypalAdvantages}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-300">
                 <div className="flex items-center space-x-2">
                   <Shield className="w-3 h-3 text-green-400" />
-                  <span>Proteção total ao comprador</span>
+                  <span>{payment.totalBuyerProtection}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Wallet className="w-3 h-3 text-blue-400" />
-                  <span>Não compartilha dados bancários</span>
+                  <span>{payment.noShareBankData}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Crown className="w-3 h-3 text-yellow-400" />
-                  <span>Pagamento instantâneo</span>
+                  <span>{payment.instantPayment}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Heart className="w-3 h-3 text-pink-400" />
-                  <span>Suporte 24/7</span>
+                  <span>{payment.support24x7}</span>
                 </div>
               </div>
             </div>
@@ -340,7 +346,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 ))}
               </div>
               <p className="text-gray-400 text-xs">
-                💖 Obrigado por apoiar conteúdo diverso e inclusivo 💖
+                {payment.thankYouSupport}
               </p>
             </div>
           </div>
