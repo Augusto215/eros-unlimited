@@ -43,13 +43,10 @@ export const login = async (email: string, password: string): Promise<Client | n
       .from('users')
       .select('id, name, email, role, created_at')
       .eq('id', authData.user.id)
-      .maybeSingle() // Use maybeSingle instead of single to avoid errors
-
-    console.log('Client query result:', { clientData, clientError })
+      .maybeSingle() // Use maybeSingle instead of errors
 
     // If client doesn't exist, create one
     if (!clientData) {
-      console.log('No client found, creating new client profile...')
       
       const { data: newClientData, error: createError } = await supabase
         .from('users')
@@ -63,7 +60,6 @@ export const login = async (email: string, password: string): Promise<Client | n
         .single()
 
       if (createError) {
-        console.error('Error creating client profile:', createError)
         await supabase.auth.signOut()
         return null
       }
@@ -88,7 +84,6 @@ export const login = async (email: string, password: string): Promise<Client | n
 
     // If there was an error fetching existing client
     if (clientError) {
-      console.error('Client fetch error:', clientError)
       return null
     }
 
@@ -112,7 +107,6 @@ export const login = async (email: string, password: string): Promise<Client | n
     return client
     
   } catch (error) {
-    console.error('Login error:', error)
     return null
   }
 }
@@ -132,7 +126,6 @@ export const register = async (name: string, email: string, password: string): P
     })
 
     if (authError) {
-      console.error('Auth registration error:', authError)
       throw new Error(authError.message)
     }
 
@@ -156,12 +149,11 @@ export const register = async (name: string, email: string, password: string): P
       .single()
 
     if (clientError) {
-      console.error('Client creation error:', clientError)
       // Try to sign out the user if profile creation fails
       try {
         await supabase.auth.signOut()
       } catch (e) {
-        console.error('Error signing out after failed registration:', e)
+        // Silent error handling for signout
       }
       throw new Error('Falha ao criar perfil do usuário: ' + clientError.message)
     }
@@ -184,7 +176,6 @@ export const register = async (name: string, email: string, password: string): P
     
     return client
   } catch (error) {
-    console.error('Registration error:', error)
     throw error
   }
 }
@@ -200,7 +191,6 @@ export const logout = async (): Promise<void> => {
       window.dispatchEvent(new CustomEvent('user-logout'))
     }
   } catch (error) {
-    console.error('Logout error:', error)
     // Even if Supabase logout fails, remove local data
     localStorage.removeItem('eros_user')
     
@@ -235,7 +225,6 @@ export const initializeAuth = async (): Promise<Client | null> => {
       .maybeSingle()
 
     if (error || !clientData) {
-      console.error('Error fetching client data:', error)
       await logout()
       return null
     }
@@ -251,7 +240,6 @@ export const initializeAuth = async (): Promise<Client | null> => {
     localStorage.setItem('eros_user', JSON.stringify(client))
     return client
   } catch (error) {
-    console.error('Auth initialization error:', error)
     localStorage.removeItem('eros_user')
     return null
   }

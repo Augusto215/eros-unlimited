@@ -298,5 +298,21 @@
       "exploreFilms": "Explore Films"
     },
     "footerMessage": "✨ Thank you for being part of our community of love and diversity ✨"
+  },
+  "myMovies": {
+    "title": "My Movies",
+    "loading": "Loading your movies...",
+    "filmCount": {
+      "singular": "movie in your library",
+      "plural": "movies in your library"
+    },
+    "noFilms": "No movies purchased yet",
+    "empty": {
+      "title": "No movies in your library",
+      "description": "You haven't purchased any movies yet. Explore our collection and find something you'll love!",
+      "exploreButton": "Explore Catalog"
+    },
+    "playButton": "Play movie",
+    "viewDetails": "View movie details"
   }
 }

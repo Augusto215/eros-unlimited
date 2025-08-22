@@ -74,7 +74,7 @@ export const createPayPalOrder = async (orderData: PayPalOrderData): Promise<Pay
     })
 
     const order = await client.execute(request)
-    const approvalUrl = order.result.links?.find(link => link.rel === 'approve')?.href
+    const approvalUrl = order.result.links?.find((link: any) => link.rel === 'approve')?.href
 
     if (!approvalUrl) {
       throw new Error('PayPal approval URL not found')
@@ -86,7 +86,6 @@ export const createPayPalOrder = async (orderData: PayPalOrderData): Promise<Pay
     }
 
   } catch (error) {
-    console.error('Error creating PayPal order:', error)
     throw new Error('Failed to create PayPal order')
   }
 }
@@ -96,27 +95,40 @@ export const capturePayPalOrder = async (orderId: string): Promise<PayPalPayment
   try {
     const client = getPayPalClient()
     const request = new paypal.orders.OrdersCaptureRequest(orderId)
-    request.requestBody({})
 
     const capture = await client.execute(request)
     const payment = capture.result
     
-    // Extract custom data
-    const customData = payment.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id
-    const { filmId, userId, email } = customData ? JSON.parse(customData) : {}
+    // Extract custom data from purchase_units
+    let filmId = '', userId = '', email = ''
+    
+    if (payment.purchase_units && payment.purchase_units.length > 0) {
+      const purchaseUnit = payment.purchase_units[0]
+      
+      // Try to get custom data from custom_id
+      if (purchaseUnit.custom_id) {
+        try {
+          const customData = JSON.parse(purchaseUnit.custom_id)
+          filmId = customData.filmId || ''
+          userId = customData.userId || ''
+          email = customData.email || ''
+        } catch (parseError) {
+          // If custom_id is not valid JSON, leave empty values
+        }
+      }
+    }
 
     return {
       id: payment.id,
       status: payment.status,
-      amount: parseFloat(payment.purchase_units[0].amount.value),
+      amount: payment.purchase_units?.[0]?.amount ? parseFloat(payment.purchase_units[0].amount.value) : 0,
       filmId,
       userId,
       email
     }
 
-  } catch (error) {
-    console.error('Error capturing PayPal order:', error)
-    throw new Error('Failed to capture PayPal payment')
+  } catch (error: any) {
+    throw new Error(`Failed to capture PayPal payment: ${error.message || error}`)
   }
 }
 
@@ -130,7 +142,6 @@ export const verifyPayPalPayment = async (orderId: string): Promise<boolean> => 
     return order.result.status === 'COMPLETED'
 
   } catch (error) {
-    console.error('Error verifying PayPal payment:', error)
     return false
   }
 }

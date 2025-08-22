@@ -22,7 +22,6 @@ export const useAuth = () => {
         const verifiedUser = await initializeAuth()
         setUser(verifiedUser)
       } catch (error) {
-        console.error('Auth initialization error:', error)
         setUser(null)
       } finally {
         setIsLoading(false)
@@ -38,7 +37,7 @@ export const useAuth = () => {
       await logout()
       setUser(null)
     } catch (error) {
-      console.error('Logout error:', error)
+      // Silent error handling for logout
     } finally {
       setIsLoggingOut(false)
     }

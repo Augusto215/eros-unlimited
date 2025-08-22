@@ -73,7 +73,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
     setIsProcessing(true)
 
     try {
-      const response = await fetch('/api/create-paypal-payment', {
+      const response = await fetch('/api/payments/create-paypal-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,14 +82,26 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
           amount: film.price,
           filmId: film.id,
           userId: userId,
-          email: formData.email
+          email: formData.email,
+          title: film.title
         })
       })
-      const { approvalUrl } = await response.json()
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
+      }
+      
+      const data = await response.json()
+      const { approvalUrl } = data
+      
+      if (!approvalUrl) {
+        throw new Error('URL de aprovação PayPal não encontrada')
+      }
+      
       window.location.href = approvalUrl
 
     } catch (error: any) {
-      console.error('PayPal payment error:', error)
       setErrors({ 
         email: error.message || `${payment.paymentError}. ${common.tryAgain}.`
       })

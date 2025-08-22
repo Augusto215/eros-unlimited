@@ -299,5 +299,21 @@
       "exploreFilms": "Explorar Películas"
     },
     "footerMessage": "✨ Gracias por ser parte de nuestra comunidad de amor y diversidad ✨"
+  },
+  "myMovies": {
+    "title": "Mis Películas",
+    "loading": "Cargando tus películas...",
+    "filmCount": {
+      "singular": "película en tu biblioteca",
+      "plural": "películas en tu biblioteca"
+    },
+    "noFilms": "Aún no has comprado películas",
+    "empty": {
+      "title": "No hay películas en tu biblioteca",
+      "description": "Aún no has comprado ninguna película. ¡Explora nuestra colección y encuentra algo que te encante!",
+      "exploreButton": "Explorar Catálogo"
+    },
+    "playButton": "Reproducir película",
+    "viewDetails": "Ver detalles de la película"
   }
 }

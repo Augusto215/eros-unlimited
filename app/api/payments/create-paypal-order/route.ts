@@ -19,8 +19,6 @@ export async function POST(request: NextRequest) {
       const order = await createPayPalOrder(orderData)
       return NextResponse.json(order)
     } catch (sdkError) {
-      console.warn('PayPal SDK falhou, usando PayPal Standard:', sdkError)
-      
       // Fallback to PayPal Standard
       const paypalUrl = createPayPalStandardUrl(orderData)
       return NextResponse.json({ 
@@ -30,7 +28,6 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Erro na criação do pedido PayPal:', error)
     return NextResponse.json(
       { error: 'Falha ao criar pedido PayPal' },
       { status: 500 }

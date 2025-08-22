@@ -36,7 +36,6 @@ export interface PaymentData {
   
       return await response.json()
     } catch (error) {
-      console.error('Error creating payment intent:', error)
       throw error
     }
   }
@@ -75,7 +74,6 @@ export interface PaymentData {
     try {
       // For development, use simulation instead of real Stripe
       if (process.env.NODE_ENV === 'development') {
-        console.log('🧪 Development mode: Simulating payment...')
         return await simulateStripePayment(paymentIntent.paymentData)
       }
   
@@ -123,7 +121,6 @@ export interface PaymentData {
       // For now, return simulation result
       return await simulateStripePayment(paymentIntent.paymentData)
     } catch (error) {
-      console.error('Payment processing error:', error)
       throw error
     }
   }

@@ -44,6 +44,9 @@ export const getMissingTranslations = async (locale: string = 'pt-BR'): Promise<
       posterUrl: film.poster_url,
       trailerUrl: film.trailer_url,
       videoUrl: film.movie_url,
+      launch: film.launch || false,
+      main: film.main || false,
+      created_at: film.created_at
     }))
   } catch (error) {
     console.error('Erro em getMissingTranslations:', error)
@@ -114,6 +117,9 @@ export const detectCatalogChanges = async (): Promise<{
       posterUrl: film.poster_url,
       trailerUrl: film.trailer_url,
       videoUrl: film.movie_url,
+      launch: film.launch || false,
+      main: film.main || false,
+      created_at: film.created_at
     }))
 
     return {

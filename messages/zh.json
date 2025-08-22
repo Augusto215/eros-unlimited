@@ -305,5 +305,21 @@
       "exploreFilms": "探索影片"
     },
     "footerMessage": "✨ 感谢您成为我们爱与多样性社区的一部分 ✨"
+  },
+  "myMovies": {
+    "title": "我的电影",
+    "loading": "正在加载您的电影...",
+    "filmCount": {
+      "singular": "部电影在您的资料库中",
+      "plural": "部电影在您的资料库中"
+    },
+    "noFilms": "尚未购买任何电影",
+    "empty": {
+      "title": "您的资料库中没有电影",
+      "description": "您还没有购买任何电影。探索我们的收藏，找到您喜欢的内容！",
+      "exploreButton": "探索目录"
+    },
+    "playButton": "播放电影",
+    "viewDetails": "查看电影详情"
   }
 }

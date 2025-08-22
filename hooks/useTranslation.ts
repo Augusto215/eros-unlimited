@@ -334,3 +334,24 @@ export const useUserProfileTranslation = () => {
     footerMessage: t('userProfile.footerMessage')
   }
 }
+
+export const useMyMoviesTranslation = () => {
+  const { t } = useI18nTranslation()
+  
+  return {
+    title: t('myMovies.title'),
+    loading: t('myMovies.loading'),
+    filmCount: {
+      singular: t('myMovies.filmCount.singular'),
+      plural: t('myMovies.filmCount.plural')
+    },
+    noFilms: t('myMovies.noFilms'),
+    empty: {
+      title: t('myMovies.empty.title'),
+      description: t('myMovies.empty.description'),
+      exploreButton: t('myMovies.empty.exploreButton')
+    },
+    playButton: t('myMovies.playButton'),
+    viewDetails: t('myMovies.viewDetails')
+  }
+}

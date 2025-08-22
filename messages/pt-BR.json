@@ -305,5 +305,21 @@
       "exploreFilms": "Explorar Filmes"
     },
     "footerMessage": "✨ Obrigado por fazer parte da nossa comunidade de amor e diversidade ✨"
+  },
+  "myMovies": {
+    "title": "Meus Filmes",
+    "loading": "Carregando seus filmes...",
+    "filmCount": {
+      "singular": "filme na sua biblioteca",
+      "plural": "filmes na sua biblioteca"
+    },
+    "noFilms": "Nenhum filme comprado ainda",
+    "empty": {
+      "title": "Nenhum filme na sua biblioteca",
+      "description": "Você ainda não comprou nenhum filme. Explore nossa coleção e encontre algo que você vai amar!",
+      "exploreButton": "Explorar Catálogo"
+    },
+    "playButton": "Reproduzir filme",
+    "viewDetails": "Ver detalhes do filme"
   }
 }
