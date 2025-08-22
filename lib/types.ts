@@ -11,7 +11,9 @@ export interface Film {
   releaseYear: number
   rating: number
   launch: boolean
+  main: boolean
   description: string
+  created_at?: string
 }
 
 export interface Client {

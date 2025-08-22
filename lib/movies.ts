@@ -16,9 +16,11 @@ const transformDbFilmToFilm = (dbFilm: any): Film => ({
   rating: dbFilm.rating,
   price: dbFilm.price,
   launch: dbFilm.launch,
+  main: dbFilm.main,
   posterUrl: dbFilm.poster_url,
   trailerUrl: dbFilm.trailer_url,
   videoUrl: dbFilm.movie_url,
+  created_at: dbFilm.created_at,
 })
 
 // Interface for new film data
@@ -31,6 +33,7 @@ export interface NewFilmData {
   rating: number
   price: number
   launch: boolean
+  main: boolean
   posterUrl?: string
   trailerUrl?: string
   videoUrl?: string
@@ -152,6 +155,7 @@ export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
       rating: filmData.rating,
       price: filmData.price,
       launch: filmData.launch,
+      main: filmData.main,
       poster_url,
       trailer_url,
       movie_url,

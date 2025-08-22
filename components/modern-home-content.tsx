@@ -10,6 +10,9 @@ interface ModernHomeContentProps {
   films: Film[]
   onFilmClick: (film: Film) => void
   purchasedFilmIds: string[]
+  customTitle?: string
+  customDescription?: string
+  customSectionTitle?: string
 }
 
 interface FilmRowProps {
@@ -581,7 +584,7 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
   )
 }
 
-export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds }: ModernHomeContentProps) {
+export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds, customTitle, customDescription, customSectionTitle }: ModernHomeContentProps) {
   const { t } = useTranslation()
   
   if (films.length === 0) {
@@ -618,11 +621,11 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
-                  {t('movies.catalog')}
+                  {customTitle || t('movies.catalog')}
                 </span>
               </h1>
               <p className="text-gray-200 text-lg max-w-2xl mx-auto">
-                {t('movies.catalogDescription')}
+                {customDescription || t('movies.catalogDescription')}
               </p>
             </div>
           </div>
@@ -642,7 +645,7 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
           {/* Available Films Section - Show all films if no purchases, or only available if user has purchases */}
           {(purchasedFilms.length === 0 ? films : availableFilms).length > 0 && (
             <ModernFilmRow
-              title={purchasedFilms.length === 0 ? t('movies.movieCatalog') : t('movies.availableMovies')}
+              title={purchasedFilms.length === 0 ? (customSectionTitle || t('movies.movieCatalog')) : t('movies.availableMovies')}
               films={purchasedFilms.length === 0 ? films : availableFilms}
               purchasedFilmIds={purchasedFilmIds}
               onFilmClick={onFilmClick}

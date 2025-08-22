@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/hooks/useTranslation"
 import { initializeAuth, getCurrentUser } from "@/lib/auth"
 import { getMovies, getUserPurchasedFilms, purchaseFilm } from "@/lib/movies"
 import type { Film } from "@/lib/types"
@@ -12,6 +13,7 @@ import PaymentModal from "@/components/payment-modal"
 import AddFilmModal from "@/components/add-film-modal"
 
 export default function Home() {
+  const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -35,22 +37,58 @@ export default function Home() {
           await loadFilmsData(user.id)
         } else {
           // Load only films data if not logged in
-          const filmsData = await getMovies()
-          setFilms(filmsData)
+          const allFilms = await getMovies()
+          // Filter only films that are marked as launches
+          const launchFilms = allFilms.filter(film => film.launch === true)
+          setFilms(launchFilms)
           
-          if (filmsData.length > 0) {
-            setHeroFilm(filmsData[0]) // Use first film as hero
+          if (launchFilms.length > 0) {
+            // First try to find films marked as main
+            const mainFilms = launchFilms.filter(film => film.main === true)
+            
+            if (mainFilms.length > 0) {
+              // Sort by creation date - most recent first
+              const sortedMainFilms = mainFilms.sort((a, b) => {
+                if (a.created_at && b.created_at) {
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                }
+                return parseInt(b.id) - parseInt(a.id)
+              })
+              setHeroFilm(sortedMainFilms[0])
+            } else {
+              // No main films, pick random
+              const randomIndex = Math.floor(Math.random() * launchFilms.length)
+              setHeroFilm(launchFilms[randomIndex])
+            }
           }
         }
       } catch (error) {
         console.error('Error initializing app:', error)
         // Still load films even if auth fails
         try {
-          const filmsData = await getMovies()
-          setFilms(filmsData)
+          const allFilms = await getMovies()
+          // Filter only films that are marked as launches
+          const launchFilms = allFilms.filter(film => film.launch === true)
+          setFilms(launchFilms)
           
-          if (filmsData.length > 0) {
-            setHeroFilm(filmsData[0])
+          if (launchFilms.length > 0) {
+            // First try to find films marked as main
+            const mainFilms = launchFilms.filter(film => film.main === true)
+            
+            if (mainFilms.length > 0) {
+              // Sort by creation date - most recent first
+              const sortedMainFilms = mainFilms.sort((a, b) => {
+                if (a.created_at && b.created_at) {
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                }
+                return parseInt(b.id) - parseInt(a.id)
+              })
+              setHeroFilm(sortedMainFilms[0])
+            } else {
+              // No main films, pick random
+              const randomIndex = Math.floor(Math.random() * launchFilms.length)
+              setHeroFilm(launchFilms[randomIndex])
+            }
           }
         } catch (filmError) {
           console.error('Error loading films:', filmError)
@@ -64,16 +102,37 @@ export default function Home() {
   }, [router])
 
   const loadFilmsData = async (userId: string) => {
-    const [filmsData, purchases] = await Promise.all([
+    const [allFilms, purchases] = await Promise.all([
       getMovies(),
       getUserPurchasedFilms(userId)
     ])
 
-    setFilms(filmsData)
+    // Filter only films that are marked as launches
+    const launchFilms = allFilms.filter(film => film.launch === true)
+    
+    setFilms(launchFilms)
     setPurchasedFilmIds(purchases)
 
-    if (filmsData.length > 0) {
-      setHeroFilm(filmsData[0]) // Use first film as hero
+    if (launchFilms.length > 0) {
+      // First try to find films marked as main
+      const mainFilms = launchFilms.filter(film => film.main === true)
+      
+      if (mainFilms.length > 0) {
+        // Sort by creation date (assuming created_at field exists) - most recent first
+        // If no created_at, sort by id as fallback (higher id = newer)
+        const sortedMainFilms = mainFilms.sort((a, b) => {
+          if (a.created_at && b.created_at) {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          }
+          // Fallback: use id comparison (assuming higher id = newer)
+          return parseInt(b.id) - parseInt(a.id)
+        })
+        setHeroFilm(sortedMainFilms[0]) // Most recent main film
+      } else {
+        // No main films, pick random
+        const randomIndex = Math.floor(Math.random() * launchFilms.length)
+        setHeroFilm(launchFilms[randomIndex])
+      }
     }
   }
 
@@ -142,7 +201,31 @@ export default function Home() {
       const user = getCurrentUser()
       if (user) {
         await loadFilmsData(user.id)
-        console.log('Films data reloaded after adding new film')
+      } else {
+        // If not logged in, still reload launch films
+        const allFilms = await getMovies()
+        const launchFilms = allFilms.filter(film => film.launch === true)
+        setFilms(launchFilms)
+        
+        if (launchFilms.length > 0) {
+          // First try to find films marked as main
+          const mainFilms = launchFilms.filter(film => film.main === true)
+          
+          if (mainFilms.length > 0) {
+            // Sort by creation date - most recent first
+            const sortedMainFilms = mainFilms.sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              }
+              return parseInt(b.id) - parseInt(a.id)
+            })
+            setHeroFilm(sortedMainFilms[0])
+          } else {
+            // No main films, pick random
+            const randomIndex = Math.floor(Math.random() * launchFilms.length)
+            setHeroFilm(launchFilms[randomIndex])
+          }
+        }
       }
     } catch (error) {
       console.error('Error reloading films data:', error)
@@ -182,10 +265,10 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
         <div className="text-center">
           <div className="w-32 h-32 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-4xl">🎬</span>
+            <span className="text-4xl">🚀</span>
           </div>
-          <h2 className="text-white text-2xl font-bold mb-2">Biblioteca em Construção</h2>
-          <p className="text-gray-400">Nenhum filme disponível no momento</p>
+          <h2 className="text-white text-2xl font-bold mb-2">Nenhum Lançamento Disponível</h2>
+          <p className="text-gray-400">Não há filmes marcados como lançamentos no momento</p>
         </div>
       </div>
     )
@@ -230,6 +313,9 @@ export default function Home() {
           films={films}
           onFilmClick={handleFilmClick}
           purchasedFilmIds={purchasedFilmIds}
+          customTitle={t('movies.releasesCatalog')}
+          customDescription={t('movies.releasesCatalogDescription')}
+          customSectionTitle={t('movies.releasesSection')}
         />
       </div>
 

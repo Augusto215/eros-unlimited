@@ -14,6 +14,7 @@ interface FilmFormData {
   rating: number | string
   price: number | string
   launch: boolean
+  main: boolean
   posterUrl: string
   trailerUrl: string
   videoUrl: string
@@ -36,6 +37,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
     rating: '',
     price: '',
     launch: false,
+    main: false,
     posterUrl: '',
     trailerUrl: '',
     videoUrl: ''
@@ -85,6 +87,19 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
 
     if (!formData.genre) {
       newErrors.genre = 'Gênero é obrigatório'
+    }
+
+    // URLs are now required
+    if (!formData.posterUrl.trim()) {
+      newErrors.posterUrl = 'URL do Poster é obrigatória'
+    }
+
+    if (!formData.trailerUrl.trim()) {
+      newErrors.trailerUrl = 'URL do Trailer é obrigatória'
+    }
+
+    if (!formData.videoUrl.trim()) {
+      newErrors.videoUrl = 'URL do Filme Completo é obrigatória'
     }
 
     // Convert to numbers for validation
@@ -150,6 +165,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         rating: Math.min(9.9, Math.max(0, Number(formData.rating))), // Clamp between 0-9.9
         price: Math.min(9999.99, Math.max(0, Number(formData.price))), // Clamp price
         launch: formData.launch,
+        main: formData.main,
         posterUrl: formData.posterUrl.trim() || undefined,
         trailerUrl: formData.trailerUrl.trim() || undefined,
         videoUrl: formData.videoUrl.trim() || undefined,
@@ -171,6 +187,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           rating: '',
           price: '',
           launch: false,
+          main: false,
           posterUrl: '',
           trailerUrl: '',
           videoUrl: ''
@@ -459,7 +476,28 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                 </select>
                 <p className="text-gray-400 text-xs mt-2 flex items-center">
                   <Sparkles className="w-3 h-3 mr-1" />
-                  Filmes marcados como lançamento aparecerão em destaque
+                  Filmes marcados como lançamento aparecerão também em uma página dedicada a lançamentos.
+                </p>
+              </div>
+
+              {/* Main */}
+              <div>
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Crown className="w-4 h-4 mr-2 text-orange-400" />
+                  Esse filme é o principal? *
+                </label>
+                <select
+                  value={formData.main ? 'sim' : 'nao'}
+                  onChange={(e) => handleInputChange('main', e.target.value === 'sim')}
+                  className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/20 transition-all duration-300"
+                  disabled={isSubmitting || showSuccessMessage}
+                >
+                  <option value="nao" className="bg-gray-800 text-white">Não</option>
+                  <option value="sim" className="bg-gray-800 text-white">Sim</option>
+                </select>
+                <p className="text-gray-400 text-xs mt-2 flex items-center">
+                  <Crown className="w-3 h-3 mr-1" />
+                  Filmes marcados como principais aparecerão no filme em destaque
                 </p>
               </div>
 
@@ -491,7 +529,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
             <h3 className="text-white font-bold text-xl mb-6 flex items-center">
               <Upload className="w-5 h-5 mr-3 text-cyan-400" />
               <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                URLs de Mídia (Opcionais)
+                URLs de Mídia (Obrigatórias)
               </span>
             </h3>
             
@@ -500,7 +538,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
-                  URL do Poster
+                  URL do Poster *
                 </label>
                 <input
                   type="url"
@@ -521,7 +559,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <Camera className="w-4 h-4 mr-2 text-orange-400" />
-                  URL do Trailer
+                  URL do Trailer *
                 </label>
                 <input
                   type="url"
@@ -542,7 +580,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <Video className="w-4 h-4 mr-2 text-green-400" />
-                  URL do Filme Completo
+                  URL do Filme Completo *
                 </label>
                 <input
                   type="url"

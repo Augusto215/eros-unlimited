@@ -39,7 +39,23 @@ export default function Home() {
           setFilms(filmsData)
           
           if (filmsData.length > 0) {
-            setHeroFilm(filmsData[0]) // Use first film as hero
+            // First try to find films marked as main
+            const mainFilms = filmsData.filter(film => film.main === true)
+            
+            if (mainFilms.length > 0) {
+              // Sort by creation date - most recent first
+              const sortedMainFilms = mainFilms.sort((a, b) => {
+                if (a.created_at && b.created_at) {
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                }
+                return parseInt(b.id) - parseInt(a.id)
+              })
+              setHeroFilm(sortedMainFilms[0])
+            } else {
+              // No main films, pick random
+              const randomIndex = Math.floor(Math.random() * filmsData.length)
+              setHeroFilm(filmsData[randomIndex])
+            }
           }
         }
       } catch (error) {
@@ -49,7 +65,23 @@ export default function Home() {
           setFilms(filmsData)
           
           if (filmsData.length > 0) {
-            setHeroFilm(filmsData[0])
+            // First try to find films marked as main
+            const mainFilms = filmsData.filter(film => film.main === true)
+            
+            if (mainFilms.length > 0) {
+              // Sort by creation date - most recent first
+              const sortedMainFilms = mainFilms.sort((a, b) => {
+                if (a.created_at && b.created_at) {
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                }
+                return parseInt(b.id) - parseInt(a.id)
+              })
+              setHeroFilm(sortedMainFilms[0])
+            } else {
+              // No main films, pick random
+              const randomIndex = Math.floor(Math.random() * filmsData.length)
+              setHeroFilm(filmsData[randomIndex])
+            }
           }
         } catch (filmError) {
           // Handle film loading error silently
@@ -72,7 +104,23 @@ export default function Home() {
     setPurchasedFilmIds(purchases)
 
     if (filmsData.length > 0) {
-      setHeroFilm(filmsData[0]) // Use first film as hero
+      // First try to find films marked as main
+      const mainFilms = filmsData.filter(film => film.main === true)
+      
+      if (mainFilms.length > 0) {
+        // Sort by creation date (most recent first)
+        const sortedMainFilms = mainFilms.sort((a, b) => {
+          if (a.created_at && b.created_at) {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          }
+          return parseInt(b.id) - parseInt(a.id)
+        })
+        setHeroFilm(sortedMainFilms[0])
+      } else {
+        // No main films, pick random
+        const randomIndex = Math.floor(Math.random() * filmsData.length)
+        setHeroFilm(filmsData[randomIndex])
+      }
     }
   }
 
@@ -141,7 +189,23 @@ export default function Home() {
         const filmsData = await getMovies()
         setFilms(filmsData)
         if (filmsData.length > 0) {
-          setHeroFilm(filmsData[0])
+          // First try to find films marked as main
+          const mainFilms = filmsData.filter(film => film.main === true)
+          
+          if (mainFilms.length > 0) {
+            // Sort by creation date - most recent first
+            const sortedMainFilms = mainFilms.sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              }
+              return parseInt(b.id) - parseInt(a.id)
+            })
+            setHeroFilm(sortedMainFilms[0])
+          } else {
+            // No main films, pick random
+            const randomIndex = Math.floor(Math.random() * filmsData.length)
+            setHeroFilm(filmsData[randomIndex])
+          }
         }
       }
     } catch (error) {

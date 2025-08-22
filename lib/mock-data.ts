@@ -16,6 +16,8 @@ export const mockFilms: Film[] = [
     releaseYear: 2017,
     rating: 4.5,
     launch: false,
+    main: true,
+    created_at: "2024-01-15T10:30:00Z",
   },
   {
     id: "2",
@@ -32,6 +34,8 @@ export const mockFilms: Film[] = [
     releaseYear: 2017,
     rating: 4.2,
     launch: false,
+    main: false,
+    created_at: "2024-01-10T08:15:00Z",
   },
   {
     id: "3",
@@ -47,6 +51,8 @@ export const mockFilms: Film[] = [
     releaseYear: 2017,
     rating: 4.0,
     launch: false,
+    main: false,
+    created_at: "2024-01-05T14:45:00Z",
   },
   {
     id: "4",
@@ -62,6 +68,8 @@ export const mockFilms: Film[] = [
     releaseYear: 2016,
     rating: 4.3,
     launch: false,
+    main: false,
+    created_at: "2024-01-01T16:20:00Z",
   },
   {
     id: "5",
@@ -72,11 +80,13 @@ export const mockFilms: Film[] = [
     posterUrl: "https://drive.google.com/uc?id=1k1GpkwuaiExDUo-Dr_Nb70g2L6SCtxrG",
     trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
     videoUrl: "https://drive.google.com/uc?export=download&id=COLE_SEU_ID_DO_FILME_AQUI",
-    genre: "Romac",
+    genre: "Romance",
     duration: 17,
     releaseYear: 2017,
     rating: 3.8,
     launch: false,
+    main: false,
+    created_at: "2024-01-20T09:10:00Z",
   },
   {
     id: "6",
@@ -87,11 +97,13 @@ export const mockFilms: Film[] = [
     posterUrl: "https://drive.google.com/uc?id=COLE_SEU_ID_DO_POSTER_AQUI",
     trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
     videoUrl: "https://drive.google.com/uc?export=download&id=COLE_SEU_ID_DO_FILME_AQUI",
-    genre: "Romac",
+    genre: "Romance",
     duration: 17,
     releaseYear: 2017,
     rating: 3.8,
     launch: false,
+    main: false,
+    created_at: "2024-01-22T11:30:00Z",
   }
 ]
 
