@@ -270,30 +270,6 @@
     "settings": "Configuración",
     "purchaseHistory": "Historial de compras"
   },
-  "filmSynopsis": {
-    "1": "Pedro es un poeta callejero \"en el armario\" atormentado por el fantasma de una mujer que cree fue brutalmente asesinada en una habitación de motel. La única paz que encuentra es cuando escribe poemas en las esquinas oscuras de los puentes de la ciudad. Viviendo en la ruidosa y concurrida Gran Manzana, la crueldad de la realidad actual y sus fantasías delirantes lo convierten gradualmente en una persona violenta. ¿Hay alguna fe en la humanidad? Pedro piensa que no, y está dispuesto a matar esta noche para saciar sus demonios internos.",
-    "2": "¿Es el amor un delirio? ¿Es la gran ciudad solo una ilusión? Para el joven P.J. toda esta confusión de sentimientos, angustia y deseos se mezclan cuando se ve perdido en medio de la multitud. Solo y confundido, lejos de su infancia olvidada, los recuerdos de su una vez querida madre comienzan a invadir su mente y su objetivo de vivir en la metrópolis. La única escapatoria es el sexo rápido que encuentra en cabinas eróticas y baños sucios del centro... pero la madre viene pronto para traerlo de vuelta a la realidad de la vida.",
-    "3": "Xerxes es un artista brasileño gay, underground y atrevido que vive en la Gran Manzana de São Paulo. Su estilo de vida único asusta a la sociedad tradicional, temerosa de cualquier cosa diferente al comportamiento ya establecido. La vida de Xerxes está en peligro ahora, ya que un grupo de skinheads despiadados quieren destruirlo a él y su sueño escandaloso de convertirse en la próxima superestrella tipo Madonna. Una película sobre libertad de expresión, arte y la lucha contra los prejuicios en nuestro mundo actual.",
-    "4": "Pedro acaba de despertar con una horrible sensación de que el mundo va a llegar a su fin pronto. Sin hogar, sin trabajo y desesperado por enamorarse, sus fantasmas del pasado lo van a poner a prueba. Y para empeorar las cosas, cree que vio a una chica siendo asesinada de manera cruel, pero ¿fue solo un sueño? ¿o es todo parte de su único sentido de ilusión?",
-    "5": "Dos líderes mundiales improbables deben trabajar juntos para salvar al mundo de una peligrosa conspiración internacional.",
-    "6": "Dos líderes mundiales improbables deben trabajar juntos para salvar al mundo de una peligrosa conspiración internacional."
-  },
-  "filmTitles": {
-    "1": "Un Hombre Oscuro - Apocalipsis",
-    "2": "Delirio",
-    "3": "Interludio - Una Película Gay",
-    "4": "Escenas del Apocalipsis",
-    "5": "Jefes de Estado",
-    "6": "Jefes de Estado"
-  },
-  "filmGenres": {
-    "1": "Romance",
-    "2": "Romance",
-    "3": "Romance", 
-    "4": "Drama",
-    "5": "Comedia",
-    "6": "Comedia"
-  },
   "userProfile": {
     "loading": "Cargando perfil...",
     "loadError": "Error al cargar perfil",

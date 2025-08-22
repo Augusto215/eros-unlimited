@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Play, Plus, Info, Star, Clock, Calendar, Sparkles, ShoppingBag} from "lucide-react"
-import { useMoviesTranslation, useFilmSynopsisTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useTranslation } from "@/hooks/useTranslation"
+import { useMoviesTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import { getCurrentUser } from "@/lib/auth"
 import Image from "next/image"
@@ -15,9 +15,6 @@ interface ModernHeroSectionProps {
 
 export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: ModernHeroSectionProps) {
   const movies = useMoviesTranslation()
-  const filmSynopsis = useFilmSynopsisTranslation()
-  const filmTitle = useFilmTitleTranslation()
-  const filmGenre = useFilmGenreTranslation()
   const { t } = useTranslation()
   const [showVideo, setShowVideo] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -115,7 +112,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
               <div>
                 <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
                   <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
-                    {filmTitle.getTitle(film.id, film.title)}
+                    {film.title}
                   </span>
                 </h1>
                 
@@ -130,7 +127,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                     <span>{film.duration} {t('movies.minutes')}</span>
                   </div>
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-3 py-1 rounded-full border border-purple-500/30">
-                    <span className="text-purple-300 font-medium">{filmGenre.getGenre(film.id, film.genre)}</span>
+                    <span className="text-purple-300 font-medium">{film.genre}</span>
                   </div>
                 </div>
               </div>
@@ -138,7 +135,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
               {/* Synopsis */}
               <div className="max-w-2xl">
                 <p className="text-lg text-gray-300 leading-relaxed mb-8 text-justify">
-                  {filmSynopsis.getSynopsis(film.id, film.synopsis)}
+                  {film.synopsis}
                 </p>
                 
                 {/* Price */}

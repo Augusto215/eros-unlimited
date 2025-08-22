@@ -269,30 +269,6 @@
     "settings": "Settings",
     "purchaseHistory": "Purchase history"
   },
-  "filmSynopsis": {
-    "1": "Pedro is an \"in the closet\" street poet tormented by the ghost of a woman he thinks was brutally murdered in a motel room. The only peace he finds is when he writes poems in the dark corners of the city bridges. Living in the noisy and crowded Big Apple, the cruelty of nowadays reality and his delusional fantasies gradually turns him into a violent person. Is there any faith in mankind? Pedro thinks there is not, and he is willing to kill tonight to satiate his inner demons.",
-    "2": "Is love a Delirium? Is the big city just an illusion? For the young P.J. all this confusion of feelings, anguish and desires are mixed when he sees himself lost in the middle of the crowd. Alone and confused, far away from his forgotten childhood, the memories of his once beloved mother starts to invade his mind and his goal of living in the metropolis. The only escape is the fast sex he finds in erotic cabins and dirty bathrooms downtown… but mother is coming soon to bring him back to reality of life.",
-    "3": "Xerxes is a Gay, underground and daring Brazilian artist living in the Big Apple of Sao Paulo. His unique lifestyle scares the traditional society, afraid of anything that is different than the already established behavior. Xerxes's life is in danger now, as a group of merciless skinheads want to destroy him and his outrageous dream of becoming the next Madonna like superstar. A movie about freedom of speech, art and the fight against prejudice in our world today.",
-    "4": "Pedro just woke up with a horrible sensation that the world is coming to an end soon. With no home, no job and desperate to fall in love, his ghosts of the past are gonna put him in trial. And to worsen things up, He believes He saw a girl being murdered in a vicious way, but, was it just a dream? or is it all part of his unique sense of illusion?",
-    "5": "Two unlikely world leaders must work together to save the world from a dangerous international conspiracy.",
-    "6": "Two unlikely world leaders must work together to save the world from a dangerous international conspiracy."
-  },
-  "filmTitles": {
-    "1": "A Dark Man Apocalypse",
-    "2": "Delirium",
-    "3": "Interlude – A Gay Movie",
-    "4": "Scenes of the Apocalypse",
-    "5": "Heads of State",
-    "6": "Heads of State"
-  },
-  "filmGenres": {
-    "1": "Romance",
-    "2": "Romance", 
-    "3": "Romance",
-    "4": "Drama",
-    "5": "Comedy",
-    "6": "Comedy"
-  },
   "userProfile": {
     "loading": "Loading profile...",
     "loadError": "Error loading profile",

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react"
 import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles, Pause, Volume2, VolumeX, Plus, Info, ChevronDown, ChevronUp } from "lucide-react"
-import { useFilmSynopsisTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useTranslation } from "@/hooks/useTranslation"
+import { useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
 
@@ -27,9 +27,6 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   onFilmClick: (film: Film) => void
   onExpandedChange?: (expanded: boolean) => void
 }) {
-  const filmSynopsis = useFilmSynopsisTranslation()
-  const filmTitle = useFilmTitleTranslation()
-  const filmGenre = useFilmGenreTranslation()
   const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const [showExpandedCard, setShowExpandedCard] = useState(false)
@@ -291,11 +288,11 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4 transition-opacity duration-300">
             <div className="space-y-3">
               <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
-                {filmTitle.getTitle(film.id, film.title)}
+                {film.title}
               </h3>
               
               <div className="flex items-center space-x-3 text-sm">
-                <span className="text-purple-300 font-medium">{filmGenre.getGenre(film.id, film.genre)}</span>
+                <span className="text-purple-300 font-medium">{film.genre}</span>
                 <div className="flex items-center space-x-1 text-gray-300">
                   <Clock className="w-3 h-3" />
                   <span>{film.duration} {t('movies.minutes')}</span>
@@ -303,7 +300,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
               </div>
 
               <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-                {filmSynopsis.getSynopsis(film.id, film.synopsis)}
+                {film.synopsis}
               </p>
 
               <div className="flex items-center justify-between pt-2">
@@ -399,7 +396,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className="text-white font-bold text-lg mb-2 line-clamp-1">
-                  {filmTitle.getTitle(film.id, film.title)}
+                  {film.title}
                 </h3>
                 
                 <div className="flex items-center space-x-3 text-sm text-gray-300 mb-3">
@@ -408,7 +405,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                     <span>{film.rating}</span>
                   </div>
                   <span>{film.releaseYear}</span>
-                  <span className="text-purple-300">{filmGenre.getGenre(film.id, film.genre)}</span>
+                  <span className="text-purple-300">{film.genre}</span>
                   <div className="flex items-center space-x-1">
                     <Clock className="w-3 h-3" />
                     <span>{film.duration} {t('movies.minutes')}</span>
@@ -432,7 +429,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                   isExpanded ? '' : 'line-clamp-3'
                 }`}
               >
-                {filmSynopsis.getSynopsis(film.id, film.synopsis)}
+                {film.synopsis}
               </p>
               
               {showReadMore && (

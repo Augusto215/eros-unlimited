@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { X, Play, Star, Clock, Calendar, Film, Heart, Crown, Sparkles } from "lucide-react"
-import { useFilmSynopsisTranslation, useMoviesTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useTranslation } from "@/hooks/useTranslation"
+import { useMoviesTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film as FilmType } from "@/lib/types"
 import Image from "next/image"
 
@@ -17,9 +17,6 @@ interface FilmModalProps {
 
 export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurchase, onPlay }: FilmModalProps) {
   const movies = useMoviesTranslation()
-  const filmSynopsis = useFilmSynopsisTranslation()
-  const filmTitle = useFilmTitleTranslation()
-  const filmGenre = useFilmGenreTranslation()
   const { t } = useTranslation()
   const [isPlaying, setIsPlaying] = useState(false)
 
@@ -98,7 +95,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
             <div className="flex-1">
               <h1 className="text-4xl lg:text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                  {filmTitle.getTitle(film.id, film.title)}
+                  {film.title}
                 </span>
               </h1>
               
@@ -120,7 +117,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 </div>
                 
                 <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-400/30">
-                  <span className="text-purple-300 font-medium">{filmGenre.getGenre(film.id, film.genre)}</span>
+                  <span className="text-purple-300 font-medium">{film.genre}</span>
                 </div>
               </div>
             </div>
@@ -148,7 +145,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
               {movies.synopsis}
             </h3>
             <p className="text-gray-300 text-lg leading-relaxed bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              {filmSynopsis.getSynopsis(film.id, film.synopsis)}
+              {film.synopsis}
             </p>
           </div>
 

@@ -303,42 +303,6 @@ export const useUserTranslation = () => {
   }
 }
 
-export const useFilmSynopsisTranslation = () => {
-  const { t } = useI18nTranslation()
-  
-  return {
-    getSynopsis: (filmId: string, fallback: string = '') => {
-      const translatedSynopsis = t(`filmSynopsis.${filmId}`)
-      // Se a tradução não existir (retorna a chave), use o fallback
-      return translatedSynopsis.startsWith('filmSynopsis.') ? fallback : translatedSynopsis
-    }
-  }
-}
-
-export const useFilmTitleTranslation = () => {
-  const { t } = useI18nTranslation()
-  
-  return {
-    getTitle: (filmId: string, fallback: string = '') => {
-      const translatedTitle = t(`filmTitles.${filmId}`)
-      // Se a tradução não existir (retorna a chave), use o fallback
-      return translatedTitle.startsWith('filmTitles.') ? fallback : translatedTitle
-    }
-  }
-}
-
-export const useFilmGenreTranslation = () => {
-  const { t } = useI18nTranslation()
-  
-  return {
-    getGenre: (filmId: string, fallback: string = '') => {
-      const translatedGenre = t(`filmGenres.${filmId}`)
-      // Se a tradução não existir (retorna a chave), use o fallback
-      return translatedGenre.startsWith('filmGenres.') ? fallback : translatedGenre
-    }
-  }
-}
-
 export const useUserProfileTranslation = () => {
   const { t } = useI18nTranslation()
   

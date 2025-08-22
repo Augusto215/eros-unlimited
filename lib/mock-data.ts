@@ -15,6 +15,7 @@ export const mockFilms: Film[] = [
     duration: 18,
     releaseYear: 2017,
     rating: 4.5,
+    launch: false,
   },
   {
     id: "2",
@@ -30,6 +31,7 @@ export const mockFilms: Film[] = [
     duration: 17,
     releaseYear: 2017,
     rating: 4.2,
+    launch: false,
   },
   {
     id: "3",
@@ -44,6 +46,7 @@ export const mockFilms: Film[] = [
     duration: 17,
     releaseYear: 2017,
     rating: 4.0,
+    launch: false,
   },
   {
     id: "4",
@@ -58,6 +61,7 @@ export const mockFilms: Film[] = [
     duration: 18,
     releaseYear: 2016,
     rating: 4.3,
+    launch: false,
   },
   {
     id: "5",
@@ -72,6 +76,7 @@ export const mockFilms: Film[] = [
     duration: 17,
     releaseYear: 2017,
     rating: 3.8,
+    launch: false,
   },
   {
     id: "6",
@@ -86,6 +91,7 @@ export const mockFilms: Film[] = [
     duration: 17,
     releaseYear: 2017,
     rating: 3.8,
+    launch: false,
   }
 ]
 

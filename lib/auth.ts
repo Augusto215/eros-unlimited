@@ -33,11 +33,10 @@ export const login = async (email: string, password: string): Promise<Client | n
     })
 
     if (authError || !authData.user) {
-      console.error('Auth error:', authError)
       return null
     }
 
-    console.log('Authenticated user ID:', authData.user.id)
+
 
     // Get user profile from users table
     const { data: clientData, error: clientError } = await supabase

@@ -276,30 +276,6 @@
     "settings": "Configurações",
     "purchaseHistory": "Histórico de compras"
   },
-  "filmSynopsis": {
-    "1": "Pedro é um poeta de rua \"no armário\" atormentado pelo fantasma de uma mulher que ele acredita ter sido brutalmente assassinada em um quarto de motel. A única paz que encontra é quando escreve poemas nos cantos escuros das pontes da cidade. Vivendo na barulhenta e lotada Big Apple, a crueldade da realidade atual e suas fantasias delirantes o transformam gradualmente em uma pessoa violenta. Há alguma fé na humanidade? Pedro acha que não, e está disposto a matar esta noite para saciar seus demônios internos.",
-    "2": "O amor é um delírio? A grande cidade é apenas uma ilusão? Para o jovem P.J., toda essa confusão de sentimentos, angústia e desejos se misturam quando se vê perdido no meio da multidão. Sozinho e confuso, longe de sua infância esquecida, as memórias de sua outrora amada mãe começam a invadir sua mente e seu objetivo de viver na metrópole. A única fuga é o sexo rápido que encontra em cabines eróticas e banheiros sujos no centro da cidade... mas a mãe está chegando em breve para trazê-lo de volta à realidade da vida.",
-    "3": "Xerxes é um artista brasileiro gay, underground e ousado vivendo na Big Apple de São Paulo. Seu estilo de vida único assusta a sociedade tradicional, com medo de qualquer coisa diferente do comportamento já estabelecido. A vida de Xerxes está em perigo agora, pois um grupo de skinheads impiedosos quer destruí-lo e seu sonho ultrajante de se tornar a próxima superestrela tipo Madonna. Um filme sobre liberdade de expressão, arte e a luta contra o preconceito em nosso mundo hoje.",
-    "4": "Pedro acabou de acordar com uma sensação horrível de que o mundo está chegando ao fim em breve. Sem casa, sem emprego e desesperado para se apaixonar, seus fantasmas do passado vão colocá-lo em julgamento. E para piorar as coisas, ele acredita ter visto uma garota sendo assassinada de forma cruel, mas será que foi apenas um sonho? ou é tudo parte de seu senso único de ilusão?",
-    "5": "Dois líderes mundiais improváveis precisam trabalhar juntos para salvar o mundo de uma conspiração internacional perigosa.",
-    "6": "Dois líderes mundiais improváveis precisam trabalhar juntos para salvar o mundo de uma conspiração internacional perigosa."
-  },
-  "filmTitles": {
-    "1": "Um Homem Sombrio - Apocalipse",
-    "2": "Delírio",
-    "3": "Interlúdio - Um Filme Gay",
-    "4": "Cenas do Apocalipse",
-    "5": "Chefes de Estado",
-    "6": "Chefes de Estado"
-  },
-  "filmGenres": {
-    "1": "Romance",
-    "2": "Romance",
-    "3": "Romance",
-    "4": "Drama",
-    "5": "Comédia",
-    "6": "Comédia"
-  },
   "userProfile": {
     "loading": "Carregando perfil...",
     "loadError": "Erro ao carregar perfil",

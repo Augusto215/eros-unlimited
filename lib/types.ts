@@ -10,6 +10,7 @@ export interface Film {
   duration: number
   releaseYear: number
   rating: number
+  launch: boolean
   description: string
 }
 

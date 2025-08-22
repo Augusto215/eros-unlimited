@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth"
 import { getUserPurchasedFilms, getMovies } from "@/lib/movies"
 import { useUserProfileTranslation } from "@/hooks/useTranslation"
@@ -34,6 +34,7 @@ interface UserData {
 
 export default function UserProfile() {
   const params = useParams()
+  const router = useRouter()
   const profileT = useUserProfileTranslation()
   const [userData, setUserData] = useState<UserData | null>(null)
   const [purchasedFilms, setPurchasedFilms] = useState<Film[]>([])
@@ -340,7 +341,10 @@ export default function UserProfile() {
                 </div>
                 <h3 className="text-white text-xl font-bold mb-2">{profileT.collection.noFilms}</h3>
                 <p className="text-gray-400 mb-6">{profileT.collection.noFilmsDescription}</p>
-                <button className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105">
+                <button 
+                  onClick={() => router.push('/')}
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105"
+                >
                   {profileT.collection.exploreFilms}
                 </button>
               </div>

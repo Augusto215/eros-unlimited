@@ -1,6 +1,7 @@
 // lib/movies.ts - Complete version with addFilm function
 import { supabase } from './supabase'
 import { mockFilms } from './mock-data'
+import { logMissingTranslations } from './translation-sync'
 import type { Film } from './types'
 
 // Transform database film to app Film type
@@ -14,9 +15,10 @@ const transformDbFilmToFilm = (dbFilm: any): Film => ({
   releaseYear: dbFilm.release_year,
   rating: dbFilm.rating,
   price: dbFilm.price,
+  launch: dbFilm.launch,
   posterUrl: dbFilm.poster_url,
   trailerUrl: dbFilm.trailer_url,
-  videoUrl: dbFilm.video_url,
+  videoUrl: dbFilm.movie_url,
 })
 
 // Interface for new film data
@@ -28,34 +30,31 @@ export interface NewFilmData {
   releaseYear: number
   rating: number
   price: number
+  launch: boolean
   posterUrl?: string
   trailerUrl?: string
   videoUrl?: string
 }
 
-// Get all movies
+// Get all movies with translation detection
 export const getMovies = async (): Promise<Film[]> => {
   try {
     const { data, error } = await supabase
-      .from('films')
+      .from('movies')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching movies:', error)
-      console.log('🎬 Fallback: Using mock films data')
       return mockFilms
     }
 
     if (!data || data.length === 0) {
-      console.log('🎬 No films in database, using mock films data')
       return mockFilms
     }
 
-    return data.map(transformDbFilmToFilm)
+    const films = data.map(transformDbFilmToFilm)
+    return films
   } catch (error) {
-    console.error('Error in getMovies:', error)
-    console.log('🎬 Fallback: Using mock films data')
     return mockFilms
   }
 }
@@ -69,13 +68,11 @@ export const getUserPurchasedFilms = async (userId: string): Promise<string[]> =
       .eq('client_id', userId)
 
     if (error) {
-      console.error('Error fetching user purchases:', error)
       return []
     }
 
     return data.map(item => item.film_id)
   } catch (error) {
-    console.error('Error in getUserPurchasedFilms:', error)
     return []
   }
 }
@@ -92,7 +89,6 @@ export const purchaseFilm = async (userId: string, filmId: string): Promise<bool
       .single()
 
     if (existing) {
-      console.log('Film already purchased')
       return true // Already purchased
     }
 
@@ -106,13 +102,11 @@ export const purchaseFilm = async (userId: string, filmId: string): Promise<bool
       })
 
     if (insertError) {
-      console.error('Error purchasing film:', insertError)
       return false
     }
 
     return true
   } catch (error) {
-    console.error('Error in purchaseFilm:', error)
     return false
   }
 }
@@ -120,7 +114,6 @@ export const purchaseFilm = async (userId: string, filmId: string): Promise<bool
 
 export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
   try {
-    console.log('🎬 addFilm called with:', filmData)
 
     // Helper function to validate and clean URLs
     const cleanUrl = (url?: string): string | null => {
@@ -132,7 +125,6 @@ export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
       
       // Must start with http:// or https://
       if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
-        console.warn('Invalid URL (no protocol):', cleaned)
         return null
       }
       
@@ -141,20 +133,14 @@ export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
         new URL(cleaned)
         return cleaned
       } catch (error) {
-        console.warn('Invalid URL format:', cleaned)
         return null
       }
     }
 
-    // Skip admin check for now
-    console.log('⏭️ Skipping admin check for testing')
-
     // Clean and validate URLs
     const poster_url = cleanUrl(filmData.posterUrl)
     const trailer_url = cleanUrl(filmData.trailerUrl)
-    const video_url = cleanUrl(filmData.videoUrl)
-
-    console.log('🔗 Cleaned URLs:', { poster_url, trailer_url, video_url })
+    const movie_url = cleanUrl(filmData.videoUrl)
 
     // Prepare data for database
     const insertData = {
@@ -165,41 +151,28 @@ export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
       release_year: filmData.releaseYear,
       rating: filmData.rating,
       price: filmData.price,
+      launch: filmData.launch,
       poster_url,
       trailer_url,
-      video_url,
+      movie_url,
     }
-
-    console.log('💾 Inserting film data to Supabase:', insertData)
 
     // Insert into Supabase
     const { data, error } = await supabase
-      .from('films')
+      .from('movies')
       .insert(insertData)
       .select()
       .single()
 
     if (error) {
-      console.error('❌ Supabase error:', error)
-      console.error('Error details:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      })
       throw new Error('Database error: ' + error.message)
     }
 
-    console.log('✅ Film saved to database:', data)
-
     // Transform database response to app format
     const newFilm = transformDbFilmToFilm(data)
-    
-    console.log('🎉 Transformed film:', newFilm)
     return newFilm
 
   } catch (error) {
-    console.error('💥 Error in addFilm:', error)
     throw error
   }
 }
@@ -211,7 +184,6 @@ export const updateFilm = async (filmId: string, filmData: Partial<NewFilmData>)
     const { data: isAdminData, error: adminError } = await supabase.rpc('is_admin')
     
     if (adminError || !isAdminData) {
-      console.error('Access denied: User is not admin')
       throw new Error('Access denied: Admin privileges required')
     }
 
@@ -224,26 +196,25 @@ export const updateFilm = async (filmId: string, filmData: Partial<NewFilmData>)
     if (filmData.releaseYear !== undefined) updateData.release_year = filmData.releaseYear
     if (filmData.rating !== undefined) updateData.rating = filmData.rating
     if (filmData.price !== undefined) updateData.price = filmData.price
+    if (filmData.launch !== undefined) updateData.launch = filmData.launch
     if (filmData.posterUrl !== undefined) updateData.poster_url = filmData.posterUrl
     if (filmData.trailerUrl !== undefined) updateData.trailer_url = filmData.trailerUrl
-    if (filmData.videoUrl !== undefined) updateData.video_url = filmData.videoUrl
+    if (filmData.videoUrl !== undefined) updateData.movie_url = filmData.videoUrl
 
     // Update film
     const { data, error } = await supabase
-      .from('films')
+      .from('movies')
       .update(updateData)
       .eq('id', filmId)
       .select()
       .single()
 
     if (error) {
-      console.error('Error updating film:', error)
       throw new Error('Failed to update film: ' + error.message)
     }
 
     return transformDbFilmToFilm(data)
   } catch (error) {
-    console.error('Error in updateFilm:', error)
     throw error
   }
 }
@@ -255,7 +226,6 @@ export const deleteFilm = async (filmId: string): Promise<boolean> => {
     const { data: isAdminData, error: adminError } = await supabase.rpc('is_admin')
     
     if (adminError || !isAdminData) {
-      console.error('Access denied: User is not admin')
       throw new Error('Access denied: Admin privileges required')
     }
 
@@ -266,24 +236,21 @@ export const deleteFilm = async (filmId: string): Promise<boolean> => {
       .eq('film_id', filmId)
 
     if (relationError) {
-      console.error('Error deleting film relationships:', relationError)
       // Continue anyway, as the film deletion is more important
     }
 
     // Delete the film
     const { error } = await supabase
-      .from('films')
+      .from('movies')
       .delete()
       .eq('id', filmId)
 
     if (error) {
-      console.error('Error deleting film:', error)
       throw new Error('Failed to delete film: ' + error.message)
     }
 
     return true
   } catch (error) {
-    console.error('Error in deleteFilm:', error)
     throw error
   }
 }

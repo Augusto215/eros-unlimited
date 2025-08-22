@@ -4,7 +4,7 @@ import { useState } from "react"
 import { X, AlertCircle, Heart, Sparkles, Crown, Star, Shield, Wallet } from "lucide-react"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
-import { usePaymentTranslation, useMoviesTranslation, useFilmTitleTranslation, useFilmGenreTranslation, useCommonTranslation } from "@/hooks/useTranslation"
+import { usePaymentTranslation, useMoviesTranslation, useCommonTranslation } from "@/hooks/useTranslation"
 
 interface PaymentModalProps {
   film: Film | null
@@ -22,8 +22,6 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
   const payment = usePaymentTranslation()
   const movies = useMoviesTranslation()
   const common = useCommonTranslation()
-  const { getTitle } = useFilmTitleTranslation()
-  const { getGenre } = useFilmGenreTranslation()
 
   const [formData, setFormData] = useState<PaymentForm>({
     email: ''
@@ -150,10 +148,10 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
             
             <h3 className="text-white text-xl font-bold mb-2">
               <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                {getTitle(film.id, film.title)}
+                {film.title}
               </span>
             </h3>
-            <p className="text-gray-300 text-sm mb-6">{getGenre(film.id, film.genre)} • {film.releaseYear}</p>
+            <p className="text-gray-300 text-sm mb-6">{film.genre} • {film.releaseYear}</p>
             
             {/* Pricing breakdown */}
             <div className="bg-white/10 backdrop-blur-sm p-5 rounded-xl border border-white/20">

@@ -20,7 +20,7 @@ export default function Home() {
   const [heroFilm, setHeroFilm] = useState<Film | null>(null)
   const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
   const [userId, setUserId] = useState('')
-  const [films, setFilms] = useState<Film[]>([])
+  const [films, setFilms] = useState<Film[]>([]) // Filmes do Supabase
   const router = useRouter()
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function Home() {
           setFilms(filmsData)
           
           if (filmsData.length > 0) {
-            setHeroFilm(filmsData[0]) // Use first film as hero
+            setHeroFilm(filmsData[0])
           }
         }
       } catch (error) {
@@ -60,19 +60,23 @@ export default function Home() {
     }
 
     initApp()
-  }, [router])
+  }, [])
 
-  const loadFilmsData = async (userId: string) => {
-    const [filmsData, purchases] = await Promise.all([
-      getMovies(),
-      getUserPurchasedFilms(userId)
-    ])
-
-    setFilms(filmsData)
-    setPurchasedFilmIds(purchases)
-
-    if (filmsData.length > 0) {
-      setHeroFilm(filmsData[0]) // Use first film as hero
+  const loadFilmsData = async (currentUserId: string) => {
+    try {
+      const [filmsData, purchasedIds] = await Promise.all([
+        getMovies(),
+        getUserPurchasedFilms(currentUserId)
+      ])
+      
+      setFilms(filmsData)
+      setPurchasedFilmIds(purchasedIds)
+      
+      if (filmsData.length > 0) {
+        setHeroFilm(filmsData[0])
+      }
+    } catch (error) {
+      // Handle error silently in production
     }
   }
 
@@ -122,8 +126,6 @@ export default function Home() {
       if (success) {
         setPurchasedFilmIds(prev => [...prev, filmId])
         setIsPaymentModalOpen(false)
-        
-        // Optional: Show a success toast/notification here
       }
     } catch (error) {
       // Handle error silently in production

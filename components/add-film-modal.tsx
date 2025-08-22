@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { X, Plus, Upload, Film, Crown, Star, Sparkles, Heart, Calendar, Clock, DollarSign, Camera, Video, Image as ImageIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { X, Plus, Upload, Film, Crown, Star, Sparkles, Heart, Calendar, Clock, DollarSign, Camera, Video, Image as ImageIcon, Check } from "lucide-react"
 import { addFilm, type NewFilmData } from "@/lib/movies"
 
 interface FilmFormData {
@@ -12,6 +13,7 @@ interface FilmFormData {
   releaseYear: number | string
   rating: number | string
   price: number | string
+  launch: boolean
   posterUrl: string
   trailerUrl: string
   videoUrl: string
@@ -24,6 +26,7 @@ interface AddFilmModalProps {
 }
 
 export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmModalProps) {
+  const router = useRouter()
   const [formData, setFormData] = useState<FilmFormData>({
     title: '',
     synopsis: '',
@@ -32,12 +35,14 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
     releaseYear: new Date().getFullYear(),
     rating: '',
     price: '',
+    launch: false,
     posterUrl: '',
     trailerUrl: '',
     videoUrl: ''
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [errors, setErrors] = useState<Partial<FilmFormData>>({})
 
   if (!isOpen) return null
@@ -51,7 +56,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: currentYear - 1900 + 1 }, (_, i) => currentYear - i)
 
-  const handleInputChange = (field: keyof FilmFormData, value: string | number) => {
+  const handleInputChange = (field: keyof FilmFormData, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -128,19 +133,13 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('Form submitted with data:', formData)
-    
     if (!validateForm()) {
-      console.log('Form validation failed')
       return
     }
 
-    console.log('Form validation passed')
     setIsSubmitting(true)
 
     try {
-      console.log('Starting film addition process...')
-      
       // Prepare data with proper type conversion and limits
       const filmToAdd = {
         title: formData.title.trim(),
@@ -150,19 +149,17 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         releaseYear: Number(formData.releaseYear),
         rating: Math.min(9.9, Math.max(0, Number(formData.rating))), // Clamp between 0-9.9
         price: Math.min(9999.99, Math.max(0, Number(formData.price))), // Clamp price
+        launch: formData.launch,
         posterUrl: formData.posterUrl.trim() || undefined,
         trailerUrl: formData.trailerUrl.trim() || undefined,
         videoUrl: formData.videoUrl.trim() || undefined,
       }
 
-      console.log('Film data to add (with safe limits):', filmToAdd)
-
       const newFilm = await addFilm(filmToAdd)
 
-      console.log('Film addition result:', newFilm)
-
       if (newFilm) {
-        console.log('Film added successfully:', newFilm)
+        // Show success message
+        setShowSuccessMessage(true)
         
         // Reset form
         setFormData({
@@ -173,6 +170,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           releaseYear: new Date().getFullYear(),
           rating: '',
           price: '',
+          launch: false,
           posterUrl: '',
           trailerUrl: '',
           videoUrl: ''
@@ -181,32 +179,32 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         // Clear errors
         setErrors({})
 
-        // Notify parent component and close modal
-        console.log('Calling onFilmAdded callback')
+        // Notify parent component
         onFilmAdded()
-        console.log('Closing modal')
-        onClose()
+
+        // Wait 3 seconds then redirect to Home
+        setTimeout(() => {
+          setShowSuccessMessage(false)
+          onClose()
+          router.push('/')
+        }, 3000)
       } else {
-        console.error('No film returned from addFilm function')
         setErrors({
           title: 'Erro inesperado ao adicionar filme'
         })
       }
     } catch (error: any) {
-      console.error('Error adding film:', error)
-      
       // Show error to user
       setErrors({
         title: error.message || 'Erro ao adicionar filme. Tente novamente.'
       })
     } finally {
-      console.log('Setting isSubmitting to false')
       setIsSubmitting(false)
     }
   }
 
   const handleClose = () => {
-    if (!isSubmitting) {
+    if (!isSubmitting && !showSuccessMessage) {
       onClose()
     }
   }
@@ -214,6 +212,23 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
       <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-xl rounded-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto border border-white/20 shadow-2xl relative">
+        
+        {/* Success Message Overlay */}
+        {showSuccessMessage && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-8 rounded-2xl border border-green-400/30 shadow-2xl transform animate-pulse">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <Check className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white text-2xl font-bold mb-2">Filme Adicionado com Sucesso! 🎬</h3>
+                  <p className="text-green-100 text-sm">Redirecionando para a página inicial em alguns segundos...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden rounded-2xl">
@@ -262,7 +277,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           </div>
           <button
             onClick={handleClose}
-            disabled={isSubmitting}
+            disabled={isSubmitting || showSuccessMessage}
             className="text-gray-400 hover:text-white p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
           >
             <X className="w-6 h-6" />
@@ -295,7 +310,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.title ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.title && (
                   <p className="text-red-400 text-sm mt-2 flex items-center">
@@ -317,11 +332,11 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.genre ? 'border-red-500' : 'border-white/20'
                   } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 >
-                  <option value="">Selecione um gênero</option>
+                  <option value="" className="bg-gray-800 text-gray-400">Selecione um gênero</option>
                   {genres.map(genre => (
-                    <option key={genre} value={genre} className="bg-gray-800">{genre}</option>
+                    <option key={genre} value={genre} className="bg-gray-800 text-white">{genre}</option>
                   ))}
                 </select>
                 {errors.genre && (
@@ -341,10 +356,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.releaseYear ? 'border-red-500' : 'border-white/20'
                   } focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 >
                   {years.map(year => (
-                    <option key={year} value={year} className="bg-gray-800">{year}</option>
+                    <option key={year} value={year} className="bg-gray-800 text-white">{year}</option>
                   ))}
                 </select>
                 {errors.releaseYear && (
@@ -368,7 +383,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.duration ? 'border-red-500' : 'border-white/20'
                   } focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.duration && (
                   <p className="text-red-400 text-sm mt-2">{errors.duration}</p>
@@ -392,7 +407,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.rating ? 'border-red-500' : 'border-white/20'
                   } focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.rating && (
                   <p className="text-red-400 text-sm mt-2">{errors.rating}</p>
@@ -420,11 +435,32 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.price ? 'border-red-500' : 'border-white/20'
                   } focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.price && (
                   <p className="text-red-400 text-sm mt-2">{errors.price}</p>
                 )}
+              </div>
+
+              {/* Launch */}
+              <div>
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Sparkles className="w-4 h-4 mr-2 text-cyan-400" />
+                  É um lançamento? *
+                </label>
+                <select
+                  value={formData.launch ? 'sim' : 'nao'}
+                  onChange={(e) => handleInputChange('launch', e.target.value === 'sim')}
+                  className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300"
+                  disabled={isSubmitting || showSuccessMessage}
+                >
+                  <option value="nao" className="bg-gray-800 text-white">Não</option>
+                  <option value="sim" className="bg-gray-800 text-white">Sim</option>
+                </select>
+                <p className="text-gray-400 text-xs mt-2 flex items-center">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Filmes marcados como lançamento aparecerão em destaque
+                </p>
               </div>
 
               {/* Synopsis */}
@@ -441,7 +477,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.synopsis ? 'border-red-500' : 'border-white/20'
                   } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300 resize-vertical`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.synopsis && (
                   <p className="text-red-400 text-sm mt-2">{errors.synopsis}</p>
@@ -474,7 +510,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.posterUrl ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.posterUrl && (
                   <p className="text-red-400 text-sm mt-2">{errors.posterUrl}</p>
@@ -495,7 +531,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.trailerUrl ? 'border-red-500' : 'border-white/20'
                   } focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.trailerUrl && (
                   <p className="text-red-400 text-sm mt-2">{errors.trailerUrl}</p>
@@ -516,7 +552,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.videoUrl ? 'border-red-500' : 'border-white/20'
                   } focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-300`}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.videoUrl && (
                   <p className="text-red-400 text-sm mt-2">{errors.videoUrl}</p>
@@ -530,20 +566,26 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
             <button
               type="button"
               onClick={handleClose}
-              disabled={isSubmitting}
+              disabled={isSubmitting || showSuccessMessage}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || showSuccessMessage}
               className="px-8 py-4 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-orange-500/25 flex items-center justify-center space-x-3"
             >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                   <span>Adicionando com amor...</span>
+                </>
+              ) : showSuccessMessage ? (
+                <>
+                  <Check className="w-6 h-6" />
+                  <span>Filme Adicionado!</span>
+                  <Sparkles className="w-5 h-5" />
                 </>
               ) : (
                 <>

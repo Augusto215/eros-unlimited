@@ -38,7 +38,7 @@ export interface Database {
           created_at?: string
         }
       }
-      films: {
+      movies: {
         Row: {
           id: string
           title: string
@@ -50,7 +50,7 @@ export interface Database {
           price: number
           poster_url: string | null
           trailer_url: string | null
-          video_url: string | null
+          movie_url: string | null
           created_at: string
         }
         Insert: {
@@ -64,7 +64,7 @@ export interface Database {
           price: number
           poster_url?: string | null
           trailer_url?: string | null
-          video_url?: string | null
+          movie_url?: string | null
           created_at?: string
         }
         Update: {
@@ -78,7 +78,7 @@ export interface Database {
           price?: number
           poster_url?: string | null
           trailer_url?: string | null
-          video_url?: string | null
+          movie_url?: string | null
           created_at?: string
         }
       }
