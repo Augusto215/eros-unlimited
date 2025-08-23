@@ -40,7 +40,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 relative overflow-hidden pt-16">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Rainbow gradient overlay */}
@@ -131,7 +131,7 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300 pl-12"
+                    className="w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300 pl-12 pr-12"
                     placeholder={auth.loginPasswordPlaceholder}
                     required
                     disabled={loading}
@@ -191,13 +191,6 @@ export default function Login() {
                 <Star className="w-4 h-4" />
                 <span>{auth.signUp}</span>
               </Link>
-            </div>
-
-            {/* Test Credentials */}
-            <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-400/30 backdrop-blur-sm">
-              <p className="text-blue-300 text-sm text-center font-medium">
-                🧪 Teste: joaoteste@gmail.com / 123456
-              </p>
             </div>
           </div>
 
