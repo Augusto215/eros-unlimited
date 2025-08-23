@@ -151,6 +151,15 @@
     "support24x7": "Suporte 24/7",
     "thankYouSupport": "💖 Obrigado por apoiar conteúdo diverso e inclusivo 💖"
   },
+  "paymentCancel": {
+    "title": "Pagamento Cancelado",
+    "message": "Seu pagamento foi cancelado. Nenhuma cobrança foi realizada.",
+    "tryAgain": "Não se preocupe! Você pode tentar novamente a qualquer momento.",
+    "backHome": "Voltar ao Início",
+    "backPaypal": "Voltar para o PayPal",
+    "autoRedirect": "Redirecionamento automático em 10 segundos...",
+    "footer": "Apoiando conteúdo diverso e inclusivo"
+  },
   "about": {
     "title": "Sobre Nós",
     "ourStory": "Nossa História",
@@ -323,5 +332,24 @@
     },
     "playButton": "Reproduzir filme",
     "viewDetails": "Ver detalhes do filme"
+  },
+  "paymentSuccess": {
+    "processingTitle": "Processando Pagamento...",
+    "processingMessage": "Aguarde enquanto confirmamos seu pagamento PayPal",
+    "capturing": "Capturando pagamento do PayPal...",
+    "errorTitle": "Erro no Pagamento",
+    "errorMessage": "Não foi possível confirmar o pagamento",
+    "backHome": "Voltar ao Início",
+    "successTitle": "Pagamento Confirmado!",
+    "successMessage": "Seu pagamento foi processado com sucesso via PayPal!",
+    "paymentId": "ID do Pagamento",
+    "amountPaid": "Valor Pago",
+    "status": "Status",
+    "approved": "APROVADO",
+    "autoRedirect": "Redirecionamento automático em 5 segundos...",
+    "goToCatalog": "Ir para o Catálogo",
+    "footer": "Obrigado pelo seu apoio ao conteúdo diverso e inclusivo! 🙏",
+    "loading": "Carregando...",
+    "preparing": "Preparando página de pagamento"
   }
 }

@@ -144,6 +144,15 @@
     "support24x7": "24/7 Support",
     "thankYouSupport": "💖 Thank you for supporting diverse and inclusive content 💖"
   },
+  "paymentCancel": {
+    "title": "Payment Cancelled",
+    "message": "Your payment was cancelled. No charge was made.",
+    "tryAgain": "Don't worry! You can try again anytime.",
+    "backHome": "Back to Home",
+    "backPaypal": "Back to PayPal",
+    "autoRedirect": "Auto redirect in 10 seconds...",
+    "footer": "Supporting diverse and inclusive content"
+  },
   "about": {
     "title": "About Us",
     "ourStory": "Our Story",
@@ -316,5 +325,24 @@
     },
     "playButton": "Play movie",
     "viewDetails": "View movie details"
+  },
+  "paymentSuccess": {
+    "processingTitle": "Processing Payment...",
+    "processingMessage": "Please wait while we confirm your PayPal payment",
+    "capturing": "Capturing PayPal payment...",
+    "errorTitle": "Payment Error",
+    "errorMessage": "Could not confirm payment",
+    "backHome": "Back to Home",
+    "successTitle": "Payment Confirmed!",
+    "successMessage": "Your payment was successfully processed via PayPal!",
+    "paymentId": "Payment ID",
+    "amountPaid": "Amount Paid",
+    "status": "Status",
+    "approved": "APPROVED",
+    "autoRedirect": "Auto redirect in 5 seconds...",
+    "goToCatalog": "Go to Catalog",
+    "footer": "Thank you for supporting diverse and inclusive content! 🙏",
+    "loading": "Loading...",
+    "preparing": "Preparing payment page"
   }
 }

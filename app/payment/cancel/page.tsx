@@ -2,9 +2,11 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { XCircle, ArrowLeft, Heart, Home } from 'lucide-react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function PaymentCancel() {
   const router = useRouter()
+  const { t } = useTranslation()
 
   useEffect(() => {
     // Redirect to home after 10 seconds
@@ -45,18 +47,18 @@ export default function PaymentCancel() {
           {/* Title */}
           <h1 className="text-2xl font-bold text-white mb-4">
             <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-              Pagamento Cancelado
+              {t('paymentCancel.title')}
             </span>
           </h1>
 
           {/* Message */}
           <p className="text-gray-300 mb-6 leading-relaxed">
-            Seu pagamento foi cancelado. Nenhuma cobrança foi realizada.
+            {t('paymentCancel.message')}
           </p>
 
           <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-4 mb-6">
             <p className="text-orange-300 text-sm">
-              Não se preocupe! Você pode tentar novamente a qualquer momento.
+              {t('paymentCancel.tryAgain')}
             </p>
           </div>
 
@@ -67,7 +69,7 @@ export default function PaymentCancel() {
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 hover:from-purple-600 hover:to-pink-600 hover:scale-105 flex items-center justify-center space-x-2"
             >
               <Home className="w-5 h-5" />
-              <span>Voltar ao Início</span>
+              <span>{t('paymentCancel.backHome')}</span>
             </button>
             
             <button
@@ -75,13 +77,13 @@ export default function PaymentCancel() {
               className="w-full bg-white/10 backdrop-blur-sm text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 hover:bg-white/20 border border-white/20 flex items-center justify-center space-x-2"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Voltar</span>
+              <span>{t('paymentCancel.backPaypal')}</span>
             </button>
           </div>
 
           {/* Auto redirect notice */}
           <p className="text-gray-400 text-xs mt-6">
-            Redirecionamento automático em 10 segundos...
+            {t('paymentCancel.autoRedirect')}
           </p>
         </div>
 
@@ -95,7 +97,7 @@ export default function PaymentCancel() {
             ))}
           </div>
           <p className="text-gray-400 text-xs">
-            Apoiando conteúdo diverso e inclusivo
+            {t('paymentCancel.footer')}
           </p>
         </div>
       </div>

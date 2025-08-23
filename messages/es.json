@@ -269,6 +269,15 @@
     "support24x7": "Soporte 24/7",
     "thankYouSupport": "💖 Gracias por apoyar contenido diverso e inclusivo 💖"
   },
+  "paymentCancel": {
+    "title": "Pago Cancelado",
+    "message": "Tu pago fue cancelado. No se realizó ningún cargo.",
+    "tryAgain": "¡No te preocupes! Puedes intentarlo de nuevo en cualquier momento.",
+    "backHome": "Volver al Inicio",
+    "backPaypal": "Volver a PayPal",
+    "autoRedirect": "Redirección automática en 10 segundos...",
+    "footer": "Apoyando contenido diverso e inclusivo"
+  },
   "user": {
     "profile": "Perfil",
     "myMovies": "Mis películas",
@@ -317,5 +326,24 @@
     },
     "playButton": "Reproducir película",
     "viewDetails": "Ver detalles de la película"
+  },
+  "paymentSuccess": {
+    "processingTitle": "Procesando Pago...",
+    "processingMessage": "Por favor espera mientras confirmamos tu pago de PayPal",
+    "capturing": "Capturando pago de PayPal...",
+    "errorTitle": "Error en el Pago",
+    "errorMessage": "No se pudo confirmar el pago",
+    "backHome": "Volver al Inicio",
+    "successTitle": "¡Pago Confirmado!",
+    "successMessage": "¡Tu pago fue procesado exitosamente vía PayPal!",
+    "paymentId": "ID de Pago",
+    "amountPaid": "Monto Pagado",
+    "status": "Estado",
+    "approved": "APROBADO",
+    "autoRedirect": "Redirección automática en 5 segundos...",
+    "goToCatalog": "Ir al Catálogo",
+    "footer": "¡Gracias por apoyar contenido diverso e inclusivo! 🙏",
+    "loading": "Cargando...",
+    "preparing": "Preparando página de pago"
   }
 }
