@@ -19,8 +19,18 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
   const [showVideo, setShowVideo] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    // Check if device is mobile
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+
     // Check if user is admin
     const user = getCurrentUser()
     setIsAdmin(user?.role === 'ADMIN')
@@ -30,21 +40,53 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
       setCurrentTime(new Date())
     }, 60000)
 
-    // Video autoplay logic with longer delay
-    const videoTimer = setTimeout(() => {
-      setShowVideo(true)
-      setTimeout(() => setShowVideo(false), 8000)
-    }, 3000)
+    // Video autoplay logic with longer delay - only on desktop
+    let videoTimer: NodeJS.Timeout
+    if (!isMobile) {
+      videoTimer = setTimeout(() => {
+        setShowVideo(true)
+        setTimeout(() => setShowVideo(false), 8000)
+      }, 3000)
+    }
 
     return () => {
       clearInterval(timer)
-      clearTimeout(videoTimer)
+      if (videoTimer) clearTimeout(videoTimer)
+      window.removeEventListener('resize', checkIsMobile)
     }
-  }, [])
+  }, [isMobile])
 
   const handleAdminAction = () => {
     if (onAdminClick) {
       onAdminClick()
+    }
+  }
+
+  const handlePosterClick = () => {
+    if (isMobile) {
+      setIsExpanded(!isExpanded)
+      if (!isExpanded && film.trailerUrl) {
+        setShowVideo(true)
+        // Hide video after 8 seconds
+        setTimeout(() => {
+          setShowVideo(false)
+        }, 8000)
+      } else {
+        setShowVideo(false)
+      }
+    }
+  }
+
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setIsExpanded(true)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setIsExpanded(false)
+      setShowVideo(false)
     }
   }
 
@@ -91,8 +133,8 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
 
       {/* Content */}
       <div className="relative z-10 flex items-center min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             
             {/* Left side - Film Info */}
             <div className="space-y-8">
@@ -110,14 +152,14 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
 
               {/* Title */}
               <div>
-                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 leading-tight">
                   <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
                     {film.title}
                   </span>
                 </h1>
                 
                 {/* Meta info */}
-                <div className="flex flex-wrap items-center space-x-6 text-gray-300 mb-6">
+                <div className="flex flex-wrap items-center space-x-4 sm:space-x-6 text-gray-300 mb-6 text-sm sm:text-base">
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-purple-400" />
                     <span>{film.releaseYear}</span>
@@ -126,36 +168,36 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                     <Clock className="w-4 h-4 text-pink-400" />
                     <span>{film.duration} {t('movies.minutes')}</span>
                   </div>
-                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-3 py-1 rounded-full border border-purple-500/30">
-                    <span className="text-purple-300 font-medium">{film.genre}</span>
+                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-2 sm:px-3 py-1 rounded-full border border-purple-500/30">
+                    <span className="text-purple-300 font-medium text-xs sm:text-sm">{film.genre}</span>
                   </div>
                 </div>
               </div>
 
               {/* Synopsis */}
               <div className="max-w-2xl">
-                <p className="text-lg text-gray-300 leading-relaxed mb-8 text-justify">
+                <p className="text-base sm:text-lg text-gray-300 leading-relaxed mb-6 sm:mb-8 text-justify">
                   {film.synopsis}
                 </p>
                 
                 {/* Price */}
-                <div className="flex items-center space-x-4 mb-8">
-                  <span className="text-gray-400">{t('movies.startingFrom')}</span>
-                  <span className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                <div className="flex items-center space-x-4 mb-6 sm:mb-8">
+                  <span className="text-gray-400 text-sm sm:text-base">{t('movies.startingFrom')}</span>
+                  <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                     USD {film.price.toFixed(2)}
                   </span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4">
                 <button
                   style={{ cursor: 'pointer' }}
                   onClick={onPlayClick}
-                  className="group flex items-center space-x-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-pink-500/25"
+                  className="group flex items-center justify-center space-x-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-pink-500/25 w-full sm:w-auto"
                 >
-                  <ShoppingBag className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  <span>{movies.buy}</span>
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm sm:text-base">{movies.buy}</span>
                 </button>
 
                 {/* <button style={ { cursor: 'pointer'}} className="group flex items-center space-x-3 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition-all duration-300 border border-white/20">
@@ -182,48 +224,154 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
             </div>
 
             {/* Right side - Enhanced Visual Elements */}
-            <div className="relative lg:block hidden">
-              <div className="relative">
-                {/* Main poster with enhanced effects */}
-                <div className="relative w-96 aspect-[2/3] mx-auto">
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-2xl blur-xl animate-pulse" />
-                  <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                    <Image
-                      src={film.posterUrl || "/placeholder.svg"}
-                      alt={film.title}
-                      fill
-                      className="object-contain"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  </div>
-                </div>
-
-                {/* Floating elements */}
-                <div className="absolute -top-8 -right-8 w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center animate-bounce">
-                  <Star className="w-8 h-8 text-white fill-current" />
-                </div>
-
-                <div className="absolute -bottom-4 -left-4 bg-gradient-to-r from-pink-500/90 to-purple-500/90 backdrop-blur-sm rounded-xl p-4 border border-pink-500/30">
-                  <div className="text-white text-center">
-                    <div className="text-2xl font-bold">{film.rating}</div>
-                    <div className="text-xs text-gray-200">{t('movies.evaluation')}</div>
-                  </div>
-                </div>
-
-                {/* Time display */}
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-lg p-3 border border-gray-600/30">
-                  <div className="text-white text-sm font-medium">
-                    {currentTime.toLocaleTimeString('pt-BR', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
+            <div className="relative">
+              {/* Mobile: Poster section that shows on tap/focus */}
+              <div className="lg:hidden">
+                <div 
+                  className={`relative transition-all duration-500 cursor-pointer ${isExpanded ? 'scale-105' : 'scale-100'}`}
+                  onClick={handlePosterClick}
+                >
+                  <div className="relative w-full max-w-sm aspect-[2/3] mx-auto">
+                    {/* Poster container */}
+                    <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-2xl bg-black">
+                      {/* Show video when expanded and available */}
+                      {isExpanded && showVideo && film.trailerUrl ? (
+                        <video 
+                          autoPlay 
+                          muted 
+                          loop
+                          className="w-full h-full object-cover"
+                          onEnded={() => setShowVideo(false)}
+                        >
+                          <source src={film.trailerUrl} type="video/mp4" />
+                        </video>
+                      ) : (
+                        <Image
+                          src={film.posterUrl || "/placeholder.svg"}
+                          alt={film.title}
+                          fill
+                          className="object-cover"
+                          priority
+                        />
+                      )}
+                      
+                      {/* Overlay gradient - more subtle when expanded */}
+                      <div className={`absolute inset-0 transition-opacity duration-300 ${isExpanded ? 'bg-gradient-to-t from-black/30 to-transparent' : 'bg-gradient-to-t from-black/50 to-transparent'}`} />
+                      
+                      {/* Play button overlay when not expanded */}
+                      {!isExpanded && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-black/60 backdrop-blur-sm rounded-full p-4 border border-white/20 animate-pulse">
+                            <Play className="w-8 h-8 text-white fill-current" />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Expanded overlay controls */}
+                      {isExpanded && (
+                        <div className="absolute inset-0 flex flex-col justify-end p-4">
+                          {/* Video controls or info */}
+                          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                            <h3 className="text-white font-bold text-lg">{film.title}</h3>
+                            <div className="flex items-center space-x-4 text-white/80 text-sm">
+                              <div className="flex items-center space-x-1">
+                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span>{film.rating}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Clock className="w-4 h-4" />
+                                <span>{film.duration}min</span>
+                              </div>
+                            </div>
+                            {film.trailerUrl && showVideo && (
+                              <p className="text-white/60 text-xs">{t('movies.watchingTrailer')}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Tap indicator - only show when not expanded */}
+                      {!isExpanded && (
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                          <div className="bg-black/60 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+                            <span className="text-white text-sm font-medium">{t('movies.tapToExpand')}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Rating badge - positioned outside poster */}
+                    <div className="absolute -top-4 -right-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full p-3 shadow-lg z-10">
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-4 h-4 text-white fill-current" />
+                        <span className="text-white font-bold text-sm">{film.rating}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Background decorative elements */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] -z-10">
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 via-purple-500/5 to-red-500/5 rounded-full blur-3xl animate-spin-slow" />
+              {/* Desktop: Original poster section with hover effects */}
+              <div className="relative lg:block hidden">
+                <div 
+                  className="relative"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  {/* Main poster with enhanced effects */}
+                  <div className="relative w-96 aspect-[2/3] mx-auto">
+                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-2xl blur-xl animate-pulse" />
+                    <div className={`relative w-full h-full rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-2xl transition-all duration-500 ${isExpanded ? 'rotate-0 scale-105' : 'rotate-3'}`}>
+                      {/* Show video on hover if available */}
+                      {isExpanded && showVideo && film.trailerUrl ? (
+                        <video 
+                          autoPlay 
+                          muted 
+                          loop
+                          className="w-full h-full object-cover"
+                          onEnded={() => setShowVideo(false)}
+                        >
+                          <source src={film.trailerUrl} type="video/mp4" />
+                        </video>
+                      ) : (
+                        <Image
+                          src={film.posterUrl || "/placeholder.svg"}
+                          alt={film.title}
+                          fill
+                          className="object-contain"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    </div>
+                  </div>
+
+                  {/* Floating elements */}
+                  <div className="absolute -top-8 -right-8 w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center animate-bounce">
+                    <Star className="w-8 h-8 text-white fill-current" />
+                  </div>
+
+                  <div className="absolute -bottom-4 -left-4 bg-gradient-to-r from-pink-500/90 to-purple-500/90 backdrop-blur-sm rounded-xl p-4 border border-pink-500/30">
+                    <div className="text-white text-center">
+                      <div className="text-2xl font-bold">{film.rating}</div>
+                      <div className="text-xs text-gray-200">{t('movies.evaluation')}</div>
+                    </div>
+                  </div>
+
+                  {/* Time display */}
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-lg p-3 border border-gray-600/30">
+                    <div className="text-white text-sm font-medium">
+                      {currentTime.toLocaleTimeString('pt-BR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Background decorative elements */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] -z-10">
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 via-purple-500/5 to-red-500/5 rounded-full blur-3xl animate-spin-slow" />
+                </div>
               </div>
             </div>
           </div>

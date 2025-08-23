@@ -263,7 +263,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
       style={{ transformOrigin: 'center center' }}
     >
       {/* Normal card */}
-      <div className={`relative aspect-[2/3] w-56 rounded-xl overflow-hidden shadow-lg transition-all duration-500 ${
+      <div className={`relative aspect-[2/3] md:w-56 w-full rounded-xl overflow-hidden shadow-lg transition-all duration-500 ${
         showExpandedCard ? 'opacity-0' : 'opacity-100 hover:scale-105'
       }`}>
         <Image 
@@ -276,7 +276,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         
         {isPurchased && (
-          <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+          <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
             <Crown className="w-3 h-3" />
             <span>POSSUI</span>
           </div>
@@ -287,51 +287,106 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
           <span>{film.rating}</span>
         </div>
 
-        {isHovered && !showExpandedCard && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4 transition-opacity duration-300">
-            <div className="space-y-3">
-              <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
-                {film.title}
-              </h3>
-              
-              <div className="flex items-center space-x-3 text-sm">
-                <span className="text-purple-300 font-medium">{film.genre}</span>
-                <div className="flex items-center space-x-1 text-gray-300">
-                  <Clock className="w-3 h-3" />
-                  <span>{film.duration} {t('movies.minutes')}</span>
-                </div>
+        {/* Mobile: Always show film info overlay */}
+        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4">
+          <div className="space-y-2">
+            <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
+              {film.title}
+            </h3>
+            
+            <div className="flex items-center space-x-3 text-sm">
+              <span className="text-purple-300 font-medium">{film.genre}</span>
+              <div className="flex items-center space-x-1 text-gray-300">
+                <Clock className="w-3 h-3" />
+                <span>{film.duration} {t('movies.minutes')}</span>
+              </div>
+            </div>
+
+            <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
+              {film.synopsis}
+            </p>
+
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onFilmClick(film)
+                  }}
+                  className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                >
+                  <Play className="w-4 h-4 text-white" />
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onFilmClick(film)
+                  }}
+                  className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                >
+                  <ShoppingBag className="w-4 h-4 text-white" />
+                </button>
               </div>
 
-              <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-                {film.synopsis}
-              </p>
+              {!isPurchased && (
+                <div className="text-right">
+                  <div className="text-green-400 font-bold text-lg">
+                    USD {film.price.toFixed(2)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center space-x-2">
-                  <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
-                    <Play className="w-4 h-4 text-white" />
-                  </button>
-                  <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
-                    <ShoppingBag className="w-4 h-4 text-white" />
-                  </button>
+        {/* Desktop: Show info on hover */}
+        {isHovered && !showExpandedCard && (
+          <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+            <div className="absolute inset-0 flex flex-col justify-end p-4 transition-opacity duration-300">
+              <div className="space-y-3">
+                <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
+                  {film.title}
+                </h3>
+                
+                <div className="flex items-center space-x-3 text-sm">
+                  <span className="text-purple-300 font-medium">{film.genre}</span>
+                  <div className="flex items-center space-x-1 text-gray-300">
+                    <Clock className="w-3 h-3" />
+                    <span>{film.duration} {t('movies.minutes')}</span>
+                  </div>
                 </div>
 
-                {!isPurchased && (
-                  <div className="text-right">
-                    <div className="text-green-400 font-bold text-lg">
-                      USD {film.price.toFixed(2)}
-                    </div>
+                <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
+                  {film.synopsis}
+                </p>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center space-x-2">
+                    <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
+                      <Play className="w-4 h-4 text-white" />
+                    </button>
+                    <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
+                      <ShoppingBag className="w-4 h-4 text-white" />
+                    </button>
                   </div>
-                )}
+
+                  {!isPurchased && (
+                    <div className="text-right">
+                      <div className="text-green-400 font-bold text-lg">
+                        USD {film.price.toFixed(2)}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Expanded Netflix-style card */}
+      {/* Expanded Netflix-style card - Only on desktop */}
       {showExpandedCard && (
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-80 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700 z-50 transition-all duration-500">
+        <div className="hidden md:block absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-80 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700 z-50 transition-all duration-500">
           {/* Video/Poster section */}
           <div className="relative aspect-video bg-black">
             {film.trailerUrl ? (
@@ -521,26 +576,26 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
   return (
     <div className="mb-12">
       {/* Section header */}
-      <div className="flex items-center justify-between mb-6 px-4">
+      <div className="flex items-center justify-between mb-6 px-4 md:px-6">
         <div className="flex items-center space-x-3">
           {icon && (
-            <div className={`w-8 h-8 bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} rounded-lg flex items-center justify-center`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} rounded-lg flex items-center justify-center`}>
               {icon}
             </div>
           )}
-          <h2 className={`text-white text-2xl font-bold bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} bg-clip-text text-transparent`}>
+          <h2 className={`text-white text-xl sm:text-2xl font-bold bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} bg-clip-text text-transparent`}>
             {title}
           </h2>
-          <div className={`h-1 w-16 bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} rounded-full`} />
+          <div className={`h-1 w-12 sm:w-16 bg-gradient-to-r ${accentColors[accentColor as keyof typeof accentColors]} rounded-full`} />
         </div>
       </div>
 
-      {/* Films container */}
-      <div className="relative group px-4 py-8">
-        {/* Navigation buttons */}
+      {/* Films container - Responsive layout */}
+      <div className="relative group">
+        {/* Navigation buttons - Hidden on mobile */}
         <button
           onClick={() => scroll("left")}
-          className={`absolute left-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
+          className={`hidden md:block absolute left-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
             hasExpandedCard ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
           }`}
         >
@@ -549,35 +604,51 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
         
         <button
           onClick={() => scroll("right")}
-          className={`absolute right-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
+          className={`hidden md:block absolute right-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
             hasExpandedCard ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
           }`}
         >
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        {/* Extended hover area for better UX */}
-        <div className="absolute inset-0 z-10 pointer-events-none" />
+        {/* Extended hover area for better UX - Hidden on mobile */}
+        <div className="absolute inset-0 z-10 pointer-events-none hidden md:block" />
 
-        {/* Films scroll container */}
-        <div
-          ref={scrollContainerRef}
-          className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16 relative z-10"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {/* Padding esquerdo */}
-          <div className="w-8 flex-shrink-0"></div>
-          {films.map((film) => (
-            <ModernFilmCard
-              key={film.id}
-              film={film}
-              isPurchased={purchasedFilmIds.includes(film.id)}
-              onFilmClick={onFilmClick}
-              onExpandedChange={setHasExpandedCard}
-            />
-          ))}
-          {/* Padding direito */}
-          <div className="w-8 flex-shrink-0"></div>
+        {/* Films container - Horizontal scroll on desktop, vertical grid on mobile */}
+        <div className="md:px-4 md:py-8">
+          {/* Mobile: Vertical grid */}
+          <div className="grid grid-cols-1 gap-6 px-4 md:hidden">
+            {films.map((film) => (
+              <ModernFilmCard
+                key={film.id}
+                film={film}
+                isPurchased={purchasedFilmIds.includes(film.id)}
+                onFilmClick={onFilmClick}
+                onExpandedChange={setHasExpandedCard}
+              />
+            ))}
+          </div>
+
+          {/* Desktop: Horizontal scroll */}
+          <div
+            ref={scrollContainerRef}
+            className="hidden md:flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16 relative z-10"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {/* Padding esquerdo */}
+            <div className="w-8 flex-shrink-0"></div>
+            {films.map((film) => (
+              <ModernFilmCard
+                key={film.id}
+                film={film}
+                isPurchased={purchasedFilmIds.includes(film.id)}
+                onFilmClick={onFilmClick}
+                onExpandedChange={setHasExpandedCard}
+              />
+            ))}
+            {/* Padding direito */}
+            <div className="w-8 flex-shrink-0"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -589,13 +660,13 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
   
   if (films.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-pink-900/20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-pink-900/20 flex items-center justify-center px-4">
         <div className="text-center">
           <div className="w-32 h-32 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
             <FilmIcon className="w-16 h-16 text-pink-400" />
           </div>
-          <h2 className="text-white text-2xl font-bold mb-2">{t('films.libraryUnderConstruction')}</h2>
-          <p className="text-gray-400">{t('films.noMoviesAvailable')}</p>
+          <h2 className="text-white text-xl sm:text-2xl font-bold mb-2">{t('films.libraryUnderConstruction')}</h2>
+          <p className="text-gray-400 text-sm sm:text-base">{t('films.noMoviesAvailable')}</p>
         </div>
       </div>
     )
@@ -614,10 +685,10 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
         <div className="absolute top-2/3 left-1/2 w-48 h-48 bg-blue-500/5 rounded-full blur-2xl animate-pulse delay-500" />
       </div>
 
-      <div className="relative z-10 pt-8 pb-16">
+      <div className="relative z-10 pt-4 sm:pt-8 pb-8 sm:pb-16">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
-          <div className="px-4 mb-12">
+          <div className="px-4 md:px-6 mb-8 sm:mb-12">
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
