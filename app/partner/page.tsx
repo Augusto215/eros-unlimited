@@ -105,7 +105,7 @@ INFORMAÇÕES DO PROJETO:
 ${formData.filmTitle ? `- Título do Filme: ${formData.filmTitle}` : ''}
 ${formData.genre ? `- Gênero: ${formData.genre}` : ''}
 ${formData.budget ? `- Orçamento: ${formData.budget}` : ''}
-${formData.timeline ? `- Cronograma: ${formData.timeline}` : ''}
+${formData.timeline ? `- Data de Lançamento: ${formData.timeline}` : ''}
 
 DESCRIÇÃO DO PROJETO:
 ${formData.description}
@@ -160,15 +160,15 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
           <div className="w-full h-full bg-gradient-to-r from-red-500/20 via-orange-500/20 via-yellow-500/20 via-green-500/20 via-blue-500/20 via-indigo-500/20 to-purple-500/20 animate-pulse" />
         </div>
         
-        <div className="relative z-10 text-center max-w-6xl mx-auto px-4 pt-20">
-          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+        <div className="relative z-10 text-center max-w-6xl mx-auto px-6 sm:px-8 md:px-4 pt-20">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
             {partner.heroTitle}
           </h1>
-          <p className="text-2xl md:text-3xl mb-8 text-gray-200 font-light">
+          <p className="text-xl sm:text-2xl md:text-3xl mb-8 text-gray-200 font-light">
             {partner.heroSubtitle}
           </p>
           <div className="w-32 h-1 bg-gradient-to-r from-red-500 to-purple-500 mx-auto mb-8 rounded-full" />
-          <p className="text-lg text-gray-300 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-300 max-w-4xl mx-auto leading-relaxed px-4 sm:px-0">
             {partner.heroText}
           </p>
         </div>
@@ -182,28 +182,28 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
 
       {/* Partnership Vision */}
       <section className="py-24 bg-gradient-to-br from-gray-900 to-black">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-8 bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl font-bold mb-8 bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
               {partner.partnershipVisionTitle}
             </h2>
             <div className="max-w-4xl mx-auto">
-              <p className="text-xl text-gray-300 leading-relaxed mb-8">
+              <p className="text-lg sm:text-xl text-gray-300 leading-relaxed mb-8">
                 {partner.visionText1} <span className="text-red-400 font-semibold">{partner.visionText2}</span> {partner.visionText3}
               </p>
-              <p className="text-lg text-gray-400 leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-400 leading-relaxed">
                 {partner.visionText4} <span className="text-pink-400 font-semibold">{partner.visionText5}</span> {partner.visionText6}
               </p>
             </div>
           </div>
 
           {/* Call to Action Box */}
-          <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 rounded-2xl p-8 border border-red-500/20 text-center">
-            <h3 className="text-3xl font-bold mb-4 text-red-400">{partner.yourFilmMatters}</h3>
-            <p className="text-xl text-gray-300 mb-6">
+          <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 rounded-2xl p-6 sm:p-8 border border-red-500/20 text-center">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-red-400">{partner.yourFilmMatters}</h3>
+            <p className="text-lg sm:text-xl text-gray-300 mb-6">
               {partner.filmMattersText1} <span className="text-pink-400 font-semibold">{partner.filmMattersText2}</span>
             </p>
-            <p className="text-lg text-gray-400">
+            <p className="text-base sm:text-lg text-gray-400">
               {partner.filmMattersText3}
             </p>
           </div>
@@ -212,8 +212,8 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
 
       {/* Partnership Benefits */}
       <section className="py-24 bg-gradient-to-br from-red-900/20 to-purple-900/20">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
             {partner.whyPartnerWithUs}
           </h2>
           
@@ -221,13 +221,13 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
             {partnershipBenefits.map((benefit, index) => (
               <div 
                 key={index}
-                className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-8 border border-red-500/20 hover:border-pink-500/40 transition-all duration-300 hover:transform hover:scale-105 text-center"
+                className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 sm:p-8 border border-red-500/20 hover:border-pink-500/40 transition-all duration-300 hover:transform hover:scale-105 text-center"
               >
                 <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   {benefit.icon}
                 </div>
-                <h3 className="text-xl font-bold text-red-400 mb-4">{benefit.title}</h3>
-                <p className="text-gray-300 leading-relaxed">{benefit.description}</p>
+                <h3 className="text-lg sm:text-xl font-bold text-red-400 mb-4">{benefit.title}</h3>
+                <p className="text-gray-300 leading-relaxed text-sm sm:text-base">{benefit.description}</p>
               </div>
             ))}
           </div>
@@ -236,12 +236,12 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
 
       {/* Partnership Gallery */}
       <section className="py-24 bg-black">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             {partner.partnershipInActionTitle}
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
             {partnerImages.map((img, index) => (
               <div 
                 key={img.id}
@@ -251,17 +251,17 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
               >
                 <div className="relative aspect-square rounded-xl overflow-hidden">
                   <div className="w-full h-full bg-gradient-to-br from-red-600 via-pink-600 to-purple-600 flex items-center justify-center">
-                    <div className="text-center p-4">
-                      <Camera className="w-12 h-12 text-white mx-auto mb-3" />
-                      <p className="text-white font-semibold text-sm">{img.category}</p>
+                    <div className="text-center p-2 sm:p-4">
+                      <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-white mx-auto mb-2 sm:mb-3" />
+                      <p className="text-white font-semibold text-xs sm:text-sm">{img.category}</p>
                     </div>
                   </div>
                   
                   {hoveredImage === index && (
                     <div className="absolute inset-0 bg-black/80 flex items-center justify-center transition-all duration-300">
-                      <div className="text-center text-white p-4">
-                        <Play className="w-8 h-8 mx-auto mb-2" />
-                        <p className="text-sm">{img.description}</p>
+                      <div className="text-center text-white p-2 sm:p-4">
+                        <Play className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+                        <p className="text-xs sm:text-sm">{img.description}</p>
                       </div>
                     </div>
                   )}
@@ -271,7 +271,7 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-gray-400 text-lg">
+            <p className="text-gray-400 text-base sm:text-lg">
               {partner.joinCommunityText}
             </p>
           </div>
@@ -280,39 +280,39 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
 
       {/* Contact & Partnership Form */}
       <section className="py-24 bg-gradient-to-br from-gray-900 to-black">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             
             {/* Contact Information */}
             <div>
-              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-8 bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
                 {partner.letsCollaborate}
               </h2>
               
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-4">{partner.contactToCollaborate}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">{partner.contactToCollaborate}</h3>
                   
                   <div className="space-y-4">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <Mail className="w-6 h-6 text-white" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
                       <div>
                         <p className="text-gray-400 text-sm">{partner.email}</p>
-                        <a href="mailto:erosunlimitedart@gmail.com" className="text-red-400 font-semibold text-lg hover:text-pink-400 transition-colors">
+                        <a href="mailto:erosunlimitedart@gmail.com" className="text-red-400 font-semibold text-base sm:text-lg hover:text-pink-400 transition-colors break-all">
                           erosunlimitedart@gmail.com
                         </a>
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
-                        <Phone className="w-6 h-6 text-white" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
                       <div>
                         <p className="text-gray-400 text-sm">{partner.phone}</p>
-                        <a href="tel:+13233837144" className="text-pink-400 font-semibold text-lg hover:text-purple-400 transition-colors">
+                        <a href="tel:+13233837144" className="text-pink-400 font-semibold text-base sm:text-lg hover:text-purple-400 transition-colors">
                           323 383 71 44
                         </a>
                       </div>
@@ -320,9 +320,9 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 p-6 rounded-xl border border-red-500/20">
-                  <h4 className="text-xl font-bold text-red-400 mb-3">{partner.readyToStart}</h4>
-                  <p className="text-gray-300 leading-relaxed">
+                <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 p-4 sm:p-6 rounded-xl border border-red-500/20">
+                  <h4 className="text-lg sm:text-xl font-bold text-red-400 mb-3">{partner.readyToStart}</h4>
+                  <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
                     {partner.readyToStartText}
                   </p>
                 </div>
@@ -331,8 +331,8 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
 
             {/* Partnership Inquiry Form */}
             <div>
-              <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-8 border border-purple-500/20">
-                <h3 className="text-2xl font-bold text-purple-400 mb-6">{partner.partnershipInquiry}</h3>
+              <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-xl p-6 sm:p-8 border border-purple-500/20">
+                <h3 className="text-xl sm:text-2xl font-bold text-purple-400 mb-6">{partner.partnershipInquiry}</h3>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -454,9 +454,9 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
 
       {/* Bottom CTA */}
       <section className="py-16 bg-gradient-to-r from-red-900/40 via-pink-900/40 to-purple-900/40">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6 text-white">{partner.readyToChangeWorld}</h2>
-          <p className="text-xl text-gray-300 mb-8">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-4 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white">{partner.readyToChangeWorld}</h2>
+          <p className="text-lg sm:text-xl text-gray-300 mb-8">
             {partner.readyToChangeWorldText}
           </p>
           <div className="flex justify-center space-x-4">

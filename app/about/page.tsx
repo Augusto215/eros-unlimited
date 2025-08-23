@@ -82,15 +82,15 @@ export default function About() {
           <div className="w-full h-full bg-gradient-to-r from-red-500/20 via-yellow-500/20 via-green-500/20 via-blue-500/20 via-indigo-500/20 to-purple-500/20 animate-pulse" />
         </div>
         
-        <div className="relative z-10 text-center max-w-6xl mx-auto px-4 pt-20">
-          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-pink-400 via-purple-400 to-orange-400 bg-clip-text text-transparent animate-pulse">
+        <div className="relative z-10 text-center max-w-6xl mx-auto px-6 sm:px-8 md:px-4 pt-20">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-pink-400 via-purple-400 to-orange-400 bg-clip-text text-transparent animate-pulse">
             {about.heroTitle}
           </h1>
-          <p className="text-2xl md:text-3xl mb-8 text-gray-200 font-light">
+          <p className="text-xl sm:text-2xl md:text-3xl mb-8 text-gray-200 font-light">
             {about.heroSubtitle}
           </p>
           <div className="w-32 h-1 bg-gradient-to-r from-pink-500 to-purple-500 mx-auto mb-8 rounded-full" />
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
             "{about.heroQuote}"
           </p>
         </div>
@@ -104,10 +104,10 @@ export default function About() {
 
       {/* Mission Section */}
       <section className="py-24 bg-gradient-to-br from-gray-900 to-black">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-5xl font-bold mb-8 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <h2 className="text-4xl sm:text-5xl font-bold mb-8 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
                 {about.ourMissionTitle}
               </h2>
               <div className="space-y-6 text-gray-300 text-lg leading-relaxed">
@@ -119,7 +119,7 @@ export default function About() {
                 </p>
               </div>
               
-              <div className="mt-12 grid grid-cols-3 gap-8">
+              <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Heart className="w-8 h-8 text-white" />
@@ -161,9 +161,9 @@ export default function About() {
 
       {/* Vision Statement */}
       <section className="py-20 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-8 text-white">{about.ourVisionTitle}</h2>
-          <p className="text-xl text-gray-300 leading-relaxed mb-8">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-4 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-white">{about.ourVisionTitle}</h2>
+          <p className="text-lg sm:text-xl text-gray-300 leading-relaxed mb-8">
             "{about.visionText1} <span className="text-pink-400 font-semibold">{about.visionText2}</span> {about.visionText3}"
           </p>
           <div className="flex justify-center space-x-4">
@@ -177,8 +177,8 @@ export default function About() {
 
       {/* Filmography Section */}
       <section className="py-24 bg-black">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
             {about.filmographyTitle}
           </h2>
           
@@ -204,8 +204,8 @@ export default function About() {
 
       {/* Awards Section */}
       <section className="py-24 bg-gradient-to-br from-purple-900/30 to-pink-900/30">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 md:px-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
             {about.recognitionTitle}
           </h2>
           
@@ -215,8 +215,8 @@ export default function About() {
                 key={index}
                 className="flex items-center p-6 bg-gradient-to-r from-gray-900/80 to-gray-800/80 rounded-xl border border-yellow-500/20 hover:border-yellow-400/40 transition-all duration-300"
               >
-                <Award className="w-8 h-8 text-yellow-400 mr-4 flex-shrink-0" />
-                <span className="text-gray-200 font-medium">{award}</span>
+                <Award className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 mr-4 flex-shrink-0" />
+                <span className="text-gray-200 font-medium text-sm sm:text-base">{award}</span>
               </div>
             ))}
           </div>
@@ -225,8 +225,8 @@ export default function About() {
 
       {/* Director's Biography */}
       <section className="py-24 bg-black">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
             {about.directorBioTitle}
           </h2>
           
@@ -234,23 +234,23 @@ export default function About() {
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
                 <div className="w-4 h-4 bg-cyan-400 rounded-full" />
-                <h3 className="text-2xl font-bold text-cyan-400">{about.directorName}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-cyan-400">{about.directorName}</h3>
               </div>
               
-              <div className="space-y-4 text-gray-300 text-lg">
+              <div className="space-y-4 text-gray-300 text-base sm:text-lg">
                 <div className="flex items-center space-x-3">
-                  <MapPin className="w-5 h-5 text-cyan-400" />
-                  <span>{about.bornIn}</span>
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+                  <span className="text-sm sm:text-base">{about.bornIn}</span>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Calendar className="w-5 h-5 text-cyan-400" />
-                  <span>{about.graduated}</span>
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+                  <span className="text-sm sm:text-base">{about.graduated}</span>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-gray-900/80 to-gray-800/80 p-6 rounded-xl border border-cyan-500/20">
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
                   {about.bioText}
                 </p>
               </div>
@@ -264,8 +264,8 @@ export default function About() {
                     <div className="w-32 h-32 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
                       <span className="text-4xl">🎭</span>
                     </div>
-                    <p className="text-xl font-bold text-cyan-400">{about.directorName}</p>
-                    <p className="text-gray-300">{about.directorProducer}</p>
+                    <p className="text-lg sm:text-xl font-bold text-cyan-400">{about.directorName}</p>
+                    <p className="text-gray-300 text-sm sm:text-base">{about.directorProducer}</p>
                   </div>
                 </div>
               </div>
@@ -276,9 +276,9 @@ export default function About() {
 
       {/* Call to Action */}
       <section className="py-24 bg-gradient-to-r from-pink-900/40 via-purple-900/40 to-blue-900/40">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-8 text-white">{about.joinJourneyTitle}</h2>
-          <p className="text-xl text-gray-300 mb-12 leading-relaxed">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-4 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-white">{about.joinJourneyTitle}</h2>
+          <p className="text-lg sm:text-xl text-gray-300 mb-12 leading-relaxed">
             {about.joinJourneyText}
           </p>
           
