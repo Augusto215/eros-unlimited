@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Play, Film as FilmIcon, User } from "lucide-react"
 import { initializeAuth, getCurrentUser } from "@/lib/auth"
-import { getMovies, getUserPurchasedFilms } from "@/lib/movies"
+import { getUserPurchasedFilms } from "@/lib/purchases"
 import { useMyMoviesTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 
@@ -13,7 +13,6 @@ export default function MyMovies() {
   const t = useMyMoviesTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [films, setFilms] = useState<Film[]>([])
-  const [userId, setUserId] = useState('')
 
   useEffect(() => {
     const initApp = async () => {
@@ -22,29 +21,17 @@ export default function MyMovies() {
         const user = getCurrentUser()
         
         if (!user) {
-          // Redirect to login if not authenticated
           router.push('/')
           return
         }
-
-        setUserId(user.id)
         
-        // Load all films and user purchases
-        const [allFilms, purchases] = await Promise.all([
-          getMovies(),
-          getUserPurchasedFilms(user.id)
-        ])
-        
-        // Filter only purchased films
-        const purchasedFilms = allFilms.filter(film => 
-          purchases.includes(film.id)
-        )
+        // Busca filmes comprados diretamente do banco
+        const purchasedFilms = await getUserPurchasedFilms(user.id)
         
         setFilms(purchasedFilms)
         
       } catch (error) {
         console.error('Error loading user movies:', error)
-        // Redirect to home on error
         router.push('/')
       } finally {
         setIsLoading(false)
