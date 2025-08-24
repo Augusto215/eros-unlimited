@@ -110,9 +110,17 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
-      <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-xl rounded-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto border border-white/20 shadow-2xl">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-2 sm:p-4">
+      <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-xl rounded-2xl w-full max-w-md sm:max-w-5xl max-h-[95vh] overflow-y-auto border border-white/20 shadow-2xl relative">
+        {/* Mobile close button */}
+        <button
+          onClick={onClose}
+          disabled={isProcessing}
+          className="lg:hidden absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/90 transition-all duration-300 transform hover:scale-110 border border-white/20"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden rounded-2xl">
           {[...Array(20)].map((_, i) => (
@@ -141,7 +149,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
 
         <div className="relative z-10 flex flex-col lg:flex-row">
           {/* Left side - Film info */}
-          <div className="lg:w-1/3 p-6 border-r border-white/20">
+          <div className="lg:w-1/3 p-4 sm:p-6 border-r border-white/20">
             <div className="relative aspect-[2/3] mb-6 rounded-xl overflow-hidden shadow-2xl">
               <Image
                 src={film.posterUrl || "/placeholder.svg"}
@@ -201,59 +209,58 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
           </div>
 
           {/* Right side - PayPal payment */}
-          <div className="flex-1 p-6">
-            <div className="flex items-center justify-between mb-8">
+          <div className="flex-1 p-4 sm:p-6">
+            {/* Desktop close button */}
+            <div className="hidden lg:flex items-center justify-between mb-4 sm:mb-8">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                   <Wallet className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-white text-2xl font-bold">
+                  <h2 className="text-white text-xl sm:text-2xl font-bold">
                     <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                       {payment.paypalPayment}
                     </span>
                   </h2>
-                  <p className="text-gray-300 text-sm">{payment.secureInstantPayment}</p>
+                  <p className="text-gray-300 text-xs sm:text-sm">{payment.secureInstantPayment}</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
                 disabled={isProcessing}
-                className="text-gray-400 hover:text-white p-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
+                className="bg-black/70 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/90 transition-all duration-300 transform hover:scale-110 border border-white/20"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {/* PayPal Section */}
-              <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Wallet className="w-10 h-10 text-white" />
+              <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-white/20">
+                <div className="text-center mb-4 sm:mb-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <Wallet className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                   </div>
-                  <h3 className="text-white font-bold text-xl mb-4">
+                  <h3 className="text-white font-bold text-lg sm:text-xl mb-2 sm:mb-4">
                     <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                       PayPal
                     </span>
                   </h3>
-                  <p className="text-gray-300 text-sm mb-6">
+                  <p className="text-gray-300 text-xs sm:text-sm mb-4 sm:mb-6">
                     {payment.redirectMessage}
                   </p>
-                  
-                  <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4 mb-6">
-                    <div className="flex items-center justify-between text-sm">
+                  <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-2 sm:p-4 mb-4 sm:mb-6">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-gray-300">{payment.totalToPay}:</span>
-                      <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                      <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                         USD {film.price.toFixed(2)}
                       </span>
                     </div>
                   </div>
                 </div>
-
                 {/* Email field for PayPal */}
-                <div className="mb-6">
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-gray-300 text-xs sm:text-sm font-medium mb-2">
                     {payment.paypalEmail}
                   </label>
                   <input
@@ -261,13 +268,13 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     placeholder={payment.paypalEmailPlaceholder}
-                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    className={`w-full p-3 sm:p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                       errors.email ? 'border-red-500' : 'border-white/20'
                     } focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300`}
                     disabled={isProcessing}
                   />
                   {errors.email && (
-                    <p className="text-red-400 text-sm mt-1 flex items-center">
+                    <p className="text-red-400 text-xs sm:text-sm mt-1 flex items-center">
                       <AlertCircle className="w-4 h-4 mr-1" />
                       {errors.email}
                     </p>
@@ -276,8 +283,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                     {payment.enterPaypalEmail}
                   </p>
                 </div>
-
-                <div className="space-y-3 text-xs text-gray-400">
+                <div className="space-y-2 sm:space-y-3 text-xs text-gray-400">
                   <div className="flex items-center justify-center space-x-2">
                     <Shield className="w-4 h-4 text-green-400" />
                     <span>{payment.paypalBuyerProtection}</span>
@@ -288,12 +294,11 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                   </div>
                 </div>
               </div>
-
               {/* Security Notice */}
-              <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-xl backdrop-blur-sm">
-                <Shield className="w-6 h-6 text-blue-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start space-x-2 sm:space-x-3 p-3 sm:p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-xl backdrop-blur-sm">
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-blue-300 text-sm">
+                  <p className="text-blue-300 text-xs sm:text-sm">
                     <strong>{payment.securePaymentNotice}</strong> {payment.militaryEncryption}
                   </p>
                   <p className="text-blue-200 text-xs mt-1">
@@ -301,32 +306,31 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                   </p>
                 </div>
               </div>
-
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isProcessing || !formData.email}
-                className="w-full py-5 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white hover:from-blue-600 hover:via-blue-700 hover:to-cyan-600 hover:shadow-blue-500/25"
+                className="w-full py-3 sm:py-5 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg flex items-center justify-center space-x-2 sm:space-x-3 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white hover:from-blue-600 hover:via-blue-700 hover:to-cyan-600 hover:shadow-blue-500/25"
               >
                 {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <div className="flex items-center space-x-2 px-1">
+                    <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-white" />
                     <span>{payment.redirectingToPaypal}</span>
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    <Wallet className="w-6 h-6" />
+                  <div className="flex items-center space-x-2 px-3">
+                    <Wallet className="w-5 h-5 sm:w-6 sm:h-6" />
                     <span>{payment.payWithPaypal} - USD {film.price.toFixed(2)}</span>
-                    <Heart className="w-5 h-5 text-pink-300" />
-                  </>
+                    <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-pink-300" />
+                  </div>
                 )}
               </button>
             </form>
 
             {/* PayPal Benefits */}
-            <div className="mt-6 bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
-              <h4 className="text-blue-300 font-medium mb-3 text-center">{payment.paypalAdvantages}</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-300">
+            <div className="mt-4 sm:mt-6 bg-blue-500/10 border border-blue-400/20 rounded-xl p-3 sm:p-4">
+              <h4 className="text-blue-300 font-medium mb-2 sm:mb-3 text-center">{payment.paypalAdvantages}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 text-xs text-gray-300">
                 <div className="flex items-center space-x-2">
                   <Shield className="w-3 h-3 text-green-400" />
                   <span>{payment.totalBuyerProtection}</span>
@@ -345,9 +349,8 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
                 </div>
               </div>
             </div>
-
             {/* Pride Footer */}
-            <div className="mt-6 text-center">
+            <div className="mt-4 sm:mt-6 text-center">
               <div className="flex justify-center space-x-1 mb-2">
                 {['🏳️‍🌈', '🏳️‍⚧️', '❤️', '🧡', '💛', '💚', '💙', '💜'].map((emoji, i) => (
                   <span key={i} className="text-lg animate-pulse" style={{ animationDelay: `${i * 0.3}s` }}>

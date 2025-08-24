@@ -227,8 +227,8 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
-      <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-xl rounded-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto border border-white/20 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-2 sm:p-4">
+      <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-xl rounded-2xl w-full max-w-md sm:max-w-5xl max-h-[95vh] overflow-y-auto border border-white/20 shadow-2xl relative flex flex-col">
         
         {/* Success Message Overlay */}
         {showSuccessMessage && (
@@ -278,33 +278,43 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         </div>
 
         {/* Header */}
-        <div className="relative z-10 flex items-center justify-between p-8 border-b border-white/20">
-          <div className="flex items-center space-x-4">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between p-4 sm:p-8 border-b border-white/20 gap-4 sm:gap-0">
+          <div className="flex items-center space-x-4 w-full sm:w-auto">
             <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
               <Crown className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-white text-3xl font-bold">
+              <h2 className="text-white text-2xl sm:text-3xl font-bold">
                 <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
                   Admin Studio
                 </span>
               </h2>
-              <p className="text-gray-300 text-sm">Adicionar novo filme à plataforma</p>
+              <p className="text-gray-300 text-xs sm:text-sm">Adicionar novo filme à plataforma</p>
             </div>
           </div>
+          {/* Mobile close button */}
           <button
             onClick={handleClose}
             disabled={isSubmitting || showSuccessMessage}
-            className="text-gray-400 hover:text-white p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
+            className="block sm:hidden absolute top-2 right-2 text-gray-400 hover:text-white p-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
+            style={{ position: 'absolute' }}
+          >
+            <X className="w-5 h-5" />
+          </button>
+          {/* Desktop close button */}
+          <button
+            onClick={handleClose}
+            disabled={isSubmitting || showSuccessMessage}
+            className="hidden sm:block text-gray-400 hover:text-white p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="relative z-10 p-8 space-y-8">
+        <form onSubmit={handleSubmit} className="relative z-10 p-2 sm:p-8 space-y-4 sm:space-y-8">
           {/* Basic Information */}
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20">
+          <div className="bg-white/10 backdrop-blur-sm p-2 sm:p-6 rounded-xl border border-white/20">
             <h3 className="text-white font-bold text-xl mb-6 flex items-center">
               <Sparkles className="w-5 h-5 mr-3 text-yellow-400" />
               <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
@@ -312,7 +322,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               </span>
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
               {/* Title */}
               <div className="md:col-span-2">
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
@@ -525,7 +535,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           </div>
 
           {/* Media URLs */}
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20">
+          <div className="bg-white/10 backdrop-blur-sm p-2 sm:p-6 rounded-xl border border-white/20">
             <h3 className="text-white font-bold text-xl mb-6 flex items-center">
               <Upload className="w-5 h-5 mr-3 text-cyan-400" />
               <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
@@ -533,7 +543,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               </span>
             </h3>
             
-            <div className="space-y-6">
+            <div className="space-y-2 sm:space-y-6">
               {/* Poster URL */}
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
@@ -600,44 +610,44 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-6 pt-6 border-t border-white/20">
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={isSubmitting || showSuccessMessage}
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
-            >
-              Cancelar
-            </button>
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-6 pt-2 sm:pt-6 border-t border-white/20">
             <button
               type="submit"
               disabled={isSubmitting || showSuccessMessage}
-              className="px-8 py-4 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-orange-500/25 flex items-center justify-center space-x-3"
+              className="px-4 py-2 sm:px-8 sm:py-4 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-xl font-bold text-base sm:text-lg hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-orange-500/25 flex items-center justify-center space-x-2 sm:space-x-3"
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-6 sm:w-6 border-b-2 border-white"></div>
                   <span>Adicionando com amor...</span>
                 </>
               ) : showSuccessMessage ? (
                 <>
-                  <Check className="w-6 h-6" />
+                  <Check className="w-4 h-4 sm:w-6 sm:h-6" />
                   <span>Filme Adicionado!</span>
-                  <Sparkles className="w-5 h-5" />
+                  <Sparkles className="w-3 h-3 sm:w-5 sm:h-5" />
                 </>
               ) : (
                 <>
-                  <Crown className="w-6 h-6" />
+                  <Crown className="w-4 h-4 sm:w-6 sm:h-6" />
                   <span>Adicionar Filme</span>
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-3 h-3 sm:w-5 sm:h-5" />
                 </>
               )}
+            </button>
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={isSubmitting || showSuccessMessage}
+              className="px-4 py-2 sm:px-8 sm:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
+            >
+              Cancelar
             </button>
           </div>
         </form>
 
         {/* Pride Footer */}
-        <div className="relative z-10 p-6 border-t border-white/20">
+        <div className="relative z-10 p-2 sm:p-6 border-t border-white/20">
           <div className="text-center">
             <div className="flex justify-center space-x-1 mb-3">
               {['🎬', '🌈', '👑', '✨', '❤️', '🧡', '💛', '💚', '💙', '💜'].map((emoji, i) => (

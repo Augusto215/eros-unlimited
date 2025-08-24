@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles, Pause, Volume2, VolumeX, Plus, Info, ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play, Star, Clock, ShoppingBag, Crown, TrendingUp, Film as FilmIcon, Sparkles, Pause, Volume2, VolumeX, Plus, Info, ChevronDown, ChevronUp, X } from "lucide-react"
 import { useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
@@ -38,6 +38,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   const [showControls, setShowControls] = useState(true)
   const [videoLoaded, setVideoLoaded] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const mobileVideoRef = useRef<HTMLVideoElement>(null)
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -45,6 +46,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showReadMore, setShowReadMore] = useState(false)
   const synopsisRef = useRef<HTMLParagraphElement>(null)
+  const mobileSynopsisRef = useRef<HTMLParagraphElement>(null)
 
   // Convert Google Drive link for video element
   const getVideoUrl = (url: string) => {
@@ -58,6 +60,9 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   }
 
   const handleMouseEnter = () => {
+    // Only trigger on desktop
+    if (window.innerWidth < 768) return
+    
     if (leaveTimeoutRef.current) {
       clearTimeout(leaveTimeoutRef.current)
       leaveTimeoutRef.current = null
@@ -73,6 +78,9 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   }
 
   const handleMouseLeave = () => {
+    // Only trigger on desktop
+    if (window.innerWidth < 768) return
+    
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current)
       hoverTimeoutRef.current = null
@@ -97,14 +105,34 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
     }, 300)
   }
 
+  const handleMobileClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowExpandedCard(true)
+    onExpandedChange?.(true)
+  }
+
+  const closeMobileModal = () => {
+    setShowExpandedCard(false)
+    onExpandedChange?.(false)
+    setIsPlaying(false)
+    setShowControls(true)
+    setVideoLoaded(false)
+    if (mobileVideoRef.current) {
+      mobileVideoRef.current.pause()
+      mobileVideoRef.current.currentTime = 0
+    }
+  }
+
   const togglePlay = async (e: React.MouseEvent) => {
     e.stopPropagation()
     
-    if (!videoRef.current || !videoLoaded) return
+    const video = window.innerWidth < 768 ? mobileVideoRef.current : videoRef.current
+    
+    if (!video || !videoLoaded) return
     
     try {
       if (isPlaying) {
-        videoRef.current.pause()
+        video.pause()
         setIsPlaying(false)
         setShowControls(true)
         if (controlsTimeoutRef.current) {
@@ -112,7 +140,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
           controlsTimeoutRef.current = null
         }
       } else {
-        await videoRef.current.play()
+        await video.play()
         setIsPlaying(true)
         // Hide controls after 2 seconds when playing
         controlsTimeoutRef.current = setTimeout(() => {
@@ -128,10 +156,12 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation()
     
-    if (!videoRef.current) return
+    const video = window.innerWidth < 768 ? mobileVideoRef.current : videoRef.current
+    
+    if (!video) return
     
     const newMutedState = !isMuted
-    videoRef.current.muted = newMutedState
+    video.muted = newMutedState
     setIsMuted(newMutedState)
     
     // Show controls temporarily when toggling mute
@@ -146,10 +176,13 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
 
   const handleVideoLoad = () => {
     setVideoLoaded(true)
-    if (videoRef.current && showExpandedCard && film.trailerUrl) {
-      videoRef.current.muted = isMuted
+    setShowControls(true)
+    const video = window.innerWidth < 768 ? mobileVideoRef.current : videoRef.current
+    
+    if (video && showExpandedCard && film.trailerUrl) {
+      video.muted = isMuted
       // Auto-play when video loads and card is expanded
-      videoRef.current.play().then(() => {
+      video.play().then(() => {
         setIsPlaying(true)
         // Hide controls after 2 seconds when auto-playing
         controlsTimeoutRef.current = setTimeout(() => {
@@ -208,8 +241,9 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
 
   // Effect to handle expanded card state changes
   useEffect(() => {
-    if (showExpandedCard && videoRef.current && film.trailerUrl) {
-      const video = videoRef.current
+    const video = window.innerWidth < 768 ? mobileVideoRef.current : videoRef.current
+    
+    if (showExpandedCard && video && film.trailerUrl) {
       video.muted = isMuted
       
       // Add event listeners
@@ -242,8 +276,9 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   }, [])
 
   useEffect(() => {
-    if (synopsisRef.current) {
-      const element = synopsisRef.current
+    const ref = window.innerWidth < 768 ? mobileSynopsisRef.current : synopsisRef.current
+    if (ref) {
+      const element = ref
       const isOverflowing = element.scrollHeight > element.clientHeight
       setShowReadMore(isOverflowing)
     }
@@ -253,6 +288,16 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
     setIsExpanded(!isExpanded)
   }
 
+  // Prevent body scroll when mobile modal is open
+  useEffect(() => {
+    if (showExpandedCard && window.innerWidth < 768) {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = ''
+      }
+    }
+  }, [showExpandedCard])
+
   return (
     <div
       className={`relative cursor-pointer transition-all duration-500 ${
@@ -260,11 +305,12 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
       }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleMobileClick}
       style={{ transformOrigin: 'center center' }}
     >
       {/* Normal card */}
       <div className={`relative aspect-[2/3] md:w-56 w-full rounded-xl overflow-hidden shadow-lg transition-all duration-500 ${
-        showExpandedCard ? 'opacity-0' : 'opacity-100 hover:scale-105'
+        showExpandedCard ? 'md:opacity-0 opacity-100' : 'opacity-100 hover:scale-105'
       }`}>
         <Image 
           src={film.posterUrl || "/placeholder.svg"} 
@@ -288,7 +334,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
         </div>
 
         {/* Mobile: Always show film info overlay */}
-        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4">
+        <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4 pointer-events-none">
           <div className="space-y-2">
             <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
               {film.title}
@@ -307,27 +353,6 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             </p>
 
             <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onFilmClick(film)
-                  }}
-                  className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-                >
-                  <Play className="w-4 h-4 text-white" />
-                </button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onFilmClick(film)
-                  }}
-                  className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-                >
-                  <ShoppingBag className="w-4 h-4 text-white" />
-                </button>
-              </div>
-
               {!isPurchased && (
                 <div className="text-right">
                   <div className="text-green-400 font-bold text-lg">
@@ -384,164 +409,336 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
         )}
       </div>
 
-      {/* Expanded Netflix-style card - Only on desktop */}
+      {/* Expanded card - Desktop version */}
       {showExpandedCard && (
-        <div className="hidden md:block absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-80 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700 z-50 transition-all duration-500">
-          {/* Video/Poster section */}
-          <div className="relative aspect-video bg-black">
-            {film.trailerUrl ? (
-              <video
-                ref={videoRef}
-                className="w-full h-full object-cover"
-                muted={isMuted}
-                loop
-                onLoadedData={handleVideoLoad}
-                onCanPlay={handleVideoLoad}
-                playsInline
-                preload="metadata"
+        <>
+          {/* Desktop version */}
+          <div className="hidden md:block absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-80 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700 z-50 transition-all duration-500">
+            {/* Video/Poster section */}
+            <div className="relative aspect-video bg-black">
+              {film.trailerUrl ? (
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  muted={isMuted}
+                  loop
+                  onLoadedData={handleVideoLoad}
+                  onCanPlay={handleVideoLoad}
+                  playsInline
+                  preload="metadata"
+                >
+                  <source src={getVideoUrl(film.trailerUrl)} type="video/mp4" />
+                </video>
+              ) : (
+                <Image 
+                  src={film.posterUrl || "/placeholder.svg"} 
+                  alt={film.title} 
+                  fill 
+                  className="object-cover" 
+                />
+              )}
+
+              {/* Video controls overlay */}
+              <div 
+                className="absolute inset-0"
+                onMouseMove={handleMouseMoveOnVideo}
               >
-                <source src={getVideoUrl(film.trailerUrl)} type="video/mp4" />
-              </video>
-            ) : (
-              <Image 
-                src={film.posterUrl || "/placeholder.svg"} 
-                alt={film.title} 
-                fill 
-                className="object-cover" 
-              />
-            )}
+                {/* Play/Pause button in center */}
+                {film.trailerUrl && showControls && (
+                  <button
+                    onClick={togglePlay}
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 bg-black/70 rounded-full hover:bg-black/90 transition-all duration-300 backdrop-blur-sm"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-6 h-6 text-white" />
+                    ) : (
+                      <Play className="w-6 h-6 text-white ml-1" />
+                    )}
+                  </button>
+                )}
 
-            {/* Video controls overlay */}
-            <div 
-              className="absolute inset-0"
-              onMouseMove={handleMouseMoveOnVideo}
-            >
-              {/* Play/Pause button in center */}
-              {film.trailerUrl && showControls && (
-                <button
-                  onClick={togglePlay}
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 bg-black/70 rounded-full hover:bg-black/90 transition-all duration-300 backdrop-blur-sm"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-6 h-6 text-white" />
-                  ) : (
-                    <Play className="w-6 h-6 text-white ml-1" />
-                  )}
-                </button>
-              )}
+                {/* Mute/Unmute button in top right */}
+                {film.trailerUrl && showControls && (
+                  <button
+                    onClick={toggleMute}
+                    className="absolute top-3 right-3 p-2 bg-black/70 rounded-full hover:bg-black/90 transition-all duration-300 backdrop-blur-sm"
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-4 h-4 text-white" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 text-white" />
+                    )}
+                  </button>
+                )}
 
-              {/* Mute/Unmute button in top right */}
-              {film.trailerUrl && showControls && (
-                <button
-                  onClick={toggleMute}
-                  className="absolute top-3 right-3 p-2 bg-black/70 rounded-full hover:bg-black/90 transition-all duration-300 backdrop-blur-sm"
-                >
-                  {isMuted ? (
-                    <VolumeX className="w-4 h-4 text-white" />
-                  ) : (
-                    <Volume2 className="w-4 h-4 text-white" />
-                  )}
-                </button>
-              )}
-
-              {/* Gradient overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Film info section */}
-          <div className="p-4 space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="text-white font-bold text-lg mb-2 line-clamp-1">
-                  {film.title}
-                </h3>
-                
-                <div className="flex items-center space-x-3 text-sm text-gray-300 mb-3">
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                    <span>{film.rating}</span>
-                  </div>
-                  <span>{film.releaseYear}</span>
-                  <span className="text-purple-300">{film.genre}</span>
-                  <div className="flex items-center space-x-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{film.duration} {t('movies.minutes')}</span>
-                  </div>
-                </div>
+                {/* Gradient overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
               </div>
             </div>
 
-            {!isPurchased && (
-                <div className="text-left">
-                  <div className="text-green-400 font-bold text-lg">
-                    USD {film.price.toFixed(2)}
+            {/* Film info section */}
+            <div className="p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="text-white font-bold text-lg mb-2 line-clamp-1">
+                    {film.title}
+                  </h3>
+                  
+                  <div className="flex items-center space-x-3 text-sm text-gray-300 mb-3">
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                      <span>{film.rating}</span>
+                    </div>
+                    <span>{film.releaseYear}</span>
+                    <span className="text-purple-300">{film.genre}</span>
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{film.duration} {t('movies.minutes')}</span>
+                    </div>
                   </div>
                 </div>
-            )}
+              </div>
 
-            <div className="relative">
-              <p 
-                ref={synopsisRef}
-                className={`text-gray-300 text-sm leading-relaxed transition-all duration-300 mb-4 text-justify ${
-                  isExpanded ? '' : 'line-clamp-3'
-                }`}
-              >
-                {film.synopsis}
-              </p>
-              
-              {showReadMore && (
-                <button
-                  onClick={toggleExpanded}
-                  className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-200 mb-4 text-justify"
+              {!isPurchased && (
+                  <div className="text-left">
+                    <div className="text-green-400 font-bold text-lg">
+                      USD {film.price.toFixed(2)}
+                    </div>
+                  </div>
+              )}
+
+              <div className="relative">
+                <p 
+                  ref={synopsisRef}
+                  className={`text-gray-300 text-sm leading-relaxed transition-all duration-300 mb-4 text-justify ${
+                    isExpanded ? '' : 'line-clamp-3'
+                  }`}
                 >
-                  {isExpanded ? (
-                    <>
-                      <span>{t('movies.readLess')}</span>
-                      <ChevronUp className="w-3 h-3" />
-                    </>
-                  ) : (
-                    <>
-                      <span>{t('movies.readMore')}</span>
-                      <ChevronDown className="w-3 h-3" />
-                    </>
-                  )}
+                  {film.synopsis}
+                </p>
+                
+                {showReadMore && (
+                  <button
+                    onClick={toggleExpanded}
+                    className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-200 mb-4 text-justify"
+                  >
+                    {isExpanded ? (
+                      <>
+                        <span>{t('movies.readLess')}</span>
+                        <ChevronUp className="w-3 h-3" />
+                      </>
+                    ) : (
+                      <>
+                        <span>{t('movies.readMore')}</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onFilmClick(film)
+                  }}
+                  className="flex items-center space-x-2 bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors font-medium text-sm"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{t('movies.buy')}</span>
                 </button>
-              )}
-            </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onFilmClick(film)
-                }}
-                className="flex items-center space-x-2 bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors font-medium text-sm"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span>{t('movies.buy')}</span>
-              </button>
-
-              {/* <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
-                <Plus className="w-4 h-4 text-white" />
-              </button> */}
-
-              {/* <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
-                <Info className="w-4 h-4 text-white" />
-              </button> */}
-
-              {isPurchased && (
-                <div className="ml-auto">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
-                    <Crown className="w-3 h-3" />
-                    <span>POSSUI</span>
+                {isPurchased && (
+                  <div className="ml-auto">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                      <Crown className="w-3 h-3" />
+                      <span>POSSUI</span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Mobile version - Full screen modal */}
+          <div className="md:hidden fixed inset-0 z-50 bg-black overflow-y-auto pt-24">
+            {/* Close button */}
+
+            {/* Mobile content container */}
+            <div className="min-h-screen flex flex-col">
+              {/* Video/Poster section */}
+              <div className="relative aspect-video bg-black">
+                {film.trailerUrl ? (
+                  <video
+                    ref={mobileVideoRef}
+                    className="w-full h-full object-cover"
+                    muted={isMuted}
+                    loop
+                    onLoadedData={handleVideoLoad}
+                    onCanPlay={handleVideoLoad}
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={getVideoUrl(film.trailerUrl)} type="video/mp4" />
+                  </video>
+                ) : (
+                  <Image 
+                    src={film.posterUrl || "/placeholder.svg"} 
+                    alt={film.title} 
+                    fill 
+                    className="object-cover" 
+                  />
+                )}
+
+                {/* Video controls overlay */}
+                <div
+                  className="absolute inset-0"
+                  onClick={(e) => {
+                    // Só processa se não for clique nos botões
+                    if (e.target === e.currentTarget) {
+                      setShowControls(true)
+                      // Esconde os controles após 3 segundos
+                      if (controlsTimeoutRef.current) {
+                        clearTimeout(controlsTimeoutRef.current)
+                      }
+                      controlsTimeoutRef.current = setTimeout(() => {
+                        if (isPlaying) {
+                          setShowControls(false)
+                        }
+                      }, 3000)
+                    }
+                  }}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      closeMobileModal()
+                    }}
+                    className="absolute top-4 right-4 z-50 p-2 bg-black/70 rounded-full backdrop-blur-sm"
+                  >
+                    <X className="w-6 h-6 text-white" />
+                  </button>
+                  {/* Play/Pause button in center */}
+                  {film.trailerUrl && (showControls || !isPlaying) && (
+                    <button
+                      onClick={togglePlay}
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-black/70 rounded-full backdrop-blur-sm"
+                    >
+                      {isPlaying ? (
+                        <Pause className="w-8 h-8 text-white" />
+                      ) : (
+                        <Play className="w-8 h-8 text-white ml-1" />
+                      )}
+                    </button>
+                  )}
+
+                  {/* Mute/Unmute button */}
+                  {film.trailerUrl && showControls && (
+                    <button
+                      onClick={toggleMute}
+                      className="absolute bottom-4 right-4 p-3 bg-black/70 rounded-full backdrop-blur-sm"
+                    >
+                      {isMuted ? (
+                        <VolumeX className="w-5 h-5 text-white" />
+                      ) : (
+                        <Volume2 className="w-5 h-5 text-white" />
+                      )}
+                    </button>
+                  )}
+
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Film info section */}
+              <div className="flex-1 p-6 space-y-4 bg-gray-900">
+                <div>
+                  <h3 className="text-white font-bold text-2xl mb-3">
+                    {film.title}
+                  </h3>
+                  
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300 mb-4">
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                      <span>{film.rating}</span>
+                    </div>
+                    <span>{film.releaseYear}</span>
+                    <span className="text-purple-300">{film.genre}</span>
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{film.duration} {t('movies.minutes')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {!isPurchased && (
+                  <div className="text-left">
+                    <div className="text-green-400 font-bold text-xl">
+                      USD {film.price.toFixed(2)}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <p 
+                    ref={mobileSynopsisRef}
+                    className={`text-gray-300 text-base leading-relaxed transition-all duration-300 ${
+                      isExpanded ? '' : 'line-clamp-4'
+                    }`}
+                  >
+                    {film.synopsis}
+                  </p>
+                  
+                  {showReadMore && (
+                    <button
+                      onClick={toggleExpanded}
+                      className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-200 mt-2"
+                    >
+                      {isExpanded ? (
+                        <>
+                          <span>{t('movies.readLess')}</span>
+                          <ChevronUp className="w-4 h-4" />
+                        </>
+                      ) : (
+                        <>
+                          <span>{t('movies.readMore')}</span>
+                          <ChevronDown className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex flex-col space-y-3">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onFilmClick(film)
+                      closeMobileModal()
+                    }}
+                    className="flex items-center justify-center space-x-2 bg-white text-black px-6 py-3 rounded-md hover:bg-gray-200 transition-colors font-medium text-base w-full"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    <span>{t('movies.buy')}</span>
+                  </button>
+
+                  {isPurchased && (
+                    <div className="flex justify-center">
+                      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center space-x-2">
+                        <Crown className="w-4 h-4" />
+                        <span>POSSUI</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
