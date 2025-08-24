@@ -111,7 +111,8 @@
     "recommendedForYou": "Recomendados para Você",
     "trending": "Em Alta",
     "libraryUnderConstruction": "Biblioteca em Construção",
-    "noMoviesAvailable": "Nenhum filme disponível no momento"
+    "noMoviesAvailable": "Nenhum filme disponível no momento",
+    "tapToWatchTrailer": "Toque para assistir ao trailer"
   },
   "payment": {
     "success": "Pagamento realizado com sucesso!",

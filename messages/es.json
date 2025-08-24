@@ -111,7 +111,8 @@
     "recommendedForYou": "Recomendado para Ti",
     "trending": "Tendencias",
     "libraryUnderConstruction": "Biblioteca en Construcción",
-    "noMoviesAvailable": "No hay películas disponibles en este momento"
+    "noMoviesAvailable": "No hay películas disponibles en este momento",
+    "tapToWatchTrailer": "Toca para ver el tráiler"
   },
   "about": {
     "title": "Acerca de Nosotros",

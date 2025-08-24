@@ -111,7 +111,8 @@
     "recommendedForYou": "为您推荐",
     "trending": "热门",
     "libraryUnderConstruction": "库正在建设中",
-    "noMoviesAvailable": "目前没有可用的电影"
+    "noMoviesAvailable": "目前没有可用的电影",
+    "tapToWatchTrailer": "点击观看预告片"
   },
   "about": {
     "title": "关于我们",

@@ -111,7 +111,8 @@
     "recommendedForYou": "Recommended for You",
     "trending": "Trending",
     "libraryUnderConstruction": "Library Under Construction",
-    "noMoviesAvailable": "No movies available at the moment"
+    "noMoviesAvailable": "No movies available at the moment",
+    "tapToWatchTrailer": "Tap to watch trailer"
   },
   "payment": {
     "success": "Payment successful!",
