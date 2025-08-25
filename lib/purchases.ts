@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Film } from '@/lib/types' 
+
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,8 +36,26 @@ export const getUserPurchasedFilmIds = async (userId: string): Promise<string[]>
   }
 }
 
+// Função auxiliar para converter snake_case para camelCase
+const mapMovieToFilm = (movie: any): Film => ({
+  id: movie.id,
+  title: movie.title,
+  synopsis: movie.synopsis || '',
+  posterUrl: movie.poster_url || '',
+  videoUrl: movie.video_url || '',
+  trailerUrl: movie.trailer_url || '',
+  price: movie.price || 0,
+  duration: movie.duration || 0,
+  genre: movie.genre || '',
+  rating: movie.rating || 0,
+  releaseYear: movie.release_year || new Date().getFullYear(),
+  launch: movie.launch || false,  
+  main: movie.main || false,       
+  description: movie.description || '' 
+})
+
 // Busca detalhes completos dos filmes comprados
-export const getUserPurchasedFilms = async (userId: string) => {
+export const getUserPurchasedFilms = async (userId: string): Promise<Film[]> => {
   try {
     const { data, error } = await supabase
       .from('purchases')
@@ -48,7 +68,8 @@ export const getUserPurchasedFilms = async (userId: string) => {
 
     if (error) throw error
 
-    return data?.map(purchase => purchase.movies) || []
+    // Usa a função de mapeamento
+    return data?.map(purchase => mapMovieToFilm(purchase.movies)) || []
   } catch (error) {
     console.error('Error fetching purchased films with details:', error)
     return []

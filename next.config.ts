@@ -7,6 +7,25 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      // Google Drive domains - ADICIONE ESTES
+      {
+        protocol: 'https',
+        hostname: 'drive.google.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'drive.usercontent.google.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
       // Allow any HTTPS domain (more flexible for testing)
       {
         protocol: 'https',

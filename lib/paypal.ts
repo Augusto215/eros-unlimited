@@ -96,38 +96,71 @@ export const capturePayPalOrder = async (orderId: string): Promise<PayPalPayment
     const client = getPayPalClient()
     const request = new paypal.orders.OrdersCaptureRequest(orderId)
 
+    // PRIMEIRO: Busca os detalhes da ordem ANTES de capturar
+    const getOrderRequest = new paypal.orders.OrdersGetRequest(orderId)
+    const orderDetails = await client.execute(getOrderRequest)
+    
+    console.log('Order details before capture:', JSON.stringify(orderDetails.result, null, 2))
+
+    // AGORA: Captura o pagamento
     const capture = await client.execute(request)
     const payment = capture.result
     
-    // Extract custom data from purchase_units
+    console.log('Capture result:', JSON.stringify(payment, null, 2))
+    
+    // Extrai os dados customizados
     let filmId = '', userId = '', email = ''
     
-    if (payment.purchase_units && payment.purchase_units.length > 0) {
-      const purchaseUnit = payment.purchase_units[0]
+    // Tenta pegar do orderDetails primeiro (mais confiável)
+    if (orderDetails.result.purchase_units && orderDetails.result.purchase_units.length > 0) {
+      const purchaseUnit = orderDetails.result.purchase_units[0]
       
-      // Try to get custom data from custom_id
       if (purchaseUnit.custom_id) {
         try {
           const customData = JSON.parse(purchaseUnit.custom_id)
           filmId = customData.filmId || ''
           userId = customData.userId || ''
           email = customData.email || ''
+          console.log('Custom data extracted from order:', customData)
         } catch (parseError) {
-          // If custom_id is not valid JSON, leave empty values
+          console.error('Error parsing custom_id from order:', parseError)
+        }
+      }
+    }
+    
+    // Se não conseguiu, tenta do payment capturado
+    if (!filmId && payment.purchase_units && payment.purchase_units.length > 0) {
+      const purchaseUnit = payment.purchase_units[0]
+      
+      if (purchaseUnit.custom_id) {
+        try {
+          const customData = JSON.parse(purchaseUnit.custom_id)
+          filmId = customData.filmId || ''
+          userId = customData.userId || ''
+          email = customData.email || ''
+          console.log('Custom data extracted from payment:', customData)
+        } catch (parseError) {
+          console.error('Error parsing custom_id from payment:', parseError)
         }
       }
     }
 
+    // Pega o amount correto
+    const amount = payment.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || 
+                   payment.purchase_units?.[0]?.amount?.value || 
+                   0
+
     return {
       id: payment.id,
       status: payment.status,
-      amount: payment.purchase_units?.[0]?.amount ? parseFloat(payment.purchase_units[0].amount.value) : 0,
+      amount: parseFloat(amount),
       filmId,
       userId,
       email
     }
 
   } catch (error: any) {
+    console.error('Error in capturePayPalOrder:', error)
     throw new Error(`Failed to capture PayPal payment: ${error.message || error}`)
   }
 }

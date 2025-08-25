@@ -7,12 +7,14 @@ import { initializeAuth, getCurrentUser } from "@/lib/auth"
 import { getUserPurchasedFilms } from "@/lib/purchases"
 import { useMyMoviesTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
+import Image from "next/image"
 
 export default function MyMovies() {
   const router = useRouter()
   const t = useMyMoviesTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [films, setFilms] = useState<Film[]>([])
+  const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({}) // Rastrear erros de imagem
 
   useEffect(() => {
     const initApp = async () => {
@@ -28,6 +30,8 @@ export default function MyMovies() {
         // Busca filmes comprados diretamente do banco
         const purchasedFilms = await getUserPurchasedFilms(user.id)
         
+        console.log('Purchased films:', purchasedFilms) // Debug: veja o que está vindo
+        
         setFilms(purchasedFilms)
         
       } catch (error) {
@@ -42,15 +46,18 @@ export default function MyMovies() {
   }, [router])
 
   const handleFilmClick = (film: Film) => {
-    // Since all films here are purchased, go directly to play
     handlePlay(film)
   }
 
   const handlePlay = (film: Film) => {
-    // Since all films here are purchased, go directly to play
     if (film.videoUrl) {
       window.open(film.videoUrl, '_blank')
     }
+  }
+
+  const handleImageError = (filmId: string) => {
+    console.log(`Image failed to load for film ${filmId}`) // Debug
+    setImageErrors(prev => ({ ...prev, [filmId]: true }))
   }
 
   if (isLoading) {
@@ -86,49 +93,56 @@ export default function MyMovies() {
         {/* Films Grid */}
         {films.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {films.map((film) => (
-              <div
-                key={film.id}
-                className="group relative cursor-pointer transform transition-all duration-300 hover:scale-105"
-                onClick={() => handleFilmClick(film)}
-              >
-                {/* Poster */}
-                <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800 shadow-lg border border-white/10">
-                  {film.posterUrl ? (
-                    <img
-                      src={film.posterUrl}
-                      alt={film.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
-                      <FilmIcon className="w-16 h-16 text-gray-400" />
+            {films.map((film) => {
+              console.log(`Film ${film.title} poster URL:`, film.posterUrl) // Debug para cada filme
+              
+              return (
+                <div
+                  key={film.id}
+                  className="group relative cursor-pointer transform transition-all duration-300 hover:scale-105"
+                  onClick={() => handleFilmClick(film)}
+                >
+                  {/* Poster */}
+                  <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800 shadow-lg border border-white/10">
+                    {film.posterUrl && !imageErrors[film.id] ? (
+                      <Image
+                        src={film.posterUrl || "/placeholder.svg"}
+                        alt={film.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        onError={() => handleImageError(film.id)}
+                        unoptimized={film.posterUrl.includes('drive.google.com')}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
+                        <FilmIcon className="w-16 h-16 text-gray-400" />
+                      </div>
+                    )}
+                    
+                    {/* Hover Overlay with Play Button */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handlePlay(film)
+                        }}
+                        className="flex items-center justify-center w-16 h-16 bg-pink-500 hover:bg-pink-600 rounded-full transform transition-all duration-300 hover:scale-110 shadow-lg"
+                        aria-label={t.playButton}
+                      >
+                        <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
+                      </button>
                     </div>
-                  )}
-                  
-                  {/* Hover Overlay with Play Button */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handlePlay(film)
-                      }}
-                      className="flex items-center justify-center w-16 h-16 bg-pink-500 hover:bg-pink-600 rounded-full transform transition-all duration-300 hover:scale-110 shadow-lg"
-                      aria-label={t.playButton}
-                    >
-                      <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
-                    </button>
-                  </div>
 
-                  {/* Film Title on Hover */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <h3 className="text-white font-semibold text-sm line-clamp-2">
-                      {film.title}
-                    </h3>
+                    {/* Film Title - Always visible on mobile, on hover for desktop */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
+                      <h3 className="text-white font-semibold text-sm line-clamp-2">
+                        {film.title}
+                      </h3>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           /* Empty State */
