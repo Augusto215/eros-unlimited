@@ -72,6 +72,9 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
   const handlePayPalPayment = async () => {
     setIsProcessing(true)
 
+    // Adiciona listener para resetar estado ao voltar do PayPal
+    window.addEventListener('pageshow', handlePageShow)
+
     try {
       const response = await fetch('/api/payments/create-paypal-order', {
         method: 'POST',
@@ -99,19 +102,24 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
         throw new Error('URL de aprovação PayPal não encontrada')
       }
       
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile: Abre em nova aba para evitar problemas
-        window.open(approvalUrl, '_blank')
-      } else {
-        // Desktop: Redireciona normalmente
-        window.location.href = approvalUrl
-      }
+      window.location.href = approvalUrl
 
     } catch (error: any) {
       setErrors({ 
         email: error.message || `${payment.paymentError}. ${common.tryAgain}.`
       })
       setIsProcessing(false)
+      window.removeEventListener('pageshow', handlePageShow)
+    }
+  }
+
+  // Handler para resetar estado ao voltar do PayPal
+  const handlePageShow = (event: PageTransitionEvent) => {
+    // Só reseta se for navigation type 'back_forward' (voltar do PayPal)
+    if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+      setIsProcessing(false)
+      setErrors({})
+      window.removeEventListener('pageshow', handlePageShow)
     }
   }
 
