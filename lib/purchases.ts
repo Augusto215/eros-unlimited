@@ -42,7 +42,7 @@ const mapMovieToFilm = (movie: any): Film => ({
   title: movie.title,
   synopsis: movie.synopsis || '',
   posterUrl: movie.poster_url || '',
-  videoUrl: movie.video_url || '',
+  videoUrl: movie.movie_url || '', // Corrigido para movie_url
   trailerUrl: movie.trailer_url || '',
   price: movie.price || 0,
   duration: movie.duration || 0,

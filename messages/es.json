@@ -112,7 +112,8 @@
     "trending": "Tendencias",
     "libraryUnderConstruction": "Biblioteca en Construcción",
     "noMoviesAvailable": "No hay películas disponibles en este momento",
-    "tapToWatchTrailer": "Toca para ver el tráiler"
+    "tapToWatchTrailer": "Toca para ver el tráiler",
+    "noVideoAvailable": "No hay video disponible"
   },
   "about": {
     "title": "Acerca de Nosotros",

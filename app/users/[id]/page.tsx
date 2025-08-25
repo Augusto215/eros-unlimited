@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth"
-import { getUserPurchasedFilms, getMovies } from "@/lib/movies"
+import { getUserPurchasedFilms } from "@/lib/purchases"
 import { useUserProfileTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import { 
@@ -59,16 +59,8 @@ export default function UserProfile() {
 
         setUserData(userWithCreatedAt)
 
-        // Load purchased films
-        const [purchased, allFilms] = await Promise.all([
-          getUserPurchasedFilms(user.id),
-          getMovies()
-        ])
-
-        setPurchasedFilmIds(purchased)
-        
-        // Filter films that user has purchased
-        const userFilms = allFilms.filter(film => purchased.includes(film.id))
+        // Busca os filmes comprados com detalhes completos
+        const userFilms = await getUserPurchasedFilms(user.id)
         setPurchasedFilms(userFilms)
 
       } catch (error) {
@@ -289,7 +281,7 @@ export default function UserProfile() {
           </div>
 
           {/* Films Collection */}
-          <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
+          <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-8 md:p-12 shadow-2xl max-w-full xl:max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 space-y-3 sm:space-y-0">
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -332,22 +324,24 @@ export default function UserProfile() {
                         <span>{profileT.collection.owned}</span>
                       </div>
 
-                      {/* Film info overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 md:p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <h3 className="text-white font-bold text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2">{film.title}</h3>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1 sm:space-x-2">
-                            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-current" />
-                            <span className="text-yellow-300 text-[10px] sm:text-xs">{film.rating}</span>
-                          </div>
-                          <div className="flex items-center space-x-1 sm:space-x-2">
-                            <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400" />
-                            <span className="text-gray-300 text-[10px] sm:text-xs">{film.duration}min</span>
+                      {/* Film info overlay - apenas no hover, sobreposto ao poster */}
+                      <div className="absolute inset-0 flex items-end group-hover:bg-black/70 group-hover:opacity-100 opacity-0 transition-all duration-300">
+                        <div className="w-full p-2 sm:p-3 md:p-4">
+                          <h3 className="text-white font-bold text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2">{film.title}</h3>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-1 sm:space-x-2">
+                              <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-current" />
+                              <span className="text-yellow-300 text-[10px] sm:text-xs">{film.rating}</span>
+                            </div>
+                            <div className="flex items-center space-x-1 sm:space-x-2">
+                              <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400" />
+                              <span className="text-gray-300 text-[10px] sm:text-xs">{film.duration}min</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  // </div>
                 ))}
               </div>
             ) : (

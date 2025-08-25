@@ -112,7 +112,8 @@
     "trending": "Trending",
     "libraryUnderConstruction": "Library Under Construction",
     "noMoviesAvailable": "No movies available at the moment",
-    "tapToWatchTrailer": "Tap to watch trailer"
+    "tapToWatchTrailer": "Tap to watch trailer",
+    "noVideoAvailable": "No video available"
   },
   "payment": {
     "success": "Payment successful!",

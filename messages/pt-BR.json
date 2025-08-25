@@ -112,7 +112,8 @@
     "trending": "Em Alta",
     "libraryUnderConstruction": "Biblioteca em Construção",
     "noMoviesAvailable": "Nenhum filme disponível no momento",
-    "tapToWatchTrailer": "Toque para assistir ao trailer"
+    "tapToWatchTrailer": "Toque para assistir ao trailer",
+    "noVideoAvailable": "Nenhum vídeo disponível"
   },
   "payment": {
     "success": "Pagamento realizado com sucesso!",
