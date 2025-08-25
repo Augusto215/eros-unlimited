@@ -120,6 +120,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    @apply text-base lg:text-[125%];
+  }
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
