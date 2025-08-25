@@ -308,7 +308,11 @@ export default function UserProfile() {
             {purchasedFilms.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {purchasedFilms.map((film) => (
-                  <div key={film.id} className="group relative">
+                  <div
+                    key={film.id}
+                    className="group relative cursor-pointer"
+                    onClick={() => router.push('/my-movies')}
+                  >
                     <div className="aspect-[2/3] rounded-lg sm:rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-105">
                       <Image
                         src={film.posterUrl || "/placeholder.svg"}
@@ -317,13 +321,11 @@ export default function UserProfile() {
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
                       {/* Owned badge */}
                       <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 md:top-3 md:left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center space-x-0.5 sm:space-x-1">
                         <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         <span>{profileT.collection.owned}</span>
                       </div>
-
                       {/* Film info overlay - apenas no hover, sobreposto ao poster */}
                       <div className="absolute inset-0 flex items-end group-hover:bg-black/70 group-hover:opacity-100 opacity-0 transition-all duration-300">
                         <div className="w-full p-2 sm:p-3 md:p-4">
@@ -341,7 +343,7 @@ export default function UserProfile() {
                         </div>
                       </div>
                     </div>
-                  // </div>
+                  </div>
                 ))}
               </div>
             ) : (
