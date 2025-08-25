@@ -53,7 +53,7 @@ export const createPayPalOrder = async (orderData: PayPalOrderData): Promise<Pay
       intent: 'CAPTURE',
       purchase_units: [{
         amount: {
-          currency_code: 'BRL',
+          currency_code: 'USD',
           value: orderData.amount.toFixed(2)
         },
         description: `Filme: ${orderData.title}`,
