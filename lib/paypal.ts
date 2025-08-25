@@ -65,11 +65,14 @@ export const createPayPalOrder = async (orderData: PayPalOrderData): Promise<Pay
       }],
       application_context: {
         brand_name: 'EROS Films',
-        landing_page: 'BILLING',
+        landing_page: 'NO_PREFERENCE', 
         shipping_preference: 'NO_SHIPPING',
         user_action: 'PAY_NOW',
-        return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
-        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/cancel`
+        // IMPORTANTE: Adicione os IDs na URL de retorno
+        return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?filmId=${orderData.filmId}&userId=${orderData.userId}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/cancel`,
+        // ADICIONE ESTAS CONFIGURAÇÕES PARA MOBILE:
+        locale: 'en_US'
       }
     })
 
@@ -86,6 +89,7 @@ export const createPayPalOrder = async (orderData: PayPalOrderData): Promise<Pay
     }
 
   } catch (error) {
+    console.error('PayPal order creation error:', error)
     throw new Error('Failed to create PayPal order')
   }
 }

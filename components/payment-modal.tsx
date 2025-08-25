@@ -99,7 +99,13 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
         throw new Error('URL de aprovação PayPal não encontrada')
       }
       
-      window.location.href = approvalUrl
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile: Abre em nova aba para evitar problemas
+        window.open(approvalUrl, '_blank')
+      } else {
+        // Desktop: Redireciona normalmente
+        window.location.href = approvalUrl
+      }
 
     } catch (error: any) {
       setErrors({ 
