@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { X, Play, Pause, Volume2, VolumeX, ShoppingBag, Star, Calendar, Clock, Maximize2, Minimize2 } from "lucide-react"
+import { X, Play, Pause, Volume2, VolumeX, ShoppingBag, Star, Calendar, Clock, Maximize2, Minimize2, RotateCcw, RotateCw } from "lucide-react"
 import { useMoviesTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
@@ -147,6 +147,27 @@ export default function FilmPlayerModal({
     }
   }
 
+  // Alterna controles ao clicar na área do vídeo
+  const handleVideoAreaClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    // Evita sumir/mostrar se clicar em botões
+    const target = e.target as HTMLElement
+    if (
+      target.tagName === 'BUTTON' ||
+      target.closest('button')
+    ) return
+    setShowControls(prev => !prev)
+    if (!showControls) {
+      // Se controles foram ativados, inicia timeout para sumir
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false)
+      }, 3000)
+    } else {
+      // Se controles foram desativados, limpa timeout
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+    }
+  }
+
   const handleMouseMove = () => {
     setShowControls(true)
     if (controlsTimeoutRef.current) {
@@ -155,6 +176,17 @@ export default function FilmPlayerModal({
     controlsTimeoutRef.current = setTimeout(() => {
       setShowControls(false)
     }, 3000)
+  }
+
+  // Pular/voltar 10 segundos
+  const skipSeconds = (sec: number) => {
+    if (videoRef.current) {
+      let newTime = videoRef.current.currentTime + sec
+      if (newTime < 0) newTime = 0
+      if (newTime > duration) newTime = duration
+      videoRef.current.currentTime = newTime
+      setCurrentTime(newTime)
+    }
   }
 
   const handleClose = () => {
@@ -188,7 +220,15 @@ export default function FilmPlayerModal({
         {/* Main Content */}
         <div className="w-full max-w-7xl mx-auto py-12">
           {/* Video Player */}
-          <div ref={playerContainerRef} className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+          <div
+            ref={playerContainerRef}
+            className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-2xl"
+            onClick={handleVideoAreaClick}
+            onMouseMove={handleMouseMove}
+            role="presentation"
+            tabIndex={-1}
+            style={{ touchAction: 'manipulation' }}
+          >
             {videoUrl ? (
               <>
                 <video 
@@ -207,17 +247,33 @@ export default function FilmPlayerModal({
                 <div className={`absolute inset-0 transition-opacity duration-300 ${
                   showControls ? 'opacity-100' : 'opacity-0'
                 }`}>
-                  {/* Center Play/Pause Button */}
-                  <button
-                    onClick={togglePlayPause}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-8 h-8 text-white" />
-                    ) : (
-                      <Play className="w-8 h-8 text-white ml-1" />
-                    )}
-                  </button>
+                  {/* Center Controls: Voltar 10s, Play/Pause, Avançar 10s */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center">
+                    <button
+                      onClick={() => skipSeconds(-10)}
+                      className="p-4 bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors mr-16"
+                      aria-label="Voltar 10 segundos"
+                    >
+                      <RotateCcw className="w-8 h-8 text-white" />
+                    </button>
+                    <button
+                      onClick={togglePlayPause}
+                      className="p-4 bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors"
+                    >
+                      {isPlaying ? (
+                        <Pause className="w-8 h-8 text-white" />
+                      ) : (
+                        <Play className="w-8 h-8 text-white ml-1" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => skipSeconds(10)}
+                      className="p-4 bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ml-16"
+                      aria-label="Avançar 10 segundos"
+                    >
+                      <RotateCw className="w-8 h-8 text-white" />
+                    </button>
+                  </div>
 
                   {/* Bottom Controls */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
@@ -250,19 +306,46 @@ export default function FilmPlayerModal({
                       {/* Progress Bar + Time */}
                       <div className="flex items-center space-x-4 flex-1 mx-6">
                         <span className="text-white text-xs font-mono min-w-[40px]">{formatTime(currentTime)}</span>
-                        <input
-                          type="range"
-                          min={0}
-                          max={duration || 0}
-                          step={0.1}
-                          value={currentTime}
-                          onChange={e => {
-                            const time = Number(e.target.value)
-                            setCurrentTime(time)
-                            if (videoRef.current) videoRef.current.currentTime = time
-                          }}
-                          className="w-full h-2 bg-gray-700 rounded-lg appearance-none accent-pink-500"
-                        />
+                        <div className="relative flex-1 group">
+                          {/* Custom Progress Bar Container */}
+                          <div className="relative w-full h-2 bg-gray-700 rounded-lg overflow-visible">
+                            {/* Progress Fill */}
+                            <div 
+                              className="absolute left-0 top-0 h-full bg-pink-500 rounded-lg transition-all duration-100"
+                              style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+                            />
+                            {/* Thumb/Circle Indicator */}
+                            <div 
+                              className="absolute top-1/2 w-4 h-4 bg-pink-500 rounded-full shadow-lg transition-all duration-100 hover:scale-125 group-hover:scale-125"
+                              style={{ 
+                                left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                                transform: 'translate(-50%, -50%)'
+                              }}
+                            >
+                              {/* Inner circle for better visibility */}
+                              <div className="absolute inset-1 bg-white rounded-full opacity-30" />
+                            </div>
+                          </div>
+                          {/* Invisible Range Input for Interaction */}
+                          <input
+                            type="range"
+                            min={0}
+                            max={duration || 0}
+                            step={0.1}
+                            value={currentTime}
+                            onChange={e => {
+                              const time = Number(e.target.value)
+                              setCurrentTime(time)
+                              if (videoRef.current) videoRef.current.currentTime = time
+                            }}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            style={{
+                              background: 'transparent',
+                              WebkitAppearance: 'none',
+                              appearance: 'none',
+                            }}
+                          />
+                        </div>
                         <span className="text-white text-xs font-mono min-w-[40px]">{formatTime(duration)}</span>
                       </div>
 
