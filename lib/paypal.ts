@@ -198,7 +198,7 @@ export const createPayPalStandardUrl = (orderData: PayPalOrderData): string => {
     item_name: orderData.title,
     item_number: orderData.filmId,
     amount: orderData.amount.toFixed(2),
-    currency_code: 'BRL',
+    currency_code: 'USD',
     return: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?filmId=${orderData.filmId}&userId=${orderData.userId}`,
     cancel_return: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/cancel`,
     notify_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/paypal/ipn`,
