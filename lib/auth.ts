@@ -24,9 +24,10 @@ export const isAuthenticated = (): boolean => {
   return getCurrentUser() !== null
 }
 
-// Login function
+// Login function - SIMPLIFICADO
 export const login = async (email: string, password: string): Promise<Client | null> => {
   try {
+    // Tentar login direto com o email fornecido
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -36,56 +37,22 @@ export const login = async (email: string, password: string): Promise<Client | n
       return null
     }
 
-    // Get user profile from users table
+    // Buscar dados do usuário da tabela users
     const { data: clientData, error: clientError } = await supabase
       .from('users')
       .select('id, name, email, role, created_at')
       .eq('id', authData.user.id)
       .maybeSingle()
 
-    // If client doesn't exist, create one
-    if (!clientData) {
-      const { data: newClientData, error: createError } = await supabase
-        .from('users')
-        .insert({
-          id: authData.user.id,
-          name: authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User',
-          email: authData.user.email || email,
-          role: 'CLIENT'
-        })
-        .select('id, name, email, role, created_at')
-        .single()
-
-      if (createError) {
-        await supabase.auth.signOut()
-        return null
-      }
-
-      const client: Client = {
-        id: newClientData.id,
-        name: newClientData.name,
-        email: newClientData.email,
-        role: newClientData.role,
-        created_at: newClientData.created_at,
-      }
-
-      localStorage.setItem('eros_user', JSON.stringify(client))
-      
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('user-login'))
-      }
-      
-      return client
-    }
-
-    if (clientError) {
+    if (clientError || !clientData) {
       return null
     }
 
+    // IMPORTANTE: Sempre usar o email do Auth, não da tabela users
     const client: Client = {
       id: clientData.id,
       name: clientData.name,
-      email: clientData.email,
+      email: authData.user.email || clientData.email, // Priorizar email do Auth
       role: clientData.role,
       created_at: clientData.created_at,
     }
@@ -149,7 +116,7 @@ export const register = async (name: string, email: string, password: string): P
     const client: Client = {
       id: clientData.id,
       name: clientData.name,
-      email: clientData.email,
+      email: authData.user.email || clientData.email, // Priorizar email do Auth
       role: clientData.role,
       created_at: clientData.created_at,
     }
@@ -189,7 +156,7 @@ export const updateUserName = async (name: string): Promise<Client | null> => {
     const updatedClient: Client = {
       id: updatedData.id,
       name: updatedData.name,
-      email: updatedData.email,
+      email: currentUser.email, // Manter o email atual do localStorage
       role: updatedData.role,
       created_at: updatedData.created_at,
     }
@@ -208,7 +175,7 @@ export const updateUserName = async (name: string): Promise<Client | null> => {
   }
 }
 
-// Update user email
+// Update user email - CORREÇÃO PRINCIPAL
 export const updateUserEmail = async (newEmail: string): Promise<Client | null> => {
   try {
     const currentUser = getCurrentUser()
@@ -216,16 +183,25 @@ export const updateUserEmail = async (newEmail: string): Promise<Client | null> 
       throw new Error('Usuário não autenticado')
     }
 
-    // Update auth email
+    // PASSO CRUCIAL: Obter o email atual do Auth
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) {
+      throw new Error('Não foi possível obter usuário autenticado')
+    }
+
+    // 1. Atualizar Auth primeiro
     const { error: authError } = await supabase.auth.updateUser({ 
       email: newEmail 
     })
 
     if (authError) {
-      throw new Error('Erro ao atualizar email na autenticação: ' + authError.message)
+      throw new Error('Erro ao atualizar email: ' + authError.message)
     }
 
-    // Update in users table
+    // 2. Aguardar processamento do Auth
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // 3. Atualizar tabela users
     const { data: updatedData, error: updateError } = await supabase
       .from('users')
       .update({ email: newEmail })
@@ -234,29 +210,94 @@ export const updateUserEmail = async (newEmail: string): Promise<Client | null> 
       .single()
 
     if (updateError) {
-      throw new Error('Erro ao atualizar email: ' + updateError.message)
+      console.warn('Erro ao atualizar email na tabela users:', updateError)
+      // Não reverter - o Auth já foi atualizado
     }
 
     const updatedClient: Client = {
-      id: updatedData.id,
-      name: updatedData.name,
-      email: updatedData.email,
-      role: updatedData.role,
-      created_at: updatedData.created_at,
+      id: currentUser.id,
+      name: updatedData?.name || currentUser.name,
+      email: newEmail, // Usar o novo email
+      role: updatedData?.role || currentUser.role,
+      created_at: updatedData?.created_at || currentUser.created_at,
     }
 
-    // Update localStorage
+    // 4. Atualizar localStorage
     localStorage.setItem('eros_user', JSON.stringify(updatedClient))
     
-    // Dispatch update event
+    // 5. Disparar evento de atualização
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('user-updated', { detail: updatedClient }))
     }
+
+    // 6. IMPORTANTE: Informar que precisa relogar
+    console.log('Email atualizado. Para garantir sincronização, faça login novamente.')
 
     return updatedClient
   } catch (error) {
     throw error
   }
+}
+
+// Função para sincronizar emails
+export const syncUserEmails = async (): Promise<void> => {
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser || !authUser.email) return
+
+    // Atualizar tabela users com o email do Auth
+    await supabase
+      .from('users')
+      .update({ email: authUser.email })
+      .eq('id', authUser.id)
+
+    // Atualizar localStorage
+    const currentUser = getCurrentUser()
+    if (currentUser && currentUser.id === authUser.id) {
+      const updatedUser = { ...currentUser, email: authUser.email }
+      localStorage.setItem('eros_user', JSON.stringify(updatedUser))
+    }
+  } catch (error) {
+    console.error('Erro ao sincronizar emails:', error)
+  }
+}
+
+// Função de debug melhorada
+export const debugUserState = async (): Promise<void> => {
+  console.log('=== DEBUG USER STATE ===')
+  
+  // 1. localStorage
+  const localUser = getCurrentUser()
+  console.log('1. Local user:', localUser)
+  
+  // 2. Auth user
+  const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+  console.log('2. Auth user:', authUser ? {
+    id: authUser.id,
+    email: authUser.email,
+    email_confirmed_at: authUser.email_confirmed_at,
+  } : 'Não autenticado', authError)
+  
+  if (authUser) {
+    // 3. Database user
+    const { data: dbUser, error: dbError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', authUser.id)
+      .single()
+    console.log('3. DB user:', dbUser, dbError)
+    
+    // 4. Verificar discrepâncias
+    if (dbUser && authUser.email !== dbUser.email) {
+      console.warn('⚠️ DISCREPÂNCIA: Auth email:', authUser.email, 'DB email:', dbUser.email)
+    }
+    
+    if (localUser && authUser.email !== localUser.email) {
+      console.warn('⚠️ DISCREPÂNCIA: Auth email:', authUser.email, 'Local email:', localUser.email)
+    }
+  }
+  
+  console.log('=== END DEBUG ===')
 }
 
 // Update user password
@@ -280,18 +321,25 @@ export const updateUserPassword = async (password: string): Promise<void> => {
   }
 }
 
+// Verifica senha atual - SIMPLIFICADO
 export const verificaSenhaAtual = async (password: string): Promise<boolean> => {
-  const user = getCurrentUser()
-  if (!user || !user.email) return false
+  try {
+    // Obter o email atual do Auth, não do localStorage
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser?.email) return false
 
-  // Autentica o usuário com a senha atual
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: user.email,
-    password
-  })
-  if (signInError) return false
+    // Criar uma nova sessão temporária para verificar a senha
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: authUser.email, // Usar email do Auth
+      password
+    })
 
-  return true
+    // Se a senha está correta, a autenticação funcionará
+    return !error && data.user !== null
+  } catch (error) {
+    console.error('Erro ao verificar senha:', error)
+    return false
+  }
 }
 
 // Logout function
@@ -312,7 +360,7 @@ export const logout = async (): Promise<void> => {
   }
 }
 
-// Initialize auth state on app load
+// Initialize auth state on app load - MELHORADO
 export const initializeAuth = async (): Promise<Client | null> => {
   try {
     const { data: { session } } = await supabase.auth.getSession()
@@ -322,11 +370,7 @@ export const initializeAuth = async (): Promise<Client | null> => {
       return null
     }
 
-    const storedUser = getCurrentUser()
-    if (storedUser && storedUser.id === session.user.id) {
-      return storedUser
-    }
-
+    // Sempre sincronizar com dados atuais
     const { data: clientData, error } = await supabase
       .from('users')
       .select('id, name, email, role, created_at')
@@ -338,15 +382,33 @@ export const initializeAuth = async (): Promise<Client | null> => {
       return null
     }
 
+    // Sincronizar email se houver discrepância
+    if (session.user.email && session.user.email !== clientData.email) {
+      console.log('Detectada discrepância de email, sincronizando...')
+      console.log('Auth email:', session.user.email)
+      console.log('DB email:', clientData.email)
+      
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ email: session.user.email })
+        .eq('id', session.user.id)
+      
+      if (updateError) {
+        console.error('Erro ao sincronizar email:', updateError)
+      }
+    }
+
+    // IMPORTANTE: Usar email do Auth, não da tabela
     const client: Client = {
       id: clientData.id,
       name: clientData.name,
-      email: clientData.email,
+      email: session.user.email || clientData.email, // Priorizar email do Auth
       role: clientData.role,
       created_at: clientData.created_at,
     }
 
     localStorage.setItem('eros_user', JSON.stringify(client))
+    
     return client
   } catch (error) {
     localStorage.removeItem('eros_user')

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { getCurrentUser, updateUserName, updateUserEmail, updateUserPassword, verificaSenhaAtual } from "@/lib/auth"
+import { getCurrentUser, updateUserName, updateUserEmail, updateUserPassword, verificaSenhaAtual, debugUserState } from "@/lib/auth"
 import { getUserPurchasedFilms } from "@/lib/purchases"
 import { useUserProfileTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
