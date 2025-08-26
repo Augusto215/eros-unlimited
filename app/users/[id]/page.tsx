@@ -240,7 +240,7 @@ export default function UserProfile() {
           </div>
 
           {/* Statistics Section */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 justify-center">
             {/* Total Films */}
             <div className="bg-gradient-to-br from-pink-500/20 to-purple-500/20 backdrop-blur-sm border border-pink-400/30 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center">
               <div className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
@@ -266,17 +266,6 @@ export default function UserProfile() {
               </div>
               <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-0.5 sm:mb-1">{averageRating.toFixed(1)}</div>
               <div className="text-yellow-300 text-xs sm:text-sm">{profileT.stats.averageRating}</div>
-            </div>
-
-            {/* Watch Time */}
-            <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-400/30 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center">
-              <div className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                <Clock className="w-4 h-4 sm:w-5 md:w-6 sm:h-5 md:h-6 text-white" />
-              </div>
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-0.5 sm:mb-1">
-                {Math.floor(purchasedFilms.reduce((sum, film) => sum + film.duration, 0) / 60)}h
-              </div>
-              <div className="text-blue-300 text-xs sm:text-sm">{profileT.stats.contentTime}</div>
             </div>
           </div>
 
