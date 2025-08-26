@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Film } from '@/lib/types' 
 
-
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -16,6 +15,15 @@ export interface Purchase {
   payment_method: string
   status: string
   purchased_at: string
+}
+
+export interface FilmProgress {
+  id: string
+  user_id: string
+  movie_id: string
+  time_watched: number 
+  last_updated: string
+  created_at: string
 }
 
 // Busca todos os IDs de filmes comprados por um usuário
@@ -42,7 +50,7 @@ const mapMovieToFilm = (movie: any): Film => ({
   title: movie.title,
   synopsis: movie.synopsis || '',
   posterUrl: movie.poster_url || '',
-  videoUrl: movie.movie_url || '', // Corrigido para movie_url
+  videoUrl: movie.movie_url || '',
   trailerUrl: movie.trailer_url || '',
   price: movie.price || 0,
   duration: movie.duration || 0,
@@ -68,7 +76,6 @@ export const getUserPurchasedFilms = async (userId: string): Promise<Film[]> => 
 
     if (error) throw error
 
-    // Usa a função de mapeamento
     return data?.map(purchase => mapMovieToFilm(purchase.movies)) || []
   } catch (error) {
     console.error('Error fetching purchased films with details:', error)
