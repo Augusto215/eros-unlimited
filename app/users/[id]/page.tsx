@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser, updateUserName, updateUserEmail, updateUserPassword, verificaSenhaAtual } from "@/lib/auth"
 import { getUserPurchasedFilms } from "@/lib/purchases"
 import { useUserProfileTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
+import type { Client } from "@/lib/auth"
 import { 
   User, 
   Crown, 
@@ -20,7 +21,13 @@ import {
   Award,
   PlayCircle,
   TrendingUp,
-  Gift
+  Gift,
+  Edit3,
+  Save,
+  X,
+  Eye,
+  EyeOff,
+  Settings
 } from "lucide-react"
 import Image from "next/image"
 
@@ -32,6 +39,14 @@ interface UserData {
   created_at: string
 }
 
+interface EditFormData {
+  name: string
+  email: string
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
 export default function UserProfile() {
   const params = useParams()
   const router = useRouter()
@@ -41,6 +56,25 @@ export default function UserProfile() {
   const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  
+  // Edit mode states
+  const [isEditing, setIsEditing] = useState(false)
+  const [editLoading, setEditLoading] = useState(false)
+  const [editError, setEditError] = useState("")
+  const [editSuccess, setEditSuccess] = useState("")
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  })
+  
+  const [editForm, setEditForm] = useState<EditFormData>({
+    name: '',
+    email: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -51,15 +85,20 @@ export default function UserProfile() {
           return
         }
 
-        // Ensure created_at is a string
         const userWithCreatedAt = {
           ...user,
           created_at: user.created_at || new Date().toISOString()
         }
 
         setUserData(userWithCreatedAt)
+        setEditForm({
+          name: user.name,
+          email: user.email,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
 
-        // Busca os filmes comprados com detalhes completos
         const userFilms = await getUserPurchasedFilms(user.id)
         setPurchasedFilms(userFilms)
 
@@ -73,6 +112,154 @@ export default function UserProfile() {
 
     loadUserData()
   }, [params])
+
+  // Listen for user updates
+  useEffect(() => {
+    const handleUserUpdate = (event: CustomEvent) => {
+      const updatedUser = event.detail as Client
+      setUserData(prev => prev ? {
+        ...prev,
+        name: updatedUser.name,
+        email: updatedUser.email
+      } : null)
+      setEditForm(prev => ({
+        ...prev,
+        name: updatedUser.name,
+        email: updatedUser.email
+      }))
+    }
+
+    window.addEventListener('user-updated', handleUserUpdate as EventListener)
+    return () => {
+      window.removeEventListener('user-updated', handleUserUpdate as EventListener)
+    }
+  }, [])
+
+  const handleInputChange = (field: keyof EditFormData, value: string) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    // Clear errors when user starts typing
+    if (editError) setEditError("")
+  }
+
+  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }))
+  }
+
+  const validateForm = (): boolean => {
+    if (!editForm.name.trim()) {
+      setEditError("Nome é obrigatório")
+      return false
+    }
+
+    if (!editForm.email.trim()) {
+      setEditError("Email é obrigatório")
+      return false
+    }
+
+    if (!editForm.email.includes('@')) {
+      setEditError("Email deve ter um formato válido")
+      return false
+    }
+
+    // Se digitou a senha antiga mas não digitou a nova
+    if (editForm.currentPassword && !editForm.newPassword) {
+      setEditError("Digite a nova senha para alterar.")
+      return false
+    }
+
+    // Se está tentando alterar a senha
+    if (editForm.newPassword) {
+      if (!editForm.currentPassword) {
+        setEditError("Senha atual é obrigatória para alterar a senha")
+        return false
+      }
+
+      if (editForm.newPassword.length < 6) {
+        setEditError("Nova senha deve ter pelo menos 6 caracteres")
+        return false
+      }
+
+      if (editForm.newPassword !== editForm.confirmPassword) {
+        setEditError("Nova senha e confirmação não coincidem")
+        return false
+      }
+    }
+
+    return true
+  }
+
+  const handleSave = async () => {
+    if (!validateForm()) return
+    if (!userData) return
+
+    setEditLoading(true)
+    setEditError("")
+    setEditSuccess("")
+
+    try {
+      // Update name if changed
+      if (editForm.name !== userData.name) {
+        await updateUserName(editForm.name)
+      }
+
+      // Update email if changed
+      if (editForm.email !== userData.email) {
+        await updateUserEmail(editForm.email)
+      }
+
+      // Update password if provided
+      if (editForm.newPassword) {
+        // Verifica se a senha atual está correta antes de aceitar a nova
+        const isCurrentPasswordValid = await verificaSenhaAtual(editForm.currentPassword)
+
+        if (!isCurrentPasswordValid) {
+          setEditError("Senha atual incorreta.")
+          setEditLoading(false)
+          return
+        }
+        await updateUserPassword(editForm.newPassword)
+        // Clear password fields after successful update
+        setEditForm(prev => ({
+          ...prev,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        }))
+      }
+
+      setEditSuccess("Perfil atualizado com sucesso!")
+      setIsEditing(false)
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setEditSuccess("") , 3000)
+
+    } catch (error: any) {
+      setEditError(error.message || "Erro ao atualizar perfil")
+    } finally {
+      setEditLoading(false)
+    }
+  }
+
+  const handleCancel = () => {
+    if (!userData) return
+    
+    setEditForm({
+      name: userData.name,
+      email: userData.email,
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    })
+    setEditError("")
+    setEditSuccess("")
+    setIsEditing(false)
+  }
 
   if (loading) {
     return (
@@ -166,10 +353,22 @@ export default function UserProfile() {
           
           {/* Header Section */}
           <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 shadow-2xl">
-            <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-4 sm:space-y-6 lg:space-y-0 lg:space-x-8">
+            {/* Success/Error Messages */}
+            {editSuccess && (
+              <div className="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg text-green-300 text-sm">
+                {editSuccess}
+              </div>
+            )}
+            {editError && (
+              <div className="mb-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg text-red-300 text-sm">
+                {editError}
+              </div>
+            )}
+
+            <div className="flex flex-col lg:flex-row items-start lg:items-start space-y-4 sm:space-y-6 lg:space-y-0 lg:space-x-8 lg:pl-8">
               
               {/* Avatar Section */}
-              <div className="relative">
+              <div className="relative mx-auto lg:mx-0">
                 <div className="w-24 h-24 sm:w-28 md:w-32 sm:h-28 md:h-32 bg-gradient-to-br from-pink-500 via-purple-500 to-cyan-500 rounded-full flex items-center justify-center shadow-2xl">
                   <User className="w-12 h-12 sm:w-14 md:w-16 sm:h-14 md:h-16 text-white" />
                 </div>
@@ -192,49 +391,194 @@ export default function UserProfile() {
               </div>
 
               {/* User Info */}
-              <div className="flex-1 text-center lg:text-left w-full">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">
-                  <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent break-words">
-                    {userData.name}
-                  </span>
-                </h1>
-                
-                <div className="flex items-center justify-center lg:justify-start space-x-2 mb-3 sm:mb-4">
-                  <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-300 text-xs sm:text-sm md:text-base truncate">{userData.email}</span>
-                </div>
+              <div className="flex-1 text-center lg:text-left w-full lg:pl-8">
+                {!isEditing ? (
+                  <>
+                    <div className="flex items-center justify-center lg:justify-start space-x-3 mb-2 sm:mb-3">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
+                        <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent break-words">
+                          {userData.name}
+                        </span>
+                      </h1>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="group p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-200 border border-white/20 hover:border-white/30"
+                        title="Editar perfil"
+                      >
+                        <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-pink-400 transition-colors" />
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center justify-center lg:justify-start space-x-2 mb-3 sm:mb-4">
+                      <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-300 text-xs sm:text-sm md:text-base truncate">{userData.email}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Edit Form */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {/* Name Field */}
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">Nome</label>
+                        <input
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all"
+                          placeholder="Seu nome"
+                        />
+                      </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 mb-4 sm:mb-6">
-                  <div className="flex items-center space-x-1 sm:space-x-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20">
-                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
-                    <span className="text-blue-300 text-xs sm:text-sm whitespace-nowrap">
-                      {profileT.memberSince} {new Date(userData.created_at).getFullYear()}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-1 sm:space-x-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20">
-                    {userData.role === 'ADMIN' ? (
-                      <>
-                        <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
-                        <span className="text-yellow-300 text-xs sm:text-sm font-medium">{profileT.administrator}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Star className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
-                        <span className="text-purple-300 text-xs sm:text-sm font-medium">{profileT.premiumMember}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+                      {/* Email Field */}
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">Email</label>
+                        <input
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all"
+                          placeholder="seu@email.com"
+                        />
+                      </div>
+                    </div>
 
-                {/* Pride Message */}
-                <div className="flex items-center justify-center lg:justify-start space-x-1 sm:space-x-2">
-                  <Rainbow className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 animate-pulse flex-shrink-0" />
-                  <span className="text-gray-300 text-xs sm:text-sm italic">
-                    {profileT.prideMessage}
-                  </span>
-                  <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-pink-400 animate-pulse flex-shrink-0" />
-                </div>
+                    {/* Password Section */}
+                    <div className="border-t border-white/10 pt-4">
+                      <h3 className="text-white font-medium mb-3">Alterar Senha (opcional)</h3>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        {/* Current Password */}
+                        <div>
+                          <label className="block text-white text-sm font-medium mb-2">Senha Atual</label>
+                          <div className="relative">
+                            <input
+                              type={showPasswords.current ? "text" : "password"}
+                              value={editForm.currentPassword}
+                              onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                              className="w-full px-3 py-2 pr-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all"
+                              placeholder="Senha atual"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => togglePasswordVisibility('current')}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                            >
+                              {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* New Password */}
+                        <div>
+                          <label className="block text-white text-sm font-medium mb-2">Nova Senha</label>
+                          <div className="relative">
+                            <input
+                              type={showPasswords.new ? "text" : "password"}
+                              value={editForm.newPassword}
+                              onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                              className="w-full px-3 py-2 pr-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all"
+                              placeholder="Nova senha (min. 6 chars)"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => togglePasswordVisibility('new')}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                            >
+                              {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div>
+                          <label className="block text-white text-sm font-medium mb-2">Confirmar Nova Senha</label>
+                          <div className="relative">
+                            <input
+                              type={showPasswords.confirm ? "text" : "password"}
+                              value={editForm.confirmPassword}
+                              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                              className="w-full px-3 py-2 pr-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all"
+                              placeholder="Confirme a nova senha"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => togglePasswordVisibility('confirm')}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                            >
+                              {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-gray-400 text-xs mt-2">Deixe em branco se não deseja alterar a senha</p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+                      <button
+                        onClick={handleSave}
+                        disabled={editLoading}
+                        className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        {editLoading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span>Salvando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            <span>Salvar</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        disabled={editLoading}
+                        className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-white/10 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <X className="w-4 h-4" />
+                        <span>Cancelar</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {!isEditing && (
+                  <>
+                    <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 mb-4 sm:mb-6">
+                      <div className="flex items-center space-x-1 sm:space-x-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20">
+                        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
+                        <span className="text-blue-300 text-xs sm:text-sm whitespace-nowrap">
+                          {profileT.memberSince} {new Date(userData.created_at).getFullYear()}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center space-x-1 sm:space-x-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20">
+                        {userData.role === 'ADMIN' ? (
+                          <>
+                            <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                            <span className="text-yellow-300 text-xs sm:text-sm font-medium">{profileT.administrator}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Star className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
+                            <span className="text-purple-300 text-xs sm:text-sm font-medium">{profileT.premiumMember}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Pride Message */}
+                    <div className="flex items-center justify-center lg:justify-start space-x-1 sm:space-x-2">
+                      <Rainbow className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 animate-pulse flex-shrink-0" />
+                      <span className="text-gray-300 text-xs sm:text-sm italic">
+                        {profileT.prideMessage}
+                      </span>
+                      <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-pink-400 animate-pulse flex-shrink-0" />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

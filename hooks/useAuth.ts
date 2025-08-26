@@ -29,6 +29,31 @@ export const useAuth = () => {
     }
 
     initAuth()
+
+    // Listen for user login/logout/update events
+    const handleUserLogin = () => {
+      const user = getCurrentUser()
+      setUser(user)
+    }
+
+    const handleUserLogout = () => {
+      setUser(null)
+    }
+
+    const handleUserUpdate = (event: CustomEvent) => {
+      const updatedUser = event.detail as Client
+      setUser(updatedUser)
+    }
+
+    window.addEventListener('user-login', handleUserLogin)
+    window.addEventListener('user-logout', handleUserLogout)
+    window.addEventListener('user-updated', handleUserUpdate as EventListener)
+
+    return () => {
+      window.removeEventListener('user-login', handleUserLogin)
+      window.removeEventListener('user-logout', handleUserLogout)
+      window.removeEventListener('user-updated', handleUserUpdate as EventListener)
+    }
   }, [])
 
   const handleLogout = async () => {

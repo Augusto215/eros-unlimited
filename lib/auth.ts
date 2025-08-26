@@ -36,18 +36,15 @@ export const login = async (email: string, password: string): Promise<Client | n
       return null
     }
 
-
-
     // Get user profile from users table
     const { data: clientData, error: clientError } = await supabase
       .from('users')
       .select('id, name, email, role, created_at')
       .eq('id', authData.user.id)
-      .maybeSingle() // Use maybeSingle instead of errors
+      .maybeSingle()
 
     // If client doesn't exist, create one
     if (!clientData) {
-      
       const { data: newClientData, error: createError } = await supabase
         .from('users')
         .insert({
@@ -74,7 +71,6 @@ export const login = async (email: string, password: string): Promise<Client | n
 
       localStorage.setItem('eros_user', JSON.stringify(client))
       
-      // Dispatch custom event to notify components about login
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('user-login'))
       }
@@ -82,12 +78,10 @@ export const login = async (email: string, password: string): Promise<Client | n
       return client
     }
 
-    // If there was an error fetching existing client
     if (clientError) {
       return null
     }
 
-    // Success - client exists
     const client: Client = {
       id: clientData.id,
       name: clientData.name,
@@ -96,10 +90,8 @@ export const login = async (email: string, password: string): Promise<Client | n
       created_at: clientData.created_at,
     }
 
-    // Store in localStorage for persistence
     localStorage.setItem('eros_user', JSON.stringify(client))
     
-    // Dispatch custom event to notify components about login
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('user-login'))
     }
@@ -114,7 +106,6 @@ export const login = async (email: string, password: string): Promise<Client | n
 // Register function
 export const register = async (name: string, email: string, password: string): Promise<Client | null> => {
   try {
-    // Create auth user with metadata
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -133,10 +124,8 @@ export const register = async (name: string, email: string, password: string): P
       throw new Error('Falha ao criar usuário')
     }
 
-    // Wait for auth to complete
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    // Create user profile
     const { data: clientData, error: clientError } = await supabase
       .from('users')
       .insert({
@@ -149,7 +138,6 @@ export const register = async (name: string, email: string, password: string): P
       .single()
 
     if (clientError) {
-      // Try to sign out the user if profile creation fails
       try {
         await supabase.auth.signOut()
       } catch (e) {
@@ -166,10 +154,8 @@ export const register = async (name: string, email: string, password: string): P
       created_at: clientData.created_at,
     }
 
-    // Store in localStorage
     localStorage.setItem('eros_user', JSON.stringify(client))
     
-    // Dispatch custom event to notify components about login
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('user-login'))
     }
@@ -180,21 +166,146 @@ export const register = async (name: string, email: string, password: string): P
   }
 }
 
+// Update user name
+export const updateUserName = async (name: string): Promise<Client | null> => {
+  try {
+    const currentUser = getCurrentUser()
+    if (!currentUser) {
+      throw new Error('Usuário não autenticado')
+    }
+
+    // Update in users table
+    const { data: updatedData, error: updateError } = await supabase
+      .from('users')
+      .update({ name })
+      .eq('id', currentUser.id)
+      .select('id, name, email, role, created_at')
+      .single()
+
+    if (updateError) {
+      throw new Error('Erro ao atualizar nome: ' + updateError.message)
+    }
+
+    const updatedClient: Client = {
+      id: updatedData.id,
+      name: updatedData.name,
+      email: updatedData.email,
+      role: updatedData.role,
+      created_at: updatedData.created_at,
+    }
+
+    // Update localStorage
+    localStorage.setItem('eros_user', JSON.stringify(updatedClient))
+    
+    // Dispatch update event
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('user-updated', { detail: updatedClient }))
+    }
+
+    return updatedClient
+  } catch (error) {
+    throw error
+  }
+}
+
+// Update user email
+export const updateUserEmail = async (newEmail: string): Promise<Client | null> => {
+  try {
+    const currentUser = getCurrentUser()
+    if (!currentUser) {
+      throw new Error('Usuário não autenticado')
+    }
+
+    // Update auth email
+    const { error: authError } = await supabase.auth.updateUser({ 
+      email: newEmail 
+    })
+
+    if (authError) {
+      throw new Error('Erro ao atualizar email na autenticação: ' + authError.message)
+    }
+
+    // Update in users table
+    const { data: updatedData, error: updateError } = await supabase
+      .from('users')
+      .update({ email: newEmail })
+      .eq('id', currentUser.id)
+      .select('id, name, email, role, created_at')
+      .single()
+
+    if (updateError) {
+      throw new Error('Erro ao atualizar email: ' + updateError.message)
+    }
+
+    const updatedClient: Client = {
+      id: updatedData.id,
+      name: updatedData.name,
+      email: updatedData.email,
+      role: updatedData.role,
+      created_at: updatedData.created_at,
+    }
+
+    // Update localStorage
+    localStorage.setItem('eros_user', JSON.stringify(updatedClient))
+    
+    // Dispatch update event
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('user-updated', { detail: updatedClient }))
+    }
+
+    return updatedClient
+  } catch (error) {
+    throw error
+  }
+}
+
+// Update user password
+export const updateUserPassword = async (password: string): Promise<void> => {
+  try {
+    const currentUser = getCurrentUser()
+    if (!currentUser) {
+      throw new Error('Usuário não autenticado')
+    }
+
+    // Update auth password
+    const { error: authError } = await supabase.auth.updateUser({ 
+      password 
+    })
+
+    if (authError) {
+      throw new Error('Erro ao atualizar senha: ' + authError.message)
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+export const verificaSenhaAtual = async (password: string): Promise<boolean> => {
+  const user = getCurrentUser()
+  if (!user || !user.email) return false
+
+  // Autentica o usuário com a senha atual
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password
+  })
+  if (signInError) return false
+
+  return true
+}
+
 // Logout function
 export const logout = async (): Promise<void> => {
   try {
     await supabase.auth.signOut()
     localStorage.removeItem('eros_user')
     
-    // Dispatch custom event to notify components about logout
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('user-logout'))
     }
   } catch (error) {
-    // Even if Supabase logout fails, remove local data
     localStorage.removeItem('eros_user')
     
-    // Still dispatch the event
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('user-logout'))
     }
@@ -211,13 +322,11 @@ export const initializeAuth = async (): Promise<Client | null> => {
       return null
     }
 
-    // Check localStorage first
     const storedUser = getCurrentUser()
     if (storedUser && storedUser.id === session.user.id) {
       return storedUser
     }
 
-    // Fetch fresh user data
     const { data: clientData, error } = await supabase
       .from('users')
       .select('id, name, email, role, created_at')
