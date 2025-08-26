@@ -15,6 +15,24 @@ export interface FilmProgress {
   created_at: string
 }
 
+// Função auxiliar para converter snake_case para camelCase
+const mapMovieToFilm = (movie: any): Film => ({
+  id: movie.id,
+  title: movie.title,
+  synopsis: movie.synopsis || '',
+  posterUrl: movie.poster_url || '',
+  videoUrl: movie.movie_url || '',
+  trailerUrl: movie.trailer_url || '',
+  price: movie.price || 0,
+  duration: movie.duration || 0,
+  genre: movie.genre || '',
+  rating: movie.rating || 0,
+  releaseYear: movie.release_year || new Date().getFullYear(),
+  launch: movie.launch || false,  
+  main: movie.main || false,       
+  description: movie.description || '' 
+})
+
 // Salva ou atualiza o progresso do filme
 export const saveFilmProgress = async (
   userId: string, 
