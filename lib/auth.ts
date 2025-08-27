@@ -1,5 +1,6 @@
 import { supabase, type Database } from './supabase'
 import type { User } from '@supabase/supabase-js'
+import { useTranslation} from "@/hooks/useTranslation"
 
 export type UserRole = 'CLIENT' | 'ADMIN'
 
@@ -72,6 +73,8 @@ export const login = async (email: string, password: string): Promise<Client | n
 
 // Register function
 export const register = async (name: string, email: string, password: string): Promise<Client | null> => {
+  const { t } = useTranslation()
+
   try {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -88,7 +91,7 @@ export const register = async (name: string, email: string, password: string): P
     }
 
     if (!authData.user) {
-      throw new Error('Falha ao criar usuário')
+      throw new Error(t('auth.failCreateUser'))
     }
 
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -110,7 +113,7 @@ export const register = async (name: string, email: string, password: string): P
       } catch (e) {
         // Silent error handling for signout
       }
-      throw new Error('Falha ao criar perfil do usuário: ' + clientError.message)
+      throw new Error(t('auth.failCreateUser') + ': ' + clientError.message)
     }
 
     const client: Client = {
@@ -135,6 +138,7 @@ export const register = async (name: string, email: string, password: string): P
 
 // Update user name
 export const updateUserName = async (name: string): Promise<Client | null> => {
+  const { t } = useTranslation()
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
@@ -150,7 +154,7 @@ export const updateUserName = async (name: string): Promise<Client | null> => {
       .single()
 
     if (updateError) {
-      throw new Error('Erro ao atualizar nome: ' + updateError.message)
+      throw new Error(t('auth.updateNameError') + ': ' + updateError.message)
     }
 
     const updatedClient: Client = {
@@ -177,6 +181,7 @@ export const updateUserName = async (name: string): Promise<Client | null> => {
 
 // Update user email - CORREÇÃO PRINCIPAL
 export const updateUserEmail = async (newEmail: string): Promise<Client | null> => {
+  const { t } = useTranslation()
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
@@ -195,13 +200,10 @@ export const updateUserEmail = async (newEmail: string): Promise<Client | null> 
     })
 
     if (authError) {
-      throw new Error('Erro ao atualizar email: ' + authError.message)
+      throw new Error(t('auth.updateEmailError') + ': ' + authError.message)
     }
 
-    // 2. Aguardar processamento do Auth
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // 3. Atualizar tabela users
+    // 2. Atualizar tabela users
     const { data: updatedData, error: updateError } = await supabase
       .from('users')
       .update({ email: newEmail })
@@ -222,15 +224,15 @@ export const updateUserEmail = async (newEmail: string): Promise<Client | null> 
       created_at: updatedData?.created_at || currentUser.created_at,
     }
 
-    // 4. Atualizar localStorage
+    // 3. Atualizar localStorage
     localStorage.setItem('eros_user', JSON.stringify(updatedClient))
     
-    // 5. Disparar evento de atualização
+    // 4. Disparar evento de atualização
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('user-updated', { detail: updatedClient }))
     }
 
-    // 6. IMPORTANTE: Informar que precisa relogar
+    // 5. IMPORTANTE: Informar que precisa relogar
     console.log('Email atualizado. Para garantir sincronização, faça login novamente.')
 
     return updatedClient
@@ -302,6 +304,8 @@ export const debugUserState = async (): Promise<void> => {
 
 // Update user password
 export const updateUserPassword = async (password: string): Promise<void> => {
+  const { t } = useTranslation()
+  
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
@@ -314,7 +318,7 @@ export const updateUserPassword = async (password: string): Promise<void> => {
     })
 
     if (authError) {
-      throw new Error('Erro ao atualizar senha: ' + authError.message)
+      throw new Error(t('auth.updateError') + ': ' + authError.message)
     }
   } catch (error) {
     throw error

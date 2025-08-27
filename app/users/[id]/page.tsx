@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { getCurrentUser, updateUserName, updateUserEmail, updateUserPassword, verificaSenhaAtual, debugUserState } from "@/lib/auth"
+import { getCurrentUser, updateUserName, updateUserPassword, verificaSenhaAtual, debugUserState } from "@/lib/auth"
 import { getUserPurchasedFilms } from "@/lib/purchases"
-import { useUserProfileTranslation } from "@/hooks/useTranslation"
+import { useUserProfileTranslation, useTranslation} from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import type { Client } from "@/lib/auth"
 import { 
@@ -48,6 +48,7 @@ interface EditFormData {
 }
 
 export default function UserProfile() {
+  const { t } = useTranslation()
   const params = useParams()
   const router = useRouter()
   const profileT = useUserProfileTranslation()
@@ -56,6 +57,7 @@ export default function UserProfile() {
   const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  
   
   // Edit mode states
   const [isEditing, setIsEditing] = useState(false)
@@ -150,7 +152,7 @@ export default function UserProfile() {
       [field]: !prev[field]
     }))
   }
-
+  
   const validateForm = (): boolean => {
     if (!editForm.name.trim()) {
       setEditError("Nome é obrigatório")
@@ -158,35 +160,35 @@ export default function UserProfile() {
     }
 
     if (!editForm.email.trim()) {
-      setEditError("Email é obrigatório")
+      setEditError(t('auth.nameRequired'))
       return false
     }
 
     if (!editForm.email.includes('@')) {
-      setEditError("Email deve ter um formato válido")
+      setEditError(t('auth.emailInvalid'))
       return false
     }
 
     // Se digitou a senha antiga mas não digitou a nova
     if (editForm.currentPassword && !editForm.newPassword) {
-      setEditError("Digite a nova senha para alterar.")
+      setEditError(t('auth.newPasswordRequired'))
       return false
     }
 
     // Se está tentando alterar a senha
     if (editForm.newPassword) {
       if (!editForm.currentPassword) {
-        setEditError("Senha atual é obrigatória para alterar a senha")
+        setEditError(t('auth.currentPasswordRequired'))
         return false
       }
 
       if (editForm.newPassword.length < 6) {
-        setEditError("Nova senha deve ter pelo menos 6 caracteres")
+        setEditError(t('auth.newPasswordMinLength'))
         return false
       }
 
       if (editForm.newPassword !== editForm.confirmPassword) {
-        setEditError("Nova senha e confirmação não coincidem")
+        setEditError(t('auth.passwordsDontMatch'))
         return false
       }
     }
@@ -209,9 +211,9 @@ export default function UserProfile() {
       }
 
       // Update email if changed
-      if (editForm.email !== userData.email) {
-        await updateUserEmail(editForm.email)
-      }
+      // if (editForm.email !== userData.email) {
+      //   await updateUserEmail(editForm.email)
+      // }
 
       // Update password if provided
       if (editForm.newPassword) {
@@ -432,13 +434,19 @@ export default function UserProfile() {
 
                       {/* Email Field */}
                       <div>
-                        <label className="block text-white text-sm font-medium mb-2">Email</label>
+                        <label className="block text-white text-sm font-medium mb-2 flex items-center gap-2">
+                          Email
+                          <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                          </svg>
+                        </label>
                         <input
                           type="email"
                           value={editForm.email}
-                          onChange={(e) => handleInputChange('email', e.target.value)}
-                          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all"
+                          className="w-full px-3 py-2 bg-gray-600/30 border border-gray-500/40 rounded-lg text-gray-300 cursor-not-allowed opacity-70 focus:outline-none transition-all"
                           placeholder="seu@email.com"
+                          disabled
+                          readOnly
                         />
                       </div>
                     </div>
