@@ -13,16 +13,46 @@ function PaymentSuccessContent() {
   const [success, setSuccess] = useState(false)
   const [paymentData, setPaymentData] = useState<any>(null)
 
+  // Múltiplas formas de capturar o ID do pedido PayPal
   const token = searchParams.get('token')
-  const PayerID = searchParams.get('PayerID')
+  const PayerID = searchParams.get('PayerID') 
+  const paymentId = searchParams.get('paymentId')
+  const orderId = searchParams.get('orderId')
+  
+  // Dados adicionais que podem estar na URL
+  const filmId = searchParams.get('filmId')
+  const userId = searchParams.get('userId')
+  
   const { t } = useTranslation()
 
   useEffect(() => {
     const processPayment = async () => {
-      if (!token || !PayerID) {
-        setError('Dados do pagamento PayPal não encontrados na URL')
+      // Primeiro, vamos fazer log de todos os parâmetros recebidos
+      console.log('PayPal redirect params:', {
+        token,
+        PayerID,
+        paymentId,
+        orderId,
+        filmId,
+        userId,
+        allParams: Object.fromEntries(searchParams.entries())
+      })
+
+      // Determinar qual ID do pedido usar
+      const orderToCapture = token || paymentId || orderId
+
+      // Verificar se temos pelo menos um identificador
+      if (!orderToCapture) {
+        console.error('Nenhum identificador de pedido encontrado nos parâmetros da URL')
+        setError('Identificador do pedido PayPal não encontrado na URL. Parâmetros recebidos: ' + 
+                 Array.from(searchParams.entries()).map(([key, value]) => `${key}=${value}`).join(', '))
         setIsProcessing(false)
         return
+      }
+
+      // Se não temos PayerID, pode ser um fluxo diferente do PayPal
+      if (!PayerID) {
+        console.warn('PayerID não encontrado, mas tentando processar mesmo assim com orderID:', orderToCapture)
       }
 
       try {
@@ -32,7 +62,11 @@ function PaymentSuccessContent() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ 
-            orderID: token
+            orderID: orderToCapture,
+            // Incluir dados adicionais se disponíveis
+            ...(filmId && { filmId }),
+            ...(userId && { userId }),
+            ...(PayerID && { PayerID })
           })
         })
 
@@ -43,26 +77,31 @@ function PaymentSuccessContent() {
         }
 
         const result = await response.json()
+        
+        console.log('Resposta da API de captura:', result)
+        
         if (!result.success) {
-          throw new Error('Falha na captura do pagamento PayPal')
+          throw new Error(result.error || 'Falha na captura do pagamento PayPal')
         }
 
         setSuccess(true)
         setPaymentData(result.payment)
         setIsProcessing(false)
 
+        // Redirecionar após 5 segundos
         setTimeout(() => {
           router.push('/')
         }, 5000)
 
       } catch (error: any) {
+        console.error('Erro ao processar pagamento:', error)
         setError(error.message || 'Erro ao processar pagamento')
         setIsProcessing(false)
       }
     }
 
     processPayment()
-  }, [token, PayerID, router])
+  }, [token, PayerID, paymentId, orderId, filmId, userId, router, searchParams])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 flex items-center justify-center p-4">
@@ -101,6 +140,21 @@ function PaymentSuccessContent() {
               <p className="text-gray-300 mb-6">
                 {error}
               </p>
+              
+              {/* Mostrar informações de debug em desenvolvimento */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="bg-yellow-500/10 border border-yellow-400/20 rounded-xl p-4 mb-6">
+                  <p className="text-yellow-300 text-xs font-mono text-left">
+                    <strong>Debug Info:</strong><br/>
+                    URL Params: {window.location.search}<br/>
+                    Token: {token || 'null'}<br/>
+                    PayerID: {PayerID || 'null'}<br/>
+                    PaymentId: {paymentId || 'null'}<br/>
+                    OrderId: {orderId || 'null'}
+                  </p>
+                </div>
+              )}
+              
               <div className="bg-red-500/10 border border-red-400/20 rounded-xl p-4 mb-6">
                 <p className="text-red-300 text-sm">
                   ❌ {t('paymentSuccess.errorMessage')}
