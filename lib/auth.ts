@@ -1,6 +1,5 @@
 import { supabase, type Database } from './supabase'
 import type { User } from '@supabase/supabase-js'
-import { useTranslation} from "@/hooks/useTranslation"
 
 export type UserRole = 'CLIENT' | 'ADMIN'
 
@@ -71,10 +70,8 @@ export const login = async (email: string, password: string): Promise<Client | n
   }
 }
 
-// Register function
+// Register function - SEM HOOKS
 export const register = async (name: string, email: string, password: string): Promise<Client | null> => {
-  const { t } = useTranslation()
-
   try {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -91,7 +88,7 @@ export const register = async (name: string, email: string, password: string): P
     }
 
     if (!authData.user) {
-      throw new Error(t('auth.failCreateUser'))
+      throw new Error('Failed to create user account')
     }
 
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -113,7 +110,7 @@ export const register = async (name: string, email: string, password: string): P
       } catch (e) {
         // Silent error handling for signout
       }
-      throw new Error(t('auth.failCreateUser') + ': ' + clientError.message)
+      throw new Error('Failed to create user profile: ' + clientError.message)
     }
 
     const client: Client = {
@@ -136,13 +133,12 @@ export const register = async (name: string, email: string, password: string): P
   }
 }
 
-// Update user name
+// Update user name - SEM HOOKS
 export const updateUserName = async (name: string): Promise<Client | null> => {
-  const { t } = useTranslation()
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
-      throw new Error('Usuário não autenticado')
+      throw new Error('User not authenticated')
     }
 
     // Update in users table
@@ -154,7 +150,7 @@ export const updateUserName = async (name: string): Promise<Client | null> => {
       .single()
 
     if (updateError) {
-      throw new Error(t('auth.updateNameError') + ': ' + updateError.message)
+      throw new Error('Failed to update name: ' + updateError.message)
     }
 
     const updatedClient: Client = {
@@ -179,19 +175,18 @@ export const updateUserName = async (name: string): Promise<Client | null> => {
   }
 }
 
-// Update user email - CORREÇÃO PRINCIPAL
+// Update user email - SEM HOOKS
 export const updateUserEmail = async (newEmail: string): Promise<Client | null> => {
-  const { t } = useTranslation()
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
-      throw new Error('Usuário não autenticado')
+      throw new Error('User not authenticated')
     }
 
     // PASSO CRUCIAL: Obter o email atual do Auth
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) {
-      throw new Error('Não foi possível obter usuário autenticado')
+      throw new Error('Could not get authenticated user')
     }
 
     // 1. Atualizar Auth primeiro
@@ -200,7 +195,7 @@ export const updateUserEmail = async (newEmail: string): Promise<Client | null> 
     })
 
     if (authError) {
-      throw new Error(t('auth.updateEmailError') + ': ' + authError.message)
+      throw new Error('Failed to update email: ' + authError.message)
     }
 
     // 2. Atualizar tabela users
@@ -212,7 +207,7 @@ export const updateUserEmail = async (newEmail: string): Promise<Client | null> 
       .single()
 
     if (updateError) {
-      console.warn('Erro ao atualizar email na tabela users:', updateError)
+      console.warn('Error updating email in users table:', updateError)
       // Não reverter - o Auth já foi atualizado
     }
 
@@ -233,7 +228,7 @@ export const updateUserEmail = async (newEmail: string): Promise<Client | null> 
     }
 
     // 5. IMPORTANTE: Informar que precisa relogar
-    console.log('Email atualizado. Para garantir sincronização, faça login novamente.')
+    console.log('Email updated. Please log in again to ensure synchronization.')
 
     return updatedClient
   } catch (error) {
@@ -260,7 +255,7 @@ export const syncUserEmails = async (): Promise<void> => {
       localStorage.setItem('eros_user', JSON.stringify(updatedUser))
     }
   } catch (error) {
-    console.error('Erro ao sincronizar emails:', error)
+    console.error('Error syncing emails:', error)
   }
 }
 
@@ -278,7 +273,7 @@ export const debugUserState = async (): Promise<void> => {
     id: authUser.id,
     email: authUser.email,
     email_confirmed_at: authUser.email_confirmed_at,
-  } : 'Não autenticado', authError)
+  } : 'Not authenticated', authError)
   
   if (authUser) {
     // 3. Database user
@@ -291,25 +286,23 @@ export const debugUserState = async (): Promise<void> => {
     
     // 4. Verificar discrepâncias
     if (dbUser && authUser.email !== dbUser.email) {
-      console.warn('⚠️ DISCREPÂNCIA: Auth email:', authUser.email, 'DB email:', dbUser.email)
+      console.warn('⚠️ DISCREPANCY: Auth email:', authUser.email, 'DB email:', dbUser.email)
     }
     
     if (localUser && authUser.email !== localUser.email) {
-      console.warn('⚠️ DISCREPÂNCIA: Auth email:', authUser.email, 'Local email:', localUser.email)
+      console.warn('⚠️ DISCREPANCY: Auth email:', authUser.email, 'Local email:', localUser.email)
     }
   }
   
   console.log('=== END DEBUG ===')
 }
 
-// Update user password
+// Update user password - SEM HOOKS
 export const updateUserPassword = async (password: string): Promise<void> => {
-  const { t } = useTranslation()
-  
   try {
     const currentUser = getCurrentUser()
     if (!currentUser) {
-      throw new Error('Usuário não autenticado')
+      throw new Error('User not authenticated')
     }
 
     // Update auth password
@@ -318,7 +311,7 @@ export const updateUserPassword = async (password: string): Promise<void> => {
     })
 
     if (authError) {
-      throw new Error(t('auth.updateError') + ': ' + authError.message)
+      throw new Error('Failed to update password: ' + authError.message)
     }
   } catch (error) {
     throw error
@@ -341,7 +334,7 @@ export const verificaSenhaAtual = async (password: string): Promise<boolean> => 
     // Se a senha está correta, a autenticação funcionará
     return !error && data.user !== null
   } catch (error) {
-    console.error('Erro ao verificar senha:', error)
+    console.error('Error verifying password:', error)
     return false
   }
 }
@@ -388,7 +381,7 @@ export const initializeAuth = async (): Promise<Client | null> => {
 
     // Sincronizar email se houver discrepância
     if (session.user.email && session.user.email !== clientData.email) {
-      console.log('Detectada discrepância de email, sincronizando...')
+      console.log('Email discrepancy detected, syncing...')
       console.log('Auth email:', session.user.email)
       console.log('DB email:', clientData.email)
       
@@ -398,7 +391,7 @@ export const initializeAuth = async (): Promise<Client | null> => {
         .eq('id', session.user.id)
       
       if (updateError) {
-        console.error('Erro ao sincronizar email:', updateError)
+        console.error('Error syncing email:', updateError)
       }
     }
 

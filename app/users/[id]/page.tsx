@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { getCurrentUser, updateUserName, updateUserPassword, verificaSenhaAtual, debugUserState } from "@/lib/auth"
 import { getUserPurchasedFilms } from "@/lib/purchases"
-import { useUserProfileTranslation, useTranslation} from "@/hooks/useTranslation"
+import { useUserProfileTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import type { Client } from "@/lib/auth"
 import { 
@@ -155,12 +155,12 @@ export default function UserProfile() {
   
   const validateForm = (): boolean => {
     if (!editForm.name.trim()) {
-      setEditError("Nome é obrigatório")
+      setEditError(t('auth.nameRequired'))
       return false
     }
 
     if (!editForm.email.trim()) {
-      setEditError(t('auth.nameRequired'))
+      setEditError(t('auth.emailRequired'))
       return false
     }
 
@@ -210,7 +210,7 @@ export default function UserProfile() {
         await updateUserName(editForm.name)
       }
 
-      // Update email if changed
+      // Update email if changed (deixando desabilitado por enquanto)
       // if (editForm.email !== userData.email) {
       //   await updateUserEmail(editForm.email)
       // }
@@ -221,7 +221,7 @@ export default function UserProfile() {
         const isCurrentPasswordValid = await verificaSenhaAtual(editForm.currentPassword)
 
         if (!isCurrentPasswordValid) {
-          setEditError("Senha atual incorreta.")
+          setEditError(t('auth.currentPasswordInvalid'))
           setEditLoading(false)
           return
         }
@@ -235,14 +235,26 @@ export default function UserProfile() {
         }))
       }
 
-      setEditSuccess("Perfil atualizado com sucesso!")
+      setEditSuccess(t('auth.profileUpdated'))
       setIsEditing(false)
       
       // Clear success message after 3 seconds
-      setTimeout(() => setEditSuccess("") , 3000)
+      setTimeout(() => setEditSuccess(""), 3000)
 
     } catch (error: any) {
-      setEditError(error.message || "Erro ao atualizar perfil")
+      // Tratar erros específicos com traduções adequadas
+      let errorMessage = error.message || t('auth.profileUpdateError')
+      
+      // Mapear erros comuns para mensagens traduzidas
+      if (errorMessage.includes('Failed to update name')) {
+        errorMessage = t('auth.updateNameError')
+      } else if (errorMessage.includes('Failed to update password')) {
+        errorMessage = t('auth.updatePasswordError') 
+      } else if (errorMessage.includes('User not authenticated')) {
+        errorMessage = t('auth.notAuthenticated')
+      }
+      
+      setEditError(errorMessage)
     } finally {
       setEditLoading(false)
     }
