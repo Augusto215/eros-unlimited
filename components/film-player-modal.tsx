@@ -24,7 +24,7 @@ export default function FilmPlayerModal({
   const movies = useMoviesTranslation()
   const { t } = useTranslation()
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -33,6 +33,8 @@ export default function FilmPlayerModal({
   const [showContinuePrompt, setShowContinuePrompt] = useState(false)
   const [savedProgress, setSavedProgress] = useState<number | null>(null)
   const [user, setUser] = useState(getCurrentUser())
+  const [isMobile, setIsMobile] = useState(false)
+  const [isPortrait, setIsPortrait] = useState(false)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -40,6 +42,28 @@ export default function FilmPlayerModal({
   const progressSaverRef = useRef<ReturnType<typeof createProgressSaver> | null>(null)
 
   const videoUrl = film.videoUrl
+
+  // Detecta se é mobile e orientação
+  useEffect(() => {
+    const checkDeviceAndOrientation = () => {
+      const isMobileDevice = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const isPortraitMode = window.innerHeight > window.innerWidth
+      setIsMobile(isMobileDevice)
+      setIsPortrait(isPortraitMode)
+    }
+
+    checkDeviceAndOrientation()
+    window.addEventListener('resize', checkDeviceAndOrientation)
+    window.addEventListener('orientationchange', () => {
+      // Pequeno delay para aguardar a mudança de orientação
+      setTimeout(checkDeviceAndOrientation, 100)
+    })
+
+    return () => {
+      window.removeEventListener('resize', checkDeviceAndOrientation)
+      window.removeEventListener('orientationchange', checkDeviceAndOrientation)
+    }
+  }, [])
 
   // Atualiza o usuário quando houver login/logout
   useEffect(() => {
@@ -229,31 +253,38 @@ export default function FilmPlayerModal({
     }
   }
 
-  const handleVideoAreaClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  // Função melhorada para controle de toque/clique na área do vídeo
+  const handleVideoAreaInteraction = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault()
     const target = e.target as HTMLElement
+    
+    // Evita ação se clicou/tocou em botão ou controle
     if (
       target.tagName === 'BUTTON' ||
-      target.closest('button')
+      target.closest('button') ||
+      target.tagName === 'INPUT' ||
+      target.closest('input')
     ) return
-    setShowControls(prev => !prev)
-    if (!showControls) {
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false)
-      }, 3000)
-    } else {
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
-    }
+
+    // Sempre mostra os controles e agenda para esconder
+    setShowControls(true)
+    
+    // Limpa timeout anterior e define novo
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false)
+    }, 2000)
   }
 
-  const handleMouseMove = () => {
+  // Função melhorada para movimento do mouse/toque
+  const handleInteractionMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     setShowControls(true)
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current)
     }
     controlsTimeoutRef.current = setTimeout(() => {
       setShowControls(false)
-    }, 3000)
+    }, 2000)
   }
 
   const skipSeconds = (sec: number) => {
@@ -290,11 +321,20 @@ export default function FilmPlayerModal({
   // Calcula a porcentagem assistida
   const watchedPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
 
+  // Define se deve mostrar botões de pular (oculta no mobile retrato)
+  const showSkipButtons = !isMobile || !isPortrait
+
+  // Define tamanhos dos botões baseado no dispositivo
+  const centerButtonSize = isMobile ? 'w-6 h-6' : 'w-8 h-8'
+  const centerButtonPadding = isMobile ? 'p-3' : 'p-4'
+  const centerButtonSpacing = isMobile ? 'mr-8 ml-8' : 'mr-16 ml-16'
+
   return (
     <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm overflow-y-auto">
       <div 
         className="relative w-full min-h-full flex items-center justify-center p-4"
-        onMouseMove={handleMouseMove}
+        onMouseMove={handleInteractionMove}
+        onTouchMove={handleInteractionMove}
       >
         <button
           onClick={handleClose}
@@ -308,24 +348,24 @@ export default function FilmPlayerModal({
         <div className="w-full max-w-7xl mx-auto py-12">
           {/* Continue Watching Prompt */}
           {showContinuePrompt && savedProgress && (
-            <div className="absolute inset-0 z-30 bg-black/80 backdrop-blur-sm flex items-center justify-center">
-              <div className="bg-gray-900 rounded-lg p-8 max-w-md border border-purple-500/30">
-                <h3 className="text-2xl font-bold text-white mb-4">
+            <div className="absolute inset-0 z-30 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-gray-900 rounded-lg p-6 md:p-8 max-w-md w-full border border-purple-500/30">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-4">
                   Continuar assistindo?
                 </h3>
-                <p className="text-gray-300 mb-6">
+                <p className="text-gray-300 mb-6 text-sm md:text-base">
                   Você parou em {formatTime(savedProgress)}. Deseja continuar de onde parou?
                 </p>
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                   <button
                     onClick={() => handleContinueWatching(true)}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors text-sm md:text-base"
                   >
                     Continuar de {formatTime(savedProgress)}
                   </button>
                   <button
                     onClick={() => handleContinueWatching(false)}
-                    className="flex-1 bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors"
+                    className="flex-1 bg-gray-700 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors text-sm md:text-base"
                   >
                     Começar do início
                   </button>
@@ -343,8 +383,8 @@ export default function FilmPlayerModal({
 
           {/* Aviso para usuário não logado */}
           {!user && isOpen && (
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-yellow-600/20 backdrop-blur-sm rounded-lg px-6 py-3 z-10 border border-yellow-500/30">
-              <p className="text-yellow-200 text-sm">
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-yellow-600/20 backdrop-blur-sm rounded-lg px-4 md:px-6 py-3 z-10 border border-yellow-500/30 mx-4 max-w-sm">
+              <p className="text-yellow-200 text-xs md:text-sm text-center">
                 Faça login para salvar seu progresso
               </p>
             </div>
@@ -353,8 +393,10 @@ export default function FilmPlayerModal({
           <div
             ref={playerContainerRef}
             className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-2xl"
-            onClick={handleVideoAreaClick}
-            onMouseMove={handleMouseMove}
+            onClick={handleVideoAreaInteraction}
+            onTouchStart={handleVideoAreaInteraction}
+            onMouseMove={handleInteractionMove}
+            onTouchMove={handleInteractionMove}
             role="presentation"
             tabIndex={-1}
             style={{ touchAction: 'manipulation' }}
@@ -374,7 +416,6 @@ export default function FilmPlayerModal({
                       progressSaverRef.current?.saveNow(duration)
                     }
                   }}
-                  onClick={togglePlayPause}
                 >
                   <source src={videoUrl} type="video/mp4" />
                 </video>
@@ -382,44 +423,55 @@ export default function FilmPlayerModal({
                 <div className={`absolute inset-0 transition-opacity duration-300 ${
                   showControls ? 'opacity-100' : 'opacity-0'
                 }`}>
+                  {/* Botões centrais */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center">
-                    <button
-                      onClick={() => skipSeconds(-10)}
-                      className="p-4 bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors mr-16"
-                      aria-label="Voltar 10 segundos"
-                    >
-                      <RotateCcw className="w-8 h-8 text-white" />
-                    </button>
+                    {/* Botão de voltar 10s - só aparece se não for mobile retrato */}
+                    {showSkipButtons && (
+                      <button
+                        onClick={() => skipSeconds(-10)}
+                        className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ${centerButtonSpacing.split(' ')[0]}`}
+                        aria-label="Voltar 10 segundos"
+                      >
+                        <RotateCcw className={centerButtonSize + " text-white"} />
+                      </button>
+                    )}
+                    
+                    {/* Botão Play/Pause */}
                     <button
                       onClick={togglePlayPause}
-                      className="p-4 bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors"
+                      className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors`}
                     >
                       {isPlaying ? (
-                        <Pause className="w-8 h-8 text-white" />
+                        <Pause className={centerButtonSize + " text-white"} />
                       ) : (
-                        <Play className="w-8 h-8 text-white ml-1" />
+                        <Play className={centerButtonSize + " text-white ml-1"} />
                       )}
                     </button>
-                    <button
-                      onClick={() => skipSeconds(10)}
-                      className="p-4 bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ml-16"
-                      aria-label="Avançar 10 segundos"
-                    >
-                      <RotateCw className="w-8 h-8 text-white" />
-                    </button>
+                    
+                    {/* Botão de avançar 10s - só aparece se não for mobile retrato */}
+                    {showSkipButtons && (
+                      <button
+                        onClick={() => skipSeconds(10)}
+                        className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ${centerButtonSpacing.split(' ')[1]}`}
+                        aria-label="Avançar 10 segundos"
+                      >
+                        <RotateCw className={centerButtonSize + " text-white"} />
+                      </button>
+                    )}
                   </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                  {/* Controles inferiores */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 md:p-6">
                     <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2 md:space-x-4">
                         <button
                           onClick={togglePlayPause}
                           className="p-2 hover:bg-white/20 rounded-full transition-colors"
                         >
                           {isPlaying ? (
-                            <Pause className="w-5 h-5 text-white" />
+                            <Pause className="w-4 h-4 md:w-5 md:h-5 text-white" />
                           ) : (
-                            <Play className="w-5 h-5 text-white ml-0.5" />
+                            <Play className="w-4 h-4 md:w-5 md:h-5 text-white ml-0.5" />
                           )}
                         </button>
 
@@ -428,23 +480,23 @@ export default function FilmPlayerModal({
                           className="p-2 hover:bg-white/20 rounded-full transition-colors"
                         >
                           {isMuted ? (
-                            <VolumeX className="w-5 h-5 text-white" />
+                            <VolumeX className="w-4 h-4 md:w-5 md:h-5 text-white" />
                           ) : (
-                            <Volume2 className="w-5 h-5 text-white" />
+                            <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
                           )}
                         </button>
                       </div>
 
-                      <div className="flex items-center space-x-4 flex-1 mx-6">
-                        <span className="text-white text-xs font-mono min-w-[40px]">{formatTime(currentTime)}</span>
+                      <div className="flex items-center space-x-2 md:space-x-4 flex-1 mx-3 md:mx-6">
+                        <span className="text-white text-xs font-mono min-w-[35px] md:min-w-[40px]">{formatTime(currentTime)}</span>
                         <div className="relative flex-1 group">
-                          <div className="relative w-full h-2 bg-gray-700 rounded-lg overflow-visible">
+                          <div className="relative w-full h-1.5 md:h-2 bg-gray-700 rounded-lg overflow-visible">
                             <div 
                               className="absolute left-0 top-0 h-full bg-pink-500 rounded-lg transition-all duration-100"
                               style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                             />
                             <div 
-                              className="absolute top-1/2 w-4 h-4 bg-pink-500 rounded-full shadow-lg transition-all duration-100 hover:scale-125 group-hover:scale-125"
+                              className="absolute top-1/2 w-3 h-3 md:w-4 md:h-4 bg-pink-500 rounded-full shadow-lg transition-all duration-100 hover:scale-125 group-hover:scale-125"
                               style={{ 
                                 left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
                                 transform: 'translate(-50%, -50%)'
@@ -478,7 +530,7 @@ export default function FilmPlayerModal({
                             }}
                           />
                         </div>
-                        <span className="text-white text-xs font-mono min-w-[40px]">{formatTime(duration)}</span>
+                        <span className="text-white text-xs font-mono min-w-[35px] md:min-w-[40px]">{formatTime(duration)}</span>
                       </div>
 
                       <div className="flex items-center">
@@ -488,9 +540,9 @@ export default function FilmPlayerModal({
                           aria-label="Tela cheia"
                         >
                           {isFullscreen ? (
-                            <Minimize2 className="w-5 h-5 text-white" />
+                            <Minimize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
                           ) : (
-                            <Maximize2 className="w-5 h-5 text-white" />
+                            <Maximize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
                           )}
                         </button>
                       </div>
@@ -509,8 +561,8 @@ export default function FilmPlayerModal({
           </div>
 
           {/* Film Information Panel */}
-          <div className="mt-6 bg-black/60 backdrop-blur-sm rounded-lg p-6 border border-white/10">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="mt-6 bg-black/60 backdrop-blur-sm rounded-lg p-4 md:p-6 border border-white/10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="lg:col-span-1">
                 <div className="relative aspect-[2/3] max-w-xs mx-auto lg:mx-0">
                   <Image
@@ -524,32 +576,32 @@ export default function FilmPlayerModal({
 
               <div className="lg:col-span-2 space-y-4">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">
                     {film.title}
                   </h2>
                   
-                  <div className="flex flex-wrap items-center gap-4 text-gray-300 mb-4">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-4 text-gray-300 mb-4">
                     <div className="flex items-center space-x-2">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span>{film.rating}</span>
+                      <span className="text-sm md:text-base">{film.rating}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-purple-400" />
-                      <span>{film.releaseYear}</span>
+                      <span className="text-sm md:text-base">{film.releaseYear}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Clock className="w-4 h-4 text-pink-400" />
-                      <span>{film.duration} {t('movies.minutes')}</span>
+                      <span className="text-sm md:text-base">{film.duration} {t('movies.minutes')}</span>
                     </div>
                     <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-3 py-1 rounded-full border border-purple-500/30">
-                      <span className="text-purple-300 font-medium">{film.genre}</span>
+                      <span className="text-purple-300 font-medium text-xs md:text-sm">{film.genre}</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">{t('movies.synopsis')}</h3>
-                  <p className="text-gray-300 leading-relaxed">
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2">{t('movies.synopsis')}</h3>
+                  <p className="text-gray-300 leading-relaxed text-sm md:text-base">
                     {film.synopsis}
                   </p>
                 </div>
