@@ -129,7 +129,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
     }
 
     // URL validation (optional)
-    const urlFields = ['posterUrl', 'trailerUrl', 'videoUrl'] as const
+    const urlFields = ['trailerUrl', 'videoUrl'] as const
     urlFields.forEach(field => {
       const url = formData[field] as string
       if (url && url.trim()) {
@@ -166,7 +166,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         price: Math.min(9999.99, Math.max(0, Number(formData.price))), // Clamp price
         launch: formData.launch,
         main: formData.main,
-        posterUrl: formData.posterUrl.trim() || undefined,
+        posterUrl: formData.posterUrl.trim() ? `https://drive.usercontent.google.com/download?id=${formData.posterUrl.trim()}` : undefined,
         trailerUrl: formData.trailerUrl.trim() || undefined,
         videoUrl: formData.videoUrl.trim() || undefined,
       }
@@ -548,13 +548,13 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
-                  URL do Poster *
+                  ID do Poster *
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   value={formData.posterUrl}
                   onChange={(e) => handleInputChange('posterUrl', e.target.value)}
-                  placeholder="https://example.com/poster.jpg"
+                  placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.posterUrl ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
