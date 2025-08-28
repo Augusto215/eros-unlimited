@@ -26,7 +26,6 @@ export default function Navbar() {
         const currentUser = getCurrentUser()
         setUser(currentUser)
       } catch (error) {
-        console.error('Error loading user:', error)
         setUser(null)
       }
     }
@@ -69,7 +68,7 @@ export default function Navbar() {
       setUser(null)
       router.push("/login")
     } catch (error) {
-      console.error('Logout error:', error)
+      // Handle logout error
     } finally {
       setIsLoggingOut(false)
     }

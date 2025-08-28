@@ -63,7 +63,6 @@ export default function Home() {
           }
         }
       } catch (error) {
-        console.error('Error initializing app:', error)
         // Still load films even if auth fails
         try {
           const allFilms = await getMovies()
@@ -182,16 +181,9 @@ export default function Home() {
       if (success) {
         setPurchasedFilmIds(prev => [...prev, filmId])
         setIsPaymentModalOpen(false)
-        
-        // Show success message
-        console.log('Film purchased successfully!')
-        
-        // Optional: Show a success toast/notification here
-      } else {
-        console.error('Failed to purchase film')
       }
     } catch (error) {
-      console.error('Error purchasing film:', error)
+      // console.error('Error purchasing film:', error)
     }
   }
 
@@ -228,7 +220,7 @@ export default function Home() {
         }
       }
     } catch (error) {
-      console.error('Error reloading films data:', error)
+      // console.error('Error reloading films data:', error)
     }
   }
 

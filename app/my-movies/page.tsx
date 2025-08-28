@@ -32,13 +32,10 @@ export default function MyMovies() {
         
         // Busca filmes comprados diretamente do banco
         const purchasedFilms = await getUserPurchasedFilms(user.id)
-        
-        console.log('Purchased films:', purchasedFilms) // Debug: veja o que está vindo
-        
+                
         setFilms(purchasedFilms)
         
       } catch (error) {
-        console.error('Error loading user movies:', error)
         router.push('/')
       } finally {
         setIsLoading(false)
@@ -64,7 +61,6 @@ export default function MyMovies() {
   }
 
   const handleImageError = (filmId: string) => {
-    console.log(`Image failed to load for film ${filmId}`) // Debug
     setImageErrors(prev => ({ ...prev, [filmId]: true }))
   }
 

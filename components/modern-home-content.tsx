@@ -148,7 +148,6 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
         }, 2000)
       }
     } catch (error) {
-      console.error('Error toggling video playback:', error)
       setIsPlaying(false)
     }
   }
@@ -189,7 +188,6 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
           setShowControls(false)
         }, 2000)
       }).catch((error) => {
-        console.error('Auto-play failed:', error)
         setIsPlaying(false)
       })
     }

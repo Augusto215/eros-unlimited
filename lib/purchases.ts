@@ -39,7 +39,6 @@ export const getUserPurchasedFilmIds = async (userId: string): Promise<string[]>
 
     return data?.map(purchase => purchase.movie_id) || []
   } catch (error) {
-    console.error('Error fetching purchased films:', error)
     return []
   }
 }
@@ -78,7 +77,6 @@ export const getUserPurchasedFilms = async (userId: string): Promise<Film[]> => 
 
     return data?.map(purchase => mapMovieToFilm(purchase.movies)) || []
   } catch (error) {
-    console.error('Error fetching purchased films with details:', error)
     return []
   }
 }

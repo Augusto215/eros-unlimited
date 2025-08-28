@@ -30,7 +30,6 @@ export default function Login() {
         setError(auth.invalidCredentials)
       }
     } catch (error) {
-      console.error('Login error:', error)
       setError(auth.loginError)
     } finally {
       setLoading(false)

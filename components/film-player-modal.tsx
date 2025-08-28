@@ -40,7 +40,6 @@ export default function FilmPlayerModal({
   const progressSaverRef = useRef<ReturnType<typeof createProgressSaver> | null>(null)
 
   const videoUrl = film.videoUrl
-  console.log("Video URL:", videoUrl)
 
   // Atualiza o usuário quando houver login/logout
   useEffect(() => {
@@ -69,7 +68,7 @@ export default function FilmPlayerModal({
             setShowContinuePrompt(true)
           }
         } catch (error) {
-          console.error('Error loading progress:', error)
+          // console.error('Error loading progress:', error)
         } finally {
           setIsLoadingProgress(false)
         }

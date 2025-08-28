@@ -105,7 +105,6 @@ export default function UserProfile() {
         setPurchasedFilms(userFilms)
 
       } catch (error) {
-        console.error('Error loading user data:', error)
         setError(profileT.errorLoadingData)
       } finally {
         setLoading(false)

@@ -41,7 +41,6 @@ export default function Register() {
         router.push("/")
       }
     } catch (error: any) {
-      console.error('Registration error:', error)
       setError(error.message || auth.registerError)
     } finally {
       setLoading(false)
