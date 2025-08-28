@@ -73,7 +73,7 @@ export const createPayPalOrder = async (orderData: PayPalOrderData): Promise<Pay
         // URLs mais claras com múltiplos parâmetros
         return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?filmId=${orderData.filmId}&userId=${orderData.userId}&source=paypal`,
         cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/cancel?filmId=${orderData.filmId}&userId=${orderData.userId}`,
-        locale: 'pt_BR' // Mudando para português brasileiro
+        locale: 'en-US'
       }
     })
 
