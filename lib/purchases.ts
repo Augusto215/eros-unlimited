@@ -14,7 +14,7 @@ export interface Purchase {
   payment_id: string
   payment_method: string
   status: string
-  purchased_at: string
+  created_at: string
 }
 
 export interface FilmProgress {
