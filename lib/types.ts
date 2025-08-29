@@ -1,7 +1,13 @@
 export interface Film {
   id: string
   title: string
+  title_pt: string
+  title_es: string
+  title_zh: string
   synopsis: string
+  synopsis_pt: string
+  synopsis_es: string
+  synopsis_zh: string
   price: number
   posterUrl: string
   trailerUrl: string

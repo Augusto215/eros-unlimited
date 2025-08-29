@@ -30,7 +30,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   onFilmClick: (film: Film) => void
   onExpandedChange?: (expanded: boolean) => void
 }) {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const [showExpandedCard, setShowExpandedCard] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -47,6 +47,20 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
   const [showReadMore, setShowReadMore] = useState(false)
   const synopsisRef = useRef<HTMLParagraphElement>(null)
   const mobileSynopsisRef = useRef<HTMLParagraphElement>(null)
+
+  const getLocalizedTitle = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.title_pt || film.title
+    if (locale === "es") return film.title_es || film.title
+    if (locale === "zh") return film.title_zh || film.title
+    return film.title
+  }
+
+  const getLocalizedSynopsis = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.synopsis_pt || film.synopsis
+    if (locale === "es") return film.synopsis_es || film.synopsis
+    if (locale === "zh") return film.synopsis_zh || film.synopsis
+    return film.synopsis
+  }
 
   // Convert Google Drive link for video element
   const getVideoUrl = (url: string) => {
@@ -280,7 +294,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
       const isOverflowing = element.scrollHeight > element.clientHeight
       setShowReadMore(isOverflowing)
     }
-  }, [film.synopsis, showExpandedCard])
+  }, [getLocalizedSynopsis(film, locale), showExpandedCard])
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
@@ -312,7 +326,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
       }`}>
         <Image 
           src={film.posterUrl || "/placeholder.svg"} 
-          alt={film.title} 
+          alt={getLocalizedTitle(film, locale)}
           fill 
           className="object-contain bg-black transition-transform duration-500 hover:scale-110" 
         />
@@ -334,12 +348,12 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
         {/* Mobile: Always show film info overlay */}
         <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-4 pointer-events-none">
           <div className="space-y-2">
-            <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
-              {film.title}
+            <h3 className={`text-white font-bold text-lg ${showExpandedCard ? '' : 'line-clamp-2'} leading-tight`}>
+              {getLocalizedTitle(film, locale)}
             </h3>
             
             <div className="flex items-center space-x-3 text-sm">
-              <span className="text-purple-300 font-medium">{film.genre}</span>
+              <span className="text-purple-300 font-medium">{t(`genre.${film.genre}`)}</span>
               <div className="flex items-center space-x-1 text-gray-300">
                 <Clock className="w-3 h-3" />
                 <span>{film.duration} {t('movies.minutes')}</span>
@@ -347,7 +361,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             </div>
 
             <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-              {film.synopsis}
+              {getLocalizedSynopsis(film, locale)}
             </p>
 
             <div className="flex items-center justify-between pt-2">
@@ -368,11 +382,11 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             <div className="absolute inset-0 flex flex-col justify-end p-4 transition-opacity duration-300">
               <div className="space-y-3">
                 <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
-                  {film.title}
+                  {getLocalizedTitle(film, locale)}
                 </h3>
                 
                 <div className="flex items-center space-x-3 text-sm">
-                  <span className="text-purple-300 font-medium">{film.genre}</span>
+                  <span className="text-purple-300 font-medium">{t(`genre.${film.genre}`)}</span>
                   <div className="flex items-center space-x-1 text-gray-300">
                     <Clock className="w-3 h-3" />
                     <span>{film.duration} {t('movies.minutes')}</span>
@@ -380,7 +394,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                 </div>
 
                 <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-                  {film.synopsis}
+                  {getLocalizedSynopsis(film, locale)}
                 </p>
 
                 <div className="flex items-center justify-between pt-2">
@@ -430,7 +444,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
               ) : (
                 <Image 
                   src={film.posterUrl || "/placeholder.svg"} 
-                  alt={film.title} 
+                  alt={getLocalizedTitle(film, locale)}
                   fill 
                   className="object-cover" 
                 />
@@ -478,8 +492,8 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             <div className="p-4 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-white font-bold text-lg mb-2 line-clamp-1">
-                    {film.title}
+                  <h3 className="text-white font-bold text-lg mb-2">
+                    {getLocalizedTitle(film, locale)}
                   </h3>
                   
                   <div className="flex items-center space-x-3 text-sm text-gray-300 mb-3">
@@ -488,7 +502,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                       <span>{film.rating}</span>
                     </div>
                     <span>{film.releaseYear}</span>
-                    <span className="text-purple-300">{film.genre}</span>
+                    <span className="text-purple-300">{t(`genre.${film.genre}`)}</span>
                     <div className="flex items-center space-x-1">
                       <Clock className="w-3 h-3" />
                       <span>{film.duration} {t('movies.minutes')}</span>
@@ -512,7 +526,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                     isExpanded ? '' : 'line-clamp-3'
                   }`}
                 >
-                  {film.synopsis}
+                  {getLocalizedSynopsis(film, locale)}
                 </p>
                 
                 {showReadMore && (
@@ -584,7 +598,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                 ) : (
                   <Image 
                     src={film.posterUrl || "/placeholder.svg"} 
-                    alt={film.title} 
+                    alt={getLocalizedTitle(film, locale)}
                     fill 
                     className="object-cover" 
                   />
@@ -655,7 +669,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
               <div className="flex-1 p-6 space-y-4 bg-gray-900">
                 <div>
                   <h3 className="text-white font-bold text-2xl mb-3">
-                    {film.title}
+                    {getLocalizedTitle(film, locale)}
                   </h3>
                   
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300 mb-4">
@@ -664,7 +678,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                       <span>{film.rating}</span>
                     </div>
                     <span>{film.releaseYear}</span>
-                    <span className="text-purple-300">{film.genre}</span>
+                    <span className="text-purple-300">{t(`genre.${film.genre}`)}</span>
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4" />
                       <span>{film.duration} {t('movies.minutes')}</span>
@@ -687,7 +701,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                       isExpanded ? '' : 'line-clamp-4'
                     }`}
                   >
-                    {film.synopsis}
+                    {getLocalizedSynopsis(film, locale)}
                   </p>
                   
                   {showReadMore && (

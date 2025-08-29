@@ -47,7 +47,13 @@ export const getUserPurchasedFilmIds = async (userId: string): Promise<string[]>
 const mapMovieToFilm = (movie: any): Film => ({
   id: movie.id,
   title: movie.title,
+  title_pt: movie.title_pt || movie.title,
+  title_es: movie.title_es || movie.title,
+  title_zh: movie.title_zh || movie.title,
   synopsis: movie.synopsis || '',
+  synopsis_pt: movie.synopsis_pt || movie.synopsis || '',
+  synopsis_es: movie.synopsis_es || movie.synopsis || '',
+  synopsis_zh: movie.synopsis_zh || movie.synopsis || '',
   posterUrl: movie.poster_url || '',
   videoUrl: movie.movie_url || '',
   trailerUrl: movie.trailer_url || '',

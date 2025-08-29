@@ -22,7 +22,7 @@ export default function FilmPlayerModal({
   onPurchase 
 }: FilmPlayerModalProps) {
   const movies = useMoviesTranslation()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [showControls, setShowControls] = useState(true)
@@ -42,6 +42,20 @@ export default function FilmPlayerModal({
   const progressSaverRef = useRef<ReturnType<typeof createProgressSaver> | null>(null)
 
   const videoUrl = film.videoUrl
+
+  const getLocalizedTitle = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.title_pt || film.title
+    if (locale === "es") return film.title_es || film.title
+    if (locale === "zh") return film.title_zh || film.title
+    return film.title
+  }
+  
+  const getLocalizedSynopsis = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.synopsis_pt || film.synopsis
+    if (locale === "es") return film.synopsis_es || film.synopsis
+    if (locale === "zh") return film.synopsis_zh || film.synopsis
+    return film.synopsis
+  }
 
   // Detecta se é mobile e orientação
   useEffect(() => {
@@ -567,7 +581,7 @@ export default function FilmPlayerModal({
                 <div className="relative aspect-[2/3] max-w-xs mx-auto lg:mx-0">
                   <Image
                     src={film.posterUrl || "/placeholder.svg"}
-                    alt={film.title}
+                    alt={getLocalizedTitle(film, locale)}
                     fill
                     className="object-cover rounded-lg"
                   />
@@ -577,7 +591,7 @@ export default function FilmPlayerModal({
               <div className="lg:col-span-2 space-y-4">
                 <div>
                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">
-                    {film.title}
+                    {getLocalizedTitle(film, locale)}
                   </h2>
                   
                   <div className="flex flex-wrap items-center gap-2 md:gap-4 text-gray-300 mb-4">
@@ -594,7 +608,7 @@ export default function FilmPlayerModal({
                       <span className="text-sm md:text-base">{film.duration} {t('movies.minutes')}</span>
                     </div>
                     <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-3 py-1 rounded-full border border-purple-500/30">
-                      <span className="text-purple-300 font-medium text-xs md:text-sm">{film.genre}</span>
+                      <span className="text-purple-300 font-medium text-xs md:text-sm">{t(`genre.${film.genre}`)}</span>
                     </div>
                   </div>
                 </div>
@@ -602,7 +616,7 @@ export default function FilmPlayerModal({
                 <div>
                   <h3 className="text-lg md:text-xl font-semibold text-white mb-2">{t('movies.synopsis')}</h3>
                   <p className="text-gray-300 leading-relaxed text-sm md:text-base">
-                    {film.synopsis}
+                    {getLocalizedSynopsis(film, locale)}
                   </p>
                 </div>
               </div>

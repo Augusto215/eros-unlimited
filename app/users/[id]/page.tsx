@@ -48,7 +48,7 @@ interface EditFormData {
 }
 
 export default function UserProfile() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const params = useParams()
   const router = useRouter()
   const profileT = useUserProfileTranslation()
@@ -69,6 +69,13 @@ export default function UserProfile() {
     new: false,
     confirm: false
   })
+
+  const getLocalizedTitle = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.title_pt || film.title
+    if (locale === "es") return film.title_es || film.title
+    if (locale === "zh") return film.title_zh || film.title
+    return film.title
+  }
   
   const [editForm, setEditForm] = useState<EditFormData>({
     name: '',
@@ -668,7 +675,7 @@ export default function UserProfile() {
                     <div className="aspect-[2/3] rounded-lg sm:rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-105">
                       <Image
                         src={film.posterUrl || "/placeholder.svg"}
-                        alt={film.title}
+                        alt={getLocalizedTitle(film, locale)}
                         fill
                         className="object-cover"
                       />
@@ -681,7 +688,7 @@ export default function UserProfile() {
                       {/* Film info overlay - apenas no hover, sobreposto ao poster */}
                       <div className="absolute inset-0 flex items-end group-hover:bg-black/70 group-hover:opacity-100 opacity-0 transition-all duration-300">
                         <div className="w-full p-2 sm:p-3 md:p-4">
-                          <h3 className="text-white font-bold text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2">{film.title}</h3>
+                          <h3 className="text-white font-bold text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2">{getLocalizedTitle(film, locale)}</h3>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-1 sm:space-x-2">
                               <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-current" />

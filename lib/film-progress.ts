@@ -19,7 +19,13 @@ export interface FilmProgress {
 const mapMovieToFilm = (movie: any): Film => ({
   id: movie.id,
   title: movie.title,
+  title_pt: movie.title_pt || '',
+  title_es: movie.title_es || '',
+  title_zh: movie.title_zh || '',
   synopsis: movie.synopsis || '',
+  synopsis_pt: movie.synopsis_pt || '',
+  synopsis_es: movie.synopsis_es || '',
+  synopsis_zh: movie.synopsis_zh || '',
   posterUrl: movie.poster_url || '',
   videoUrl: movie.movie_url || '',
   trailerUrl: movie.trailer_url || '',

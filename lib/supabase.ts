@@ -42,7 +42,13 @@ export interface Database {
         Row: {
           id: string
           title: string
+          title_pt: string
+          title_es: string
+          title_zh: string
           synopsis: string
+          synopsis_pt: string
+          synopsis_es: string
+          synopsis_zh: string
           genre: string
           duration: number
           release_year: number
@@ -56,7 +62,13 @@ export interface Database {
         Insert: {
           id?: string
           title: string
+          title_pt: string
+          title_es: string
+          title_zh: string
           synopsis: string
+          synopsis_pt: string
+          synopsis_es: string
+          synopsis_zh: string
           genre: string
           duration: number
           release_year: number
@@ -70,7 +82,13 @@ export interface Database {
         Update: {
           id?: string
           title?: string
+          title_pt?: string
+          title_es?: string
+          title_zh?: string
           synopsis?: string
+          synopsis_pt?: string
+          synopsis_es?: string
+          synopsis_zh?: string
           genre?: string
           duration?: number
           release_year?: number

@@ -17,7 +17,7 @@ interface FilmModalProps {
 
 export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurchase, onPlay }: FilmModalProps) {
   const movies = useMoviesTranslation()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [isPlaying, setIsPlaying] = useState(false)
 
   if (!isOpen || !film) return null
@@ -31,6 +31,20 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
 
   const handlePurchase = () => {
     onPurchase(film.id)
+  }
+
+  const getLocalizedTitle = (film: FilmType, locale: string) => {
+    if (locale === "pt-BR") return film.title_pt || film.title
+    if (locale === "es") return film.title_es || film.title
+    if (locale === "zh") return film.title_zh || film.title
+    return film.title
+  }
+  
+  const getLocalizedSynopsis = (film: FilmType, locale: string) => {
+    if (locale === "pt-BR") return film.synopsis_pt || film.synopsis
+    if (locale === "es") return film.synopsis_es || film.synopsis
+    if (locale === "zh") return film.synopsis_zh || film.synopsis
+    return film.synopsis
   }
 
   return (
@@ -53,7 +67,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
             <div className="relative aspect-video rounded-t-2xl overflow-hidden">
               <Image
                 src={film.posterUrl || "/placeholder.svg"}
-                alt={film.title}
+                alt={getLocalizedTitle(film, locale)}
                 fill
                 className="object-contain"
               />
@@ -95,7 +109,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
             <div className="flex-1">
               <h1 className="text-4xl lg:text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                  {film.title}
+                  {getLocalizedTitle(film, locale)}
                 </span>
               </h1>
               
@@ -117,7 +131,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 </div>
                 
                 <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-400/30">
-                  <span className="text-purple-300 font-medium">{film.genre}</span>
+                  <span className="text-purple-300 font-medium">{t(`genre.${film.genre}`)}</span>
                 </div>
               </div>
             </div>
@@ -145,7 +159,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
               {movies.synopsis}
             </h3>
             <p className="text-gray-300 text-lg leading-relaxed bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              {film.synopsis}
+              {getLocalizedSynopsis(film, locale)}
             </p>
           </div>
 

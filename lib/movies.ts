@@ -1,6 +1,5 @@
 // lib/movies.ts - Complete version with addFilm function
 import { supabase } from './supabase'
-import { mockFilms } from './mock-data'
 import { logMissingTranslations } from './translation-sync'
 import type { Film } from './types'
 
@@ -8,7 +7,13 @@ import type { Film } from './types'
 const transformDbFilmToFilm = (dbFilm: any): Film => ({
   id: dbFilm.id,
   title: dbFilm.title,
+  title_pt: dbFilm.title_pt || dbFilm.title,
+  title_es: dbFilm.title_es || dbFilm.title,
+  title_zh: dbFilm.title_zh || dbFilm.title,
   synopsis: dbFilm.synopsis,
+  synopsis_pt: dbFilm.synopsis_pt || dbFilm.synopsis || '',
+  synopsis_es: dbFilm.synopsis_es || dbFilm.synopsis || '',
+  synopsis_zh: dbFilm.synopsis_zh || dbFilm.synopsis || '',
   description: dbFilm.description || dbFilm.synopsis,
   genre: dbFilm.genre,
   duration: dbFilm.duration,
@@ -26,7 +31,13 @@ const transformDbFilmToFilm = (dbFilm: any): Film => ({
 // Interface for new film data
 export interface NewFilmData {
   title: string
+  title_pt?: string
+  title_es?: string
+  title_zh?: string
   synopsis: string
+  synopsis_pt?: string
+  synopsis_es?: string
+  synopsis_zh?: string
   genre: string
   duration: number
   releaseYear: number
@@ -48,17 +59,17 @@ export const getMovies = async (): Promise<Film[]> => {
       .order('created_at', { ascending: false })
 
     if (error) {
-      return mockFilms
+      return []
     }
 
     if (!data || data.length === 0) {
-      return mockFilms
+      return []
     }
 
     const films = data.map(transformDbFilmToFilm)
     return films
   } catch (error) {
-    return mockFilms
+    return []
   }
 }
 
@@ -148,7 +159,13 @@ export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
     // Prepare data for database
     const insertData = {
       title: filmData.title.trim(),
+      title_pt: filmData.title_pt?.trim() || filmData.title.trim(),
+      title_es: filmData.title_es?.trim() || filmData.title.trim(),
+      title_zh: filmData.title_zh?.trim() || filmData.title.trim(),
       synopsis: filmData.synopsis.trim(),
+      synopsis_pt: filmData.synopsis_pt?.trim() || filmData.synopsis.trim(),
+      synopsis_es: filmData.synopsis_es?.trim() || filmData.synopsis.trim(),
+      synopsis_zh: filmData.synopsis_zh?.trim() || filmData.synopsis.trim(),
       genre: filmData.genre,
       duration: filmData.duration,
       release_year: filmData.releaseYear,
@@ -194,7 +211,13 @@ export const updateFilm = async (filmId: string, filmData: Partial<NewFilmData>)
     // Prepare update data
     const updateData: any = {}
     if (filmData.title !== undefined) updateData.title = filmData.title
+    if (filmData.title_pt !== undefined) updateData.title_pt = filmData.title_pt
+    if (filmData.title_es !== undefined) updateData.title_es = filmData.title_es
+    if (filmData.title_zh !== undefined) updateData.title_zh = filmData.title_zh
     if (filmData.synopsis !== undefined) updateData.synopsis = filmData.synopsis
+    if (filmData.synopsis_pt !== undefined) updateData.synopsis_pt = filmData.synopsis_pt
+    if (filmData.synopsis_es !== undefined) updateData.synopsis_es = filmData.synopsis_es
+    if (filmData.synopsis_zh !== undefined) updateData.synopsis_zh = filmData.synopsis_zh
     if (filmData.genre !== undefined) updateData.genre = filmData.genre
     if (filmData.duration !== undefined) updateData.duration = filmData.duration
     if (filmData.releaseYear !== undefined) updateData.release_year = filmData.releaseYear

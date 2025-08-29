@@ -4,7 +4,7 @@ import { useState } from "react"
 import { X, AlertCircle, Heart, Sparkles, Crown, Star, Shield, Wallet } from "lucide-react"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
-import { usePaymentTranslation, useMoviesTranslation, useCommonTranslation } from "@/hooks/useTranslation"
+import { usePaymentTranslation, useMoviesTranslation, useCommonTranslation, useTranslation } from "@/hooks/useTranslation"
 
 interface PaymentModalProps {
   film: Film | null
@@ -22,6 +22,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
   const payment = usePaymentTranslation()
   const movies = useMoviesTranslation()
   const common = useCommonTranslation()
+  const { t, locale } = useTranslation()
 
   const [formData, setFormData] = useState<PaymentForm>({
     email: ''
@@ -44,6 +45,13 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
         [field]: undefined
       }))
     }
+  }
+
+  const getLocalizedTitle = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.title_pt || film.title
+    if (locale === "es") return film.title_es || film.title
+    if (locale === "zh") return film.title_zh || film.title
+    return film.title
   }
 
   const validateForm = (): boolean => {
@@ -167,7 +175,7 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
             <div className="relative aspect-[2/3] mb-6 rounded-xl overflow-hidden shadow-2xl">
               <Image
                 src={film.posterUrl || "/placeholder.svg"}
-                alt={film.title}
+                alt={getLocalizedTitle(film, locale)}
                 fill
                 className="object-cover"
               />
@@ -182,11 +190,11 @@ export default function PaymentModal({ film, isOpen, userId, onClose, onPaymentS
             
             <h3 className="text-white text-xl font-bold mb-2">
               <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                {film.title}
+                {getLocalizedTitle(film, locale)}
               </span>
             </h3>
-            <p className="text-gray-300 text-sm mb-6">{film.genre} • {film.releaseYear}</p>
-            
+            <p className="text-gray-300 text-sm mb-6">{t(`genre.${film.genre}`)} • {film.releaseYear}</p>
+
             {/* Pricing breakdown */}
             <div className="bg-white/10 backdrop-blur-sm p-5 rounded-xl border border-white/20">
               <div className="flex justify-between items-center mb-3">

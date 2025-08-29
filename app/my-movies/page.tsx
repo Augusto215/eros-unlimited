@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation"
 import { Play, Film as FilmIcon, User } from "lucide-react"
 import { initializeAuth, getCurrentUser } from "@/lib/auth"
 import { getUserPurchasedFilms } from "@/lib/purchases"
-import { useMyMoviesTranslation } from "@/hooks/useTranslation"
+import { useMyMoviesTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
 import FilmPlayerModal from "@/components/film-player-modal"
 
 export default function MyMovies() {
   const router = useRouter()
+  const { locale } = useTranslation()
   const t = useMyMoviesTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [films, setFilms] = useState<Film[]>([])
@@ -48,6 +49,13 @@ export default function MyMovies() {
   const handleFilmClick = (film: Film) => {
     setSelectedFilm(film)
     setShowFilmModal(true)
+  }
+
+  const getLocalizedTitle = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.title_pt || film.title
+    if (locale === "es") return film.title_es || film.title
+    if (locale === "zh") return film.title_zh || film.title
+    return film.title
   }
 
   const handlePlay = (film: Film) => {
@@ -111,7 +119,7 @@ export default function MyMovies() {
                       {film.posterUrl && !imageErrors[film.id] ? (
                         <Image
                           src={film.posterUrl || "/placeholder.svg"}
-                          alt={film.title}
+                          alt={getLocalizedTitle(film, locale)}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-110"
                           onError={() => handleImageError(film.id)}
@@ -138,7 +146,7 @@ export default function MyMovies() {
                       {/* Film Title - Always visible on mobile, on hover for desktop */}
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                         <h3 className="text-white font-semibold text-sm line-clamp-2">
-                          {film.title}
+                          {getLocalizedTitle(film, locale)}
                         </h3>
                       </div>
                     </div>

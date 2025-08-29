@@ -371,5 +371,23 @@
     "footer": "Obrigado pelo seu apoio ao conteúdo diverso e inclusivo! 🙏",
     "loading": "Carregando...",
     "preparing": "Preparando página de pagamento"
+  },
+  "genre": {
+    "Ação": "Ação",
+    "Aventura": "Aventura",
+    "Animação": "Animação",
+    "Comédia": "Comédia",
+    "Crime": "Crime",
+    "Drama": "Drama",
+    "Fantasia": "Fantasia",
+    "Ficção Científica": "Ficção Científica",
+    "Horror": "Horror",
+    "Mistério": "Mistério",
+    "Romance": "Romance",
+    "Thriller": "Thriller",
+    "Guerra": "Guerra",
+    "Western": "Western",
+    "Musical": "Musical",
+    "Documentário": "Documentário"
   }
 }

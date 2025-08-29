@@ -7,7 +7,13 @@ import { addFilm, type NewFilmData } from "@/lib/movies"
 
 interface FilmFormData {
   title: string
+  title_pt: string
+  title_es: string
+  title_zh: string
   synopsis: string
+  synopsis_pt: string
+  synopsis_es: string
+  synopsis_zh: string
   genre: string
   duration: number | string
   releaseYear: number | string
@@ -30,7 +36,13 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
   const router = useRouter()
   const [formData, setFormData] = useState<FilmFormData>({
     title: '',
+    title_pt: '',
+    title_es: '',
+    title_zh: '',
     synopsis: '',
+    synopsis_pt: '',
+    synopsis_es: '',
+    synopsis_zh: '',
     genre: '',
     duration: '',
     releaseYear: new Date().getFullYear(),
@@ -81,8 +93,32 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
       newErrors.title = 'Título é obrigatório'
     }
 
+    if (!formData.title_pt.trim()) {
+      newErrors.title_pt = 'Título em Português é obrigatório'
+    }
+
+    if (!formData.title_es.trim()) {
+      newErrors.title_es = 'Título em Espanhol é obrigatório'
+    }
+
+    if (!formData.title_zh.trim()) {
+      newErrors.title_zh = 'Título em Chinês é obrigatório'
+    }
+
     if (!formData.synopsis.trim()) {
       newErrors.synopsis = 'Sinopse é obrigatória'
+    }
+
+    if (!formData.synopsis_pt.trim()) {
+      newErrors.synopsis_pt = 'Sinopse em Português é obrigatória'
+    }
+
+    if (!formData.synopsis_es.trim()) {
+      newErrors.synopsis_es = 'Sinopse em Espanhol é obrigatória'
+    }
+
+    if (!formData.synopsis_zh.trim()) {
+      newErrors.synopsis_zh = 'Sinopse em Chinês é obrigatória'
     }
 
     if (!formData.genre) {
@@ -91,7 +127,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
 
     // URLs are now required
     if (!formData.posterUrl.trim()) {
-      newErrors.posterUrl = 'URL do Poster é obrigatória'
+      newErrors.posterUrl = 'ID do Poster é obrigatória'
     }
 
     if (!formData.trailerUrl.trim()) {
@@ -158,7 +194,13 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
       // Prepare data with proper type conversion and limits
       const filmToAdd = {
         title: formData.title.trim(),
+        title_pt: formData.title_pt.trim(),
+        title_es: formData.title_es.trim(),
+        title_zh: formData.title_zh.trim(),
         synopsis: formData.synopsis.trim(),
+        synopsis_pt: formData.synopsis_pt.trim(),
+        synopsis_es: formData.synopsis_es.trim(),
+        synopsis_zh: formData.synopsis_zh.trim(),
         genre: formData.genre,
         duration: Math.min(999, Math.max(1, Number(formData.duration))), // Clamp between 1-999
         releaseYear: Number(formData.releaseYear),
@@ -180,7 +222,13 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         // Reset form
         setFormData({
           title: '',
+          title_pt: '',
+          title_es: '',
+          title_zh: '',
           synopsis: '',
+          synopsis_pt: '',
+          synopsis_es: '',
+          synopsis_zh: '',
           genre: '',
           duration: '',
           releaseYear: new Date().getFullYear(),
@@ -323,17 +371,89 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
-              {/* Title */}
+              {/* Title em inglês */}
               <div className="md:col-span-2">
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <Film className="w-4 h-4 mr-2 text-purple-400" />
-                  Título *
+                  Título em inglês *
                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Ex: Call Me By Your Name"
+                  placeholder="Ex: Miss Brian’s Carnival Curse"
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.title ? 'border-red-500' : 'border-white/20'
+                  } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                  disabled={isSubmitting || showSuccessMessage}
+                />
+                {errors.title && (
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-4 h-4 mr-1" />
+                    {errors.title}
+                  </p>
+                )}
+              </div>
+
+              {/* Title em português */}
+              <div className="md:col-span-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Film className="w-4 h-4 mr-2 text-purple-400" />
+                  Título em português *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title_pt}
+                  onChange={(e) => handleInputChange('title_pt', e.target.value)}
+                  placeholder="Ex: A Maldição do Carnaval de Miss Brian"
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.title ? 'border-red-500' : 'border-white/20'
+                  } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                  disabled={isSubmitting || showSuccessMessage}
+                />
+                {errors.title && (
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-4 h-4 mr-1" />
+                    {errors.title}
+                  </p>
+                )}
+              </div>
+
+              {/* Title em espanhol */}
+              <div className="md:col-span-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Film className="w-4 h-4 mr-2 text-purple-400" />
+                  Título em espanhol *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title_es}
+                  onChange={(e) => handleInputChange('title_es', e.target.value)}
+                  placeholder="Ex: La Maldición del Carnaval de Miss Brian"
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.title ? 'border-red-500' : 'border-white/20'
+                  } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                  disabled={isSubmitting || showSuccessMessage}
+                />
+                {errors.title && (
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-4 h-4 mr-1" />
+                    {errors.title}
+                  </p>
+                )}
+              </div>
+
+              {/* Title em mandarim */}
+              <div className="md:col-span-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Film className="w-4 h-4 mr-2 text-purple-400" />
+                  Título em mandarim *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title_zh}
+                  onChange={(e) => handleInputChange('title_zh', e.target.value)}
+                  placeholder="Ex: 布莱恩小姐的狂欢节诅咒"
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.title ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
@@ -511,16 +631,16 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                 </p>
               </div>
 
-              {/* Synopsis */}
+              {/* Synopsis em inglês */}
               <div className="md:col-span-2">
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <Heart className="w-4 h-4 mr-2 text-pink-400" />
-                  Sinopse *
+                  Sinopse em inglês *
                 </label>
                 <textarea
                   value={formData.synopsis}
                   onChange={(e) => handleInputChange('synopsis', e.target.value)}
-                  placeholder="Conte a história deste filme incrível..."
+                  placeholder="Tell the story of this incredible film..."
                   rows={4}
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.synopsis ? 'border-red-500' : 'border-white/20'
@@ -529,6 +649,69 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                 />
                 {errors.synopsis && (
                   <p className="text-red-400 text-sm mt-2">{errors.synopsis}</p>
+                )}
+              </div>
+
+              {/* Synopsis em português */}
+              <div className="md:col-span-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Heart className="w-4 h-4 mr-2 text-pink-400" />
+                  Sinopse em português *
+                </label>
+                <textarea
+                  value={formData.synopsis_pt}
+                  onChange={(e) => handleInputChange('synopsis_pt', e.target.value)}
+                  placeholder="Conte a história deste filme incrível..."
+                  rows={4}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.synopsis_pt ? 'border-red-500' : 'border-white/20'
+                  } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300 resize-vertical`}
+                  disabled={isSubmitting || showSuccessMessage}
+                />
+                {errors.synopsis_pt && (
+                  <p className="text-red-400 text-sm mt-2">{errors.synopsis_pt}</p>
+                )}
+              </div>
+
+              {/* Synopsis em espanhol */}
+              <div className="md:col-span-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Heart className="w-4 h-4 mr-2 text-pink-400" />
+                  Sinopse em espanhol *
+                </label>
+                <textarea
+                  value={formData.synopsis_es}
+                  onChange={(e) => handleInputChange('synopsis_es', e.target.value)}
+                  placeholder="Cuente la historia de esta increíble película..."
+                  rows={4}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.synopsis_es ? 'border-red-500' : 'border-white/20'
+                  } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300 resize-vertical`}
+                  disabled={isSubmitting || showSuccessMessage}
+                />
+                {errors.synopsis_es && (
+                  <p className="text-red-400 text-sm mt-2">{errors.synopsis_es}</p>
+                )}
+              </div>
+
+              {/* Synopsis em mandarim */}
+              <div className="md:col-span-2">
+                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                  <Heart className="w-4 h-4 mr-2 text-pink-400" />
+                  Sinopse em mandarim *
+                </label>
+                <textarea
+                  value={formData.synopsis_zh}
+                  onChange={(e) => handleInputChange('synopsis_zh', e.target.value)}
+                  placeholder="讲述这部精彩电影的故事..."
+                  rows={4}
+                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                    errors.synopsis_zh ? 'border-red-500' : 'border-white/20'
+                  } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300 resize-vertical`}
+                  disabled={isSubmitting || showSuccessMessage}
+                />
+                {errors.synopsis_zh && (
+                  <p className="text-red-400 text-sm mt-2">{errors.synopsis_zh}</p>
                 )}
               </div>
             </div>

@@ -15,7 +15,7 @@ interface ModernHeroSectionProps {
 
 export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: ModernHeroSectionProps) {
   const movies = useMoviesTranslation()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [showVideo, setShowVideo] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -24,6 +24,20 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  const getLocalizedTitle = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.title_pt || film.title
+    if (locale === "es") return film.title_es || film.title
+    if (locale === "zh") return film.title_zh || film.title
+    return film.title
+  }
+  
+  const getLocalizedSynopsis = (film: Film, locale: string) => {
+    if (locale === "pt-BR") return film.synopsis_pt || film.synopsis
+    if (locale === "es") return film.synopsis_es || film.synopsis
+    if (locale === "zh") return film.synopsis_zh || film.synopsis
+    return film.synopsis
+  }
 
   useEffect(() => {
     // Check if device is mobile
@@ -133,7 +147,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
           <div className="relative w-full h-full">
             <Image 
               src={film.posterUrl || "/placeholder.svg"} 
-              alt={film.title} 
+              alt={getLocalizedTitle(film, locale)}
               fill 
               className="object-cover" 
               priority 
@@ -181,11 +195,11 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-3 md:mb-4 leading-tight">
                   {/* Mobile: White text with shadow for better visibility */}
                   <span className="md:hidden block text-white drop-shadow-2xl" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.9)' }}>
-                    {film.title}
+                    {getLocalizedTitle(film, locale)}
                   </span>
                   {/* Desktop: Gradient text */}
                   <span className="hidden md:block bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent">
-                    {film.title}
+                    {getLocalizedTitle(film, locale)}
                   </span>
                 </h1>
                 
@@ -200,7 +214,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                     <span>{film.duration} {t('movies.minutes')}</span>
                   </div>
                   <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 md:from-purple-500/20 md:to-pink-500/20 px-2 md:px-3 py-0.5 md:py-1 rounded-full border border-purple-500/30">
-                    <span className="text-purple-300 font-medium text-xs md:text-sm">{film.genre}</span>
+                    <span className="text-purple-300 font-medium text-xs md:text-sm">{t(`genre.${film.genre}`)}</span>
                   </div>
                 </div>
               </div>
@@ -208,7 +222,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
               {/* Synopsis - Better contrast on mobile */}
               <div className="max-w-2xl">
                 <p className="text-sm md:text-base lg:text-lg text-gray-200 md:text-gray-300 leading-relaxed mb-4 md:mb-6 lg:mb-8 text-justify">
-                  {film.synopsis}
+                  {getLocalizedSynopsis(film, locale)}
                 </p>
                 
                 {/* Price */}
@@ -325,7 +339,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                         <>
                           <Image
                             src={film.posterUrl || "/placeholder.svg"}
-                            alt={film.title}
+                            alt={getLocalizedTitle(film, locale)}
                             fill
                             className="object-cover"
                             priority
@@ -352,7 +366,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                       {isExpanded && (
                         <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
                           <div className="bg-black/60 backdrop-blur-sm rounded-xl p-4 space-y-2">
-                            <h3 className="text-white font-bold text-lg">{film.title}</h3>
+                            <h3 className="text-white font-bold text-lg">{getLocalizedTitle(film, locale)}</h3>
                             <div className="flex items-center space-x-4 text-white/80 text-sm">
                               <div className="flex items-center space-x-1">
                                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -408,7 +422,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                       ) : (
                         <Image
                           src={film.posterUrl || "/placeholder.svg"}
-                          alt={film.title}
+                          alt={getLocalizedTitle(film, locale)}
                           fill
                           className="object-contain"
                         />
