@@ -66,15 +66,15 @@ export const getMovies = async (): Promise<Film[]> => {
 export const getUserPurchasedFilms = async (userId: string): Promise<string[]> => {
   try {
     const { data, error } = await supabase
-      .from('client_films')
-      .select('film_id')
-      .eq('client_id', userId)
+      .from('purchases')
+      .select('movie_id')
+      .eq('user_id', userId)
 
     if (error) {
       return []
     }
 
-    return data.map(item => item.film_id)
+    return data?.map(item => item.movie_id)
   } catch (error) {
     return []
   }
@@ -85,10 +85,10 @@ export const purchaseFilm = async (userId: string, filmId: string): Promise<bool
   try {
     // Check if already purchased
     const { data: existing, error: checkError } = await supabase
-      .from('client_films')
+      .from('purchases')
       .select('id')
-      .eq('client_id', userId)
-      .eq('film_id', filmId)
+      .eq('user_id', userId)
+      .eq('movie_id', filmId)
       .single()
 
     if (existing) {
@@ -97,10 +97,10 @@ export const purchaseFilm = async (userId: string, filmId: string): Promise<bool
 
     // Insert new purchase
     const { error: insertError } = await supabase
-      .from('client_films')
+      .from('purchases')
       .insert({
-        client_id: userId,
-        film_id: filmId,
+        user_id: userId,
+        movie_id: filmId,
         purchase_date: new Date().toISOString(),
       })
 
@@ -233,11 +233,11 @@ export const deleteFilm = async (filmId: string): Promise<boolean> => {
       throw new Error('Access denied: Admin privileges required')
     }
 
-    // First, delete all client_films relationships
+    // First, delete all purchases relationships
     const { error: relationError } = await supabase
-      .from('client_films')
+      .from('purchases')
       .delete()
-      .eq('film_id', filmId)
+      .eq('movie_id', filmId)
 
     if (relationError) {
       // Continue anyway, as the film deletion is more important

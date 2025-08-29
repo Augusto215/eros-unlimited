@@ -113,8 +113,10 @@ export default function Home() {
     setPurchasedFilmIds(purchases)
 
     if (launchFilms.length > 0) {
-      // First try to find films marked as main
-      const mainFilms = launchFilms.filter(film => film.main === true)
+      // First try to find films marked as main that haven't been purchased
+      const mainFilms = launchFilms.filter(
+        film => film.main === true && !purchases.includes(film.id) // ✅ Filtrar filmes NÃO comprados
+      )
       
       if (mainFilms.length > 0) {
         // Sort by creation date (assuming created_at field exists) - most recent first
@@ -126,11 +128,34 @@ export default function Home() {
           // Fallback: use id comparison (assuming higher id = newer)
           return parseInt(b.id) - parseInt(a.id)
         })
-        setHeroFilm(sortedMainFilms[0]) // Most recent main film
+        setHeroFilm(sortedMainFilms[0]) // Most recent main film that hasn't been purchased
       } else {
-        // No main films, pick random
-        const randomIndex = Math.floor(Math.random() * launchFilms.length)
-        setHeroFilm(launchFilms[randomIndex])
+        // No unpurchased main films, try to find any unpurchased launch film
+        const unpurchasedLaunchFilms = launchFilms.filter(film => !purchases.includes(film.id))
+        
+        if (unpurchasedLaunchFilms.length > 0) {
+          // Pick random from unpurchased films
+          const randomIndex = Math.floor(Math.random() * unpurchasedLaunchFilms.length)
+          setHeroFilm(unpurchasedLaunchFilms[randomIndex])
+        } else {
+          // All launch films are purchased - this is an edge case
+          // You could either show no hero film or show a purchased one
+          // For now, let's show the most recent main film even if purchased
+          const allMainFilms = launchFilms.filter(film => film.main === true)
+          if (allMainFilms.length > 0) {
+            const sortedMainFilms = allMainFilms.sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              }
+              return parseInt(b.id) - parseInt(a.id)
+            })
+            setHeroFilm(sortedMainFilms[0])
+          } else {
+            // No main films at all, pick random
+            const randomIndex = Math.floor(Math.random() * launchFilms.length)
+            setHeroFilm(launchFilms[randomIndex])
+          }
+        }
       }
     }
   }
@@ -179,8 +204,39 @@ export default function Home() {
     try {
       const success = await purchaseFilm(user.id, filmId)
       if (success) {
-        setPurchasedFilmIds(prev => [...prev, filmId])
+        const newPurchasedFilmIds = [...purchasedFilmIds, filmId]
+        setPurchasedFilmIds(newPurchasedFilmIds)
         setIsPaymentModalOpen(false)
+        
+        // If the purchased film is the current hero film, find a new one
+        if (heroFilm && heroFilm.id === filmId) {
+          const unpurchasedMainFilms = films.filter(
+            film => film.main === true && !newPurchasedFilmIds.includes(film.id)
+          )
+          
+          if (unpurchasedMainFilms.length > 0) {
+            // Sort by creation date - most recent first
+            const sortedMainFilms = unpurchasedMainFilms.sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              }
+              return parseInt(b.id) - parseInt(a.id)
+            })
+            setHeroFilm(sortedMainFilms[0])
+          } else {
+            // No unpurchased main films, try any unpurchased launch film
+            const unpurchasedLaunchFilms = films.filter(film => !newPurchasedFilmIds.includes(film.id))
+            
+            if (unpurchasedLaunchFilms.length > 0) {
+              const randomIndex = Math.floor(Math.random() * unpurchasedLaunchFilms.length)
+              setHeroFilm(unpurchasedLaunchFilms[randomIndex])
+            } else {
+              // All films are purchased - keep the current hero film or set to null
+              // This is an edge case where user bought all available films
+              setHeroFilm(null)
+            }
+          }
+        }
       }
     } catch (error) {
       // console.error('Error purchasing film:', error)
@@ -307,7 +363,7 @@ export default function Home() {
           purchasedFilmIds={purchasedFilmIds}
           customTitle={t('movies.releasesCatalog')}
           customDescription={t('movies.releasesCatalogDescription')}
-          customSectionTitle={t('movies.releasesSection')}
+          customSectionTitle={purchasedFilmIds.length === 0 ? t('movies.releasesSection') : t('movies.releasesDisponiveis')}
         />
       </div>
 

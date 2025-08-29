@@ -39,7 +39,7 @@ export default function Home() {
           setFilms(filmsData)
           
           if (filmsData.length > 0) {
-            // First try to find films marked as main
+            // First try to find films marked as main - SEM filtrar por compras (usuário não logado)
             const mainFilms = filmsData.filter(film => film.main === true)
             
             if (mainFilms.length > 0) {
@@ -65,7 +65,7 @@ export default function Home() {
           setFilms(filmsData)
           
           if (filmsData.length > 0) {
-            // First try to find films marked as main
+            // First try to find films marked as main - SEM filtrar por compras (erro de auth)
             const mainFilms = filmsData.filter(film => film.main === true)
             
             if (mainFilms.length > 0) {
@@ -104,8 +104,10 @@ export default function Home() {
     setPurchasedFilmIds(purchases)
 
     if (filmsData.length > 0) {
-      // First try to find films marked as main
-      const mainFilms = filmsData.filter(film => film.main === true)
+      // First try to find films marked as main that haven't been purchased
+      const mainFilms = filmsData.filter(
+        film => film.main === true && !purchases.includes(film.id) // ✅ CORREÇÃO: usar purchases
+      )
       
       if (mainFilms.length > 0) {
         // Sort by creation date (most recent first)
@@ -117,9 +119,30 @@ export default function Home() {
         })
         setHeroFilm(sortedMainFilms[0])
       } else {
-        // No main films, pick random
-        const randomIndex = Math.floor(Math.random() * filmsData.length)
-        setHeroFilm(filmsData[randomIndex])
+        // No unpurchased main films, try to find any unpurchased film
+        const unpurchasedFilms = filmsData.filter(film => !purchases.includes(film.id))
+        
+        if (unpurchasedFilms.length > 0) {
+          // Pick random from unpurchased films
+          const randomIndex = Math.floor(Math.random() * unpurchasedFilms.length)
+          setHeroFilm(unpurchasedFilms[randomIndex])
+        } else {
+          // All films are purchased - show most recent main film even if purchased
+          const allMainFilms = filmsData.filter(film => film.main === true)
+          if (allMainFilms.length > 0) {
+            const sortedMainFilms = allMainFilms.sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              }
+              return parseInt(b.id) - parseInt(a.id)
+            })
+            setHeroFilm(sortedMainFilms[0])
+          } else {
+            // No main films, pick random
+            const randomIndex = Math.floor(Math.random() * filmsData.length)
+            setHeroFilm(filmsData[randomIndex])
+          }
+        }
       }
     }
   }
@@ -168,10 +191,38 @@ export default function Home() {
     try {
       const success = await purchaseFilm(user.id, filmId)
       if (success) {
-        setPurchasedFilmIds(prev => [...prev, filmId])
+        const newPurchasedFilmIds = [...purchasedFilmIds, filmId]
+        setPurchasedFilmIds(newPurchasedFilmIds)
         setIsPaymentModalOpen(false)
         
-        // Optional: Show a success toast/notification here
+        // ✅ NOVA LÓGICA: Se o filme comprado é o filme principal atual, trocar por outro
+        if (heroFilm && heroFilm.id === filmId) {
+          const unpurchasedMainFilms = films.filter(
+            film => film.main === true && !newPurchasedFilmIds.includes(film.id)
+          )
+          
+          if (unpurchasedMainFilms.length > 0) {
+            // Sort by creation date - most recent first
+            const sortedMainFilms = unpurchasedMainFilms.sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              }
+              return parseInt(b.id) - parseInt(a.id)
+            })
+            setHeroFilm(sortedMainFilms[0])
+          } else {
+            // No unpurchased main films, try any unpurchased film
+            const unpurchasedFilms = films.filter(film => !newPurchasedFilmIds.includes(film.id))
+            
+            if (unpurchasedFilms.length > 0) {
+              const randomIndex = Math.floor(Math.random() * unpurchasedFilms.length)
+              setHeroFilm(unpurchasedFilms[randomIndex])
+            } else {
+              // All films are purchased
+              setHeroFilm(null)
+            }
+          }
+        }
       }
     } catch (error) {
       // Handle error silently in production
@@ -183,13 +234,13 @@ export default function Home() {
     try {
       const user = getCurrentUser()
       if (user) {
-        await loadFilmsData(user.id)
+        await loadFilmsData(user.id) // ✅ Esta função já está corrigida
       } else {
         // Reload films without user data
         const filmsData = await getMovies()
         setFilms(filmsData)
         if (filmsData.length > 0) {
-          // First try to find films marked as main
+          // First try to find films marked as main - SEM filtrar por compras (não logado)
           const mainFilms = filmsData.filter(film => film.main === true)
           
           if (mainFilms.length > 0) {

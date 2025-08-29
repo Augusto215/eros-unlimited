@@ -813,14 +813,16 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
         <div className="md:px-4 md:py-8">
           {/* Mobile: Vertical grid */}
           <div className="grid grid-cols-1 gap-6 px-4 md:hidden">
-            {films.map((film) => (
-              <ModernFilmCard
-                key={film.id}
-                film={film}
-                isPurchased={purchasedFilmIds.includes(film.id)}
-                onFilmClick={onFilmClick}
-                onExpandedChange={setHasExpandedCard}
-              />
+            {films
+              .filter(film => !purchasedFilmIds.includes(film.id))
+              .map((film) => (
+                <ModernFilmCard
+                  key={film.id}
+                  film={film}
+                  isPurchased={false}
+                  onFilmClick={onFilmClick}
+                  onExpandedChange={setHasExpandedCard}
+                />
             ))}
           </div>
 
@@ -832,14 +834,16 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
           >
             {/* Padding esquerdo */}
             <div className="w-8 flex-shrink-0"></div>
-            {films.map((film) => (
-              <ModernFilmCard
-                key={film.id}
-                film={film}
-                isPurchased={purchasedFilmIds.includes(film.id)}
-                onFilmClick={onFilmClick}
-                onExpandedChange={setHasExpandedCard}
-              />
+            {films
+              .filter(film => !purchasedFilmIds.includes(film.id))
+              .map((film) => (
+                <ModernFilmCard
+                  key={film.id}
+                  film={film}
+                  isPurchased={false}
+                  onFilmClick={onFilmClick}
+                  onExpandedChange={setHasExpandedCard}
+                />
             ))}
             {/* Padding direito */}
             <div className="w-8 flex-shrink-0"></div>
@@ -869,7 +873,6 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
 
   const purchasedFilms = films.filter((film) => purchasedFilmIds.includes(film.id))
   const availableFilms = films.filter((film) => !purchasedFilmIds.includes(film.id))
-  const recommendedFilms = films.slice(0, 6) // Primeiros 6 filmes como recomendados
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/10 to-pink-900/10 relative overflow-hidden">
@@ -906,52 +909,16 @@ export default function ModernHomeContent({ films, onFilmClick, purchasedFilmIds
               </p>
             </div>
           </div>
-          
-          {/* Purchased Films Section - Only show if user has purchased films */}
-          {purchasedFilms.length > 0 && (
-            <ModernFilmRow
-              title={t('films.myMovies')}
-              films={purchasedFilms}
-              purchasedFilmIds={purchasedFilmIds}
-              onFilmClick={onFilmClick}
-              icon={<Crown className="w-4 h-4 text-white" />}
-              accentColor="green"
-            />
-          )}
 
           {/* Available Films Section - Show all films if no purchases, or only available if user has purchases */}
           {(purchasedFilms.length === 0 ? films : availableFilms).length > 0 && (
             <ModernFilmRow
-              title={purchasedFilms.length === 0 ? (customSectionTitle || t('movies.movieCatalog')) : t('movies.availableMovies')}
+              title={customSectionTitle || (purchasedFilmIds.length === 0 ? t('movies.movieCatalog') : t('movies.availableMovies'))}
               films={purchasedFilms.length === 0 ? films : availableFilms}
               purchasedFilmIds={purchasedFilmIds}
               onFilmClick={onFilmClick}
               icon={<ShoppingBag className="w-4 h-4 text-white" />}
               accentColor="blue"
-            />
-          )}
-
-          {/* Recommended Section - Only show if there are enough films and user has purchases */}
-          {recommendedFilms.length > 3 && purchasedFilms.length > 0 && (
-            <ModernFilmRow
-              title={t('films.recommendedForYou')}
-              films={recommendedFilms}
-              purchasedFilmIds={purchasedFilmIds}
-              onFilmClick={onFilmClick}
-              icon={<Sparkles className="w-4 h-4 text-white" />}
-              accentColor="orange"
-            />
-          )}
-
-          {/* Trending Section - Only show if there are enough films and user has purchases */}
-          {films.length > 4 && purchasedFilms.length > 0 && (
-            <ModernFilmRow
-              title={t('films.trending')}
-              films={films.slice(1, 7)} // Filmes do índice 1 ao 6
-              purchasedFilmIds={purchasedFilmIds}
-              onFilmClick={onFilmClick}
-              icon={<TrendingUp className="w-4 h-4 text-white" />}
-              accentColor="pink"
             />
           )}
         </div>
