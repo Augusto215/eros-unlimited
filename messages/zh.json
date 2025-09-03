@@ -18,7 +18,8 @@
     "myMovies": "我的电影",
     "login": "登录",
     "logout": "退出",
-    "loggingOut": "正在退出..."
+    "loggingOut": "正在退出...",
+    "editMovie": "编辑电影"
   },
   "language": {
     "select": "语言",

@@ -18,7 +18,8 @@
     "myMovies": "My movies",
     "login": "Login",
     "logout": "Logout",
-    "loggingOut": "Logging out..."
+    "loggingOut": "Logging out...",
+    "editMovie": "Edit Movie"
   },
   "language": {
     "select": "Language",

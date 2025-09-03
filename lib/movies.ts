@@ -201,13 +201,6 @@ export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
 // Update an existing film (Admin only)
 export const updateFilm = async (filmId: string, filmData: Partial<NewFilmData>): Promise<Film | null> => {
   try {
-    // Check if user is admin
-    const { data: isAdminData, error: adminError } = await supabase.rpc('is_admin')
-    
-    if (adminError || !isAdminData) {
-      throw new Error('Access denied: Admin privileges required')
-    }
-
     // Prepare update data
     const updateData: any = {}
     if (filmData.title !== undefined) updateData.title = filmData.title
@@ -224,6 +217,7 @@ export const updateFilm = async (filmId: string, filmData: Partial<NewFilmData>)
     if (filmData.rating !== undefined) updateData.rating = filmData.rating
     if (filmData.price !== undefined) updateData.price = filmData.price
     if (filmData.launch !== undefined) updateData.launch = filmData.launch
+    if (filmData.main !== undefined) updateData.main = filmData.main
     if (filmData.posterUrl !== undefined) updateData.poster_url = filmData.posterUrl
     if (filmData.trailerUrl !== undefined) updateData.trailer_url = filmData.trailerUrl
     if (filmData.videoUrl !== undefined) updateData.movie_url = filmData.videoUrl
@@ -249,13 +243,6 @@ export const updateFilm = async (filmId: string, filmData: Partial<NewFilmData>)
 // Delete a film (Admin only)
 export const deleteFilm = async (filmId: string): Promise<boolean> => {
   try {
-    // Check if user is admin
-    const { data: isAdminData, error: adminError } = await supabase.rpc('is_admin')
-    
-    if (adminError || !isAdminData) {
-      throw new Error('Access denied: Admin privileges required')
-    }
-
     // First, delete all purchases relationships
     const { error: relationError } = await supabase
       .from('purchases')

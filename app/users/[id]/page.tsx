@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { getCurrentUser, updateUserName, updateUserPassword, verificaSenhaAtual, debugUserState } from "@/lib/auth"
 import { getUserPurchasedFilms } from "@/lib/purchases"
+import { getMovies  } from "@/lib/movies"
 import { useUserProfileTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import type { Client } from "@/lib/auth"
@@ -35,7 +36,7 @@ interface UserData {
   id: string
   name: string
   email: string
-  role: 'CLIENT' | 'ADMIN'
+  role: 'CLIENT' | 'ADMIN' | 'STAFF'
   created_at: string
 }
 
@@ -108,9 +109,16 @@ export default function UserProfile() {
           confirmPassword: ''
         })
 
-        const userFilms = await getUserPurchasedFilms(user.id)
-        setPurchasedFilms(userFilms)
+        let userFilms: Film[] = []
 
+        if (user.role === 'STAFF') {
+          userFilms = await getMovies() 
+        } else {
+          userFilms = await getUserPurchasedFilms(user.id)
+        }
+        
+        setPurchasedFilms(userFilms)
+        
       } catch (error) {
         setError(profileT.errorLoadingData)
       } finally {
@@ -672,12 +680,12 @@ export default function UserProfile() {
                     className="group relative cursor-pointer"
                     onClick={() => router.push('/my-movies')}
                   >
-                    <div className="aspect-[2/3] rounded-lg sm:rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-105">
+                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-105">
                       <Image
                         src={film.posterUrl || "/placeholder.svg"}
                         alt={getLocalizedTitle(film, locale)}
                         fill
-                        className="object-cover"
+                        className="bg-black object-contains rounded-lg"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       {/* Owned badge */}

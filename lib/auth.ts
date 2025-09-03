@@ -1,7 +1,7 @@
 import { supabase, type Database } from './supabase'
 import type { User } from '@supabase/supabase-js'
 
-export type UserRole = 'CLIENT' | 'ADMIN' | 'TEST'
+export type UserRole = 'CLIENT' | 'ADMIN' | 'STAFF'
 
 export interface Client {
   id: string

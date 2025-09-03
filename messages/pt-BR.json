@@ -18,7 +18,8 @@
     "myMovies": "Meus filmes",
     "login": "Login",
     "logout": "Sair",
-    "loggingOut": "Saindo..."
+    "loggingOut": "Saindo...",
+    "editMovie": "Editar Filme"
   },
   "language": {
     "select": "Idioma",

@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Play, Film as FilmIcon, User } from "lucide-react"
+import { Play, Film as FilmIcon, User, Edit } from "lucide-react"
 import { initializeAuth, getCurrentUser } from "@/lib/auth"
 import { getMovies } from "@/lib/movies"
 import { getUserPurchasedFilms } from "@/lib/purchases"
 import { useMyMoviesTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
 import Image from "next/image"
-import FilmPlayerModal from "@/components/film-player-modal"
+import EditFilmModal from "@/components/edit-film-modal"
 
-export default function MyMovies() {
+export default function EditMovie() {
   const router = useRouter()
   const { locale } = useTranslation()
   const t = useMyMoviesTranslation()
@@ -19,7 +19,7 @@ export default function MyMovies() {
   const [films, setFilms] = useState<Film[]>([])
   const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({}) // Rastrear erros de imagem
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null)
-  const [showFilmModal, setShowFilmModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   useEffect(() => {
     const initApp = async () => {
@@ -32,16 +32,8 @@ export default function MyMovies() {
           return
         }
 
-        let purchasedFilms: Film[] = []
-
-        if (user.role === 'STAFF') {
-          purchasedFilms = await getMovies()
-        } else {
-          // Busca filmes comprados diretamente do banco
-          purchasedFilms = await getUserPurchasedFilms(user.id)
-        }
-                
-        setFilms(purchasedFilms)
+        let allMovies: Film[] = await getMovies()
+        setFilms(allMovies)
         
       } catch (error) {
         router.push('/')
@@ -55,7 +47,7 @@ export default function MyMovies() {
 
   const handleFilmClick = (film: Film) => {
     setSelectedFilm(film)
-    setShowFilmModal(true)
+    setShowEditModal(true)
   }
 
   const getLocalizedTitle = (film: Film, locale: string) => {
@@ -65,14 +57,24 @@ export default function MyMovies() {
     return film.title
   }
 
-  const handlePlay = (film: Film) => {
+  const handleEdit = (film: Film) => {
     setSelectedFilm(film)
-    setShowFilmModal(true)
+    setShowEditModal(true)
   }
 
   const handleCloseModal = () => {
-    setShowFilmModal(false)
+    setShowEditModal(false)
     setSelectedFilm(null)
+  }
+
+  const handleFilmUpdated = async () => {
+    // Reload films after update
+    try {
+      const allMovies: Film[] = await getMovies()
+      setFilms(allMovies)
+    } catch (error) {
+      console.error('Error reloading films:', error)
+    }
   }
 
   const handleImageError = (filmId: string) => {
@@ -98,13 +100,13 @@ export default function MyMovies() {
           <div className="mb-8 pt-14">
             <div className="px-6">
               <h1 className="text-2xl md:text-5xl font-bold text-white mb-2 flex items-center whitespace-nowrap overflow-hidden text-ellipsis">
-                <User className="w-8 h-8 mr-3 text-pink-400" />
-                {t.title}
+                <Edit className="w-8 h-8 mr-3 text-pink-400" />
+                Editar/Deletar Filmes
               </h1>
               <p className="text-white/70 text-lg">
                 {films.length > 0 
-                  ? `${films.length} ${films.length === 1 ? t.filmCount.singular : t.filmCount.plural}`
-                  : t.noFilms
+                  ? `${films.length} ${films.length === 1 ? 'filme disponível' : 'filmes disponíveis'} para edição/deleção`
+                  : 'Nenhum filme disponível'
                 }
               </p>
             </div>
@@ -128,7 +130,7 @@ export default function MyMovies() {
                           src={film.posterUrl || "/placeholder.svg"}
                           alt={getLocalizedTitle(film, locale)}
                           fill
-                          className="bg-black object-contains transition-transform duration-300 group-hover:scale-110"
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
                           onError={() => handleImageError(film.id)}
                           unoptimized={film.posterUrl.includes('drive.google.com')}
                         />
@@ -137,17 +139,17 @@ export default function MyMovies() {
                           <FilmIcon className="w-16 h-16 text-gray-400" />
                         </div>
                       )}
-                      {/* Hover Overlay with Play Button */}
+                      {/* Hover Overlay with Edit Button */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
-                            handlePlay(film)
+                            handleEdit(film)
                           }}
-                          className="flex items-center justify-center w-16 h-16 bg-pink-500 hover:bg-pink-600 rounded-full transform transition-all duration-300 hover:scale-110 shadow-lg"
-                          aria-label={t.playButton}
+                          className="flex items-center justify-center w-16 h-16 bg-orange-500 hover:bg-orange-600 rounded-full transform transition-all duration-300 hover:scale-110 shadow-lg"
+                          aria-label="Editar filme"
                         >
-                          <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
+                          <Edit className="w-8 h-8 text-white" />
                         </button>
                       </div>
                       {/* Film Title - Always visible on mobile, on hover for desktop */}
@@ -168,16 +170,16 @@ export default function MyMovies() {
                 <FilmIcon className="w-16 h-16 text-white/60" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-4">
-                {t.empty.title}
+                Nenhum filme disponível
               </h2>
               <p className="text-white/70 text-center mb-8 max-w-md">
-                {t.empty.description}
+                Não há filmes cadastrados no sistema para edição.
               </p>
               <button
                 onClick={() => router.push('/')}
                 className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
-                {t.empty.exploreButton}
+                Voltar ao Início
               </button>
             </div>
           )}
@@ -204,12 +206,13 @@ export default function MyMovies() {
         </div>
       </div>
 
-      {/* Film Player Modal */}
+      {/* Edit Film Modal */}
       {selectedFilm && (
-        <FilmPlayerModal
+        <EditFilmModal
           film={selectedFilm}
-          isOpen={showFilmModal}
+          isOpen={showEditModal}
           onClose={handleCloseModal}
+          onFilmUpdated={handleFilmUpdated}
         />
       )}
     </>

@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { X, Plus, Upload, Film, Crown, Star, Sparkles, Heart, Calendar, Clock, DollarSign, Camera, Video, Image as ImageIcon, Check } from "lucide-react"
-import { addFilm, type NewFilmData } from "@/lib/movies"
+import { X, Film as FilmIcon, Heart, Calendar, Clock, Star, DollarSign, Upload, Sparkles, Crown, Check, Trash2 } from "lucide-react"
+import { updateFilm, deleteFilm } from "@/lib/movies"
+import type { Film } from "@/lib/types"
 
 interface FilmFormData {
   title: string
@@ -26,13 +27,14 @@ interface FilmFormData {
   videoUrl: string
 }
 
-interface AddFilmModalProps {
+interface EditFilmModalProps {
+  film: Film
   isOpen: boolean
   onClose: () => void
-  onFilmAdded: () => void
+  onFilmUpdated: () => void
 }
 
-export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmModalProps) {
+export default function EditFilmModal({ film, isOpen, onClose, onFilmUpdated }: EditFilmModalProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<FilmFormData>({
     title: '',
@@ -57,7 +59,42 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [errors, setErrors] = useState<Partial<FilmFormData>>({})
+
+  // Populate form data when film changes
+  useEffect(() => {
+    if (film && isOpen) {
+      // Extract Google Drive ID from poster URL if it exists
+      let posterIdOnly = ''
+      if (film.posterUrl) {
+        const driveMatch = film.posterUrl.match(/id=([a-zA-Z0-9_-]+)/)
+        posterIdOnly = driveMatch ? driveMatch[1] : film.posterUrl
+      }
+
+      setFormData({
+        title: film.title || '',
+        title_pt: film.title_pt || '',
+        title_es: film.title_es || '',
+        title_zh: film.title_zh || '',
+        synopsis: film.synopsis || '',
+        synopsis_pt: film.synopsis_pt || '',
+        synopsis_es: film.synopsis_es || '',
+        synopsis_zh: film.synopsis_zh || '',
+        genre: film.genre || '',
+        duration: film.duration || '',
+        releaseYear: film.releaseYear || new Date().getFullYear(),
+        rating: film.rating || '',
+        price: film.price || '',
+        launch: film.launch || false,
+        main: film.main || false,
+        posterUrl: posterIdOnly,
+        trailerUrl: film.trailerUrl || '',
+        videoUrl: film.videoUrl || ''
+      })
+    }
+  }, [film, isOpen])
 
   if (!isOpen) return null
 
@@ -192,7 +229,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
 
     try {
       // Prepare data with proper type conversion and limits
-      const filmToAdd = {
+      const filmToUpdate = {
         title: formData.title.trim(),
         title_pt: formData.title_pt.trim(),
         title_es: formData.title_es.trim(),
@@ -213,9 +250,9 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         videoUrl: formData.videoUrl.trim() || undefined,
       }
 
-      const newFilm = await addFilm(filmToAdd)
+      const updatedFilm = await updateFilm(film.id, filmToUpdate)
 
-      if (newFilm) {
+      if (updatedFilm) {
         // Show success message
         setShowSuccessMessage(true)
         
@@ -227,49 +264,26 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           }
         }, 100)
         
-        // Reset form
-        setFormData({
-          title: '',
-          title_pt: '',
-          title_es: '',
-          title_zh: '',
-          synopsis: '',
-          synopsis_pt: '',
-          synopsis_es: '',
-          synopsis_zh: '',
-          genre: '',
-          duration: '',
-          releaseYear: new Date().getFullYear(),
-          rating: '',
-          price: '',
-          launch: false,
-          main: false,
-          posterUrl: '',
-          trailerUrl: '',
-          videoUrl: ''
-        })
-
         // Clear errors
         setErrors({})
 
         // Notify parent component
-        onFilmAdded()
+        onFilmUpdated()
 
-        // Wait 3 seconds then redirect to Home
+        // Wait 2 seconds then close modal
         setTimeout(() => {
           setShowSuccessMessage(false)
           onClose()
-          router.push('/')
-        }, 3000)
+        }, 2000)
       } else {
         setErrors({
-          title: 'Erro inesperado ao adicionar filme'
+          title: 'Erro inesperado ao atualizar filme'
         })
       }
     } catch (error: any) {
       // Show error to user
       setErrors({
-        title: error.message || 'Erro ao adicionar filme. Tente novamente.'
+        title: error.message || 'Erro ao atualizar filme. Tente novamente.'
       })
     } finally {
       setIsSubmitting(false)
@@ -277,9 +291,47 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
   }
 
   const handleClose = () => {
-    if (!isSubmitting && !showSuccessMessage) {
+    if (!isSubmitting && !showSuccessMessage && !isDeleting) {
       onClose()
     }
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    
+    try {
+      const success = await deleteFilm(film.id)
+      
+      if (success) {
+        // Notify parent component to reload films
+        onFilmUpdated()
+        
+        // Close modal after successful deletion
+        onClose()
+      } else {
+        setErrors({
+          title: 'Erro inesperado ao deletar filme'
+        })
+      }
+    } catch (error: any) {
+      setErrors({
+        title: error.message || 'Erro ao deletar filme. Tente novamente.'
+      })
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
+    }
+  }
+
+  const handleShowDeleteConfirm = () => {
+    setShowDeleteConfirm(true)
+    // Scroll to top of the modal to show the confirmation overlay
+    setTimeout(() => {
+      const modalElement = document.querySelector('.modal-container')
+      if (modalElement) {
+        modalElement.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }, 100)
   }
 
   return (
@@ -295,9 +347,56 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   <Check className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white text-2xl font-bold mb-2">Filme Adicionado com Sucesso! 🎬</h3>
-                  <p className="text-green-100 text-sm">Redirecionando para a página inicial em alguns segundos...</p>
+                  <h3 className="text-white font-bold text-xl">Filme Atualizado!</h3>
+                  <p className="text-white/80">As alterações foram salvas com sucesso.</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Overlay */}
+        {showDeleteConfirm && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl">
+            <div className="bg-gradient-to-r from-red-600 to-red-500 p-8 rounded-2xl border border-red-400/30 shadow-2xl max-w-md mx-4">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-xl">Confirmar Exclusão</h3>
+                  <p className="text-white/80">Esta ação não pode ser desfeita.</p>
+                </div>
+              </div>
+              <p className="text-white mb-6">
+                Tem certeza que deseja deletar o filme <strong>"{film.title}"</strong>? 
+                Todas as informações e compras relacionadas serão removidas.
+              </p>
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 px-6 py-3 bg-white text-red-600 rounded-xl font-bold hover:bg-gray-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                      <span>Deletando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Sim, Deletar</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                  className="flex-1 px-6 py-3 bg-white/20 text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
               </div>
             </div>
           </div>
@@ -323,7 +422,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               ) : i % 6 === 2 ? (
                 <Sparkles className="w-2 h-2 text-cyan-400/30" />
               ) : i % 6 === 3 ? (
-                <Film className="w-3 h-3 text-purple-400/30" />
+                <FilmIcon className="w-3 h-3 text-purple-400/30" />
               ) : i % 6 === 4 ? (
                 <Crown className="w-2 h-2 text-orange-400/30" />
               ) : (
@@ -336,22 +435,22 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         {/* Header */}
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between p-4 sm:p-8 border-b border-white/20 gap-4 sm:gap-0">
           <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
-              <Crown className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+              <FilmIcon className="w-6 h-6 text-white" />
             </div>
             <div>
               <h2 className="text-white text-2xl sm:text-3xl font-bold">
-                <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
-                  Admin Studio
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Editar Filme
                 </span>
               </h2>
-              <p className="text-gray-300 text-xs sm:text-sm">Adicionar novo filme à plataforma</p>
+              <p className="text-gray-300 text-xs sm:text-sm">Modificar informações do filme: {film.title}</p>
             </div>
           </div>
           {/* Mobile close button */}
           <button
             onClick={handleClose}
-            disabled={isSubmitting || showSuccessMessage}
+            disabled={isSubmitting || showSuccessMessage || isDeleting || showDeleteConfirm}
             className="block sm:hidden absolute top-2 right-2 text-gray-400 hover:text-white p-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
             style={{ position: 'absolute' }}
           >
@@ -360,7 +459,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           {/* Desktop close button */}
           <button
             onClick={handleClose}
-            disabled={isSubmitting || showSuccessMessage}
+            disabled={isSubmitting || showSuccessMessage || isDeleting || showDeleteConfirm}
             className="hidden sm:block text-gray-400 hover:text-white p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
           >
             <X className="w-6 h-6" />
@@ -382,14 +481,14 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               {/* Title em inglês */}
               <div className="md:col-span-2">
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <Film className="w-4 h-4 mr-2 text-purple-400" />
+                  <FilmIcon className="w-4 h-4 mr-2 text-purple-400" />
                   Título em inglês *
                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Ex: Miss Brian’s Carnival Curse"
+                  placeholder="Ex: Miss Brian's Carnival Curse"
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
                     errors.title ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
@@ -397,7 +496,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                 />
                 {errors.title && (
                   <p className="text-red-400 text-sm mt-2 flex items-center">
-                    <X className="w-4 h-4 mr-1" />
+                    <X className="w-3 h-3 mr-1" />
                     {errors.title}
                   </p>
                 )}
@@ -406,7 +505,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               {/* Title em português */}
               <div className="md:col-span-2">
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <Film className="w-4 h-4 mr-2 text-purple-400" />
+                  <FilmIcon className="w-4 h-4 mr-2 text-purple-400" />
                   Título em português *
                 </label>
                 <input
@@ -415,14 +514,14 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   onChange={(e) => handleInputChange('title_pt', e.target.value)}
                   placeholder="Ex: A Maldição do Carnaval de Miss Brian"
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
-                    errors.title ? 'border-red-500' : 'border-white/20'
+                    errors.title_pt ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
                   disabled={isSubmitting || showSuccessMessage}
                 />
-                {errors.title && (
+                {errors.title_pt && (
                   <p className="text-red-400 text-sm mt-2 flex items-center">
-                    <X className="w-4 h-4 mr-1" />
-                    {errors.title}
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.title_pt}
                   </p>
                 )}
               </div>
@@ -430,7 +529,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               {/* Title em espanhol */}
               <div className="md:col-span-2">
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <Film className="w-4 h-4 mr-2 text-purple-400" />
+                  <FilmIcon className="w-4 h-4 mr-2 text-purple-400" />
                   Título em espanhol *
                 </label>
                 <input
@@ -439,14 +538,14 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   onChange={(e) => handleInputChange('title_es', e.target.value)}
                   placeholder="Ex: La Maldición del Carnaval de Miss Brian"
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
-                    errors.title ? 'border-red-500' : 'border-white/20'
+                    errors.title_es ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
                   disabled={isSubmitting || showSuccessMessage}
                 />
-                {errors.title && (
+                {errors.title_es && (
                   <p className="text-red-400 text-sm mt-2 flex items-center">
-                    <X className="w-4 h-4 mr-1" />
-                    {errors.title}
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.title_es}
                   </p>
                 )}
               </div>
@@ -454,7 +553,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               {/* Title em mandarim */}
               <div className="md:col-span-2">
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <Film className="w-4 h-4 mr-2 text-purple-400" />
+                  <FilmIcon className="w-4 h-4 mr-2 text-purple-400" />
                   Título em mandarim *
                 </label>
                 <input
@@ -463,14 +562,14 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   onChange={(e) => handleInputChange('title_zh', e.target.value)}
                   placeholder="Ex: 布莱恩小姐的狂欢节诅咒"
                   className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
-                    errors.title ? 'border-red-500' : 'border-white/20'
+                    errors.title_zh ? 'border-red-500' : 'border-white/20'
                   } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
                   disabled={isSubmitting || showSuccessMessage}
                 />
-                {errors.title && (
+                {errors.title_zh && (
                   <p className="text-red-400 text-sm mt-2 flex items-center">
-                    <X className="w-4 h-4 mr-1" />
-                    {errors.title}
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.title_zh}
                   </p>
                 )}
               </div>
@@ -489,13 +588,18 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   } focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/20 transition-all duration-300`}
                   disabled={isSubmitting || showSuccessMessage}
                 >
-                  <option value="" className="bg-gray-800 text-gray-400">Selecione um gênero</option>
-                  {genres.map(genre => (
-                    <option key={genre} value={genre} className="bg-gray-800 text-white">{genre}</option>
+                  <option value="">Selecione um gênero</option>
+                  {genres.map((genre) => (
+                    <option key={genre} value={genre} className="bg-gray-800">
+                      {genre}
+                    </option>
                   ))}
                 </select>
                 {errors.genre && (
-                  <p className="text-red-400 text-sm mt-2">{errors.genre}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.genre}
+                  </p>
                 )}
               </div>
 
@@ -513,12 +617,17 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   } focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300`}
                   disabled={isSubmitting || showSuccessMessage}
                 >
-                  {years.map(year => (
-                    <option key={year} value={year} className="bg-gray-800 text-white">{year}</option>
+                  {years.map((year) => (
+                    <option key={year} value={year} className="bg-gray-800">
+                      {year}
+                    </option>
                   ))}
                 </select>
                 {errors.releaseYear && (
-                  <p className="text-red-400 text-sm mt-2">{errors.releaseYear}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.releaseYear}
+                  </p>
                 )}
               </div>
 
@@ -526,7 +635,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <Clock className="w-4 h-4 mr-2 text-green-400" />
-                  Duração (minutos) * <span className="text-gray-500 ml-2">(1-999)</span>
+                  Duração (minutos) *
                 </label>
                 <input
                   type="number"
@@ -541,7 +650,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.duration && (
-                  <p className="text-red-400 text-sm mt-2">{errors.duration}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.duration}
+                  </p>
                 )}
               </div>
 
@@ -549,7 +661,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <Star className="w-4 h-4 mr-2 text-yellow-400" />
-                  Avaliação * <span className="text-gray-500 ml-2">(0-9.9)</span>
+                  Avaliação *
                 </label>
                 <input
                   type="number"
@@ -565,7 +677,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.rating && (
-                  <p className="text-red-400 text-sm mt-2">{errors.rating}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.rating}
+                  </p>
                 )}
                 <p className="text-gray-400 text-xs mt-2 flex items-center">
                   <Sparkles className="w-3 h-3 mr-1" />
@@ -577,7 +692,7 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
                   <DollarSign className="w-4 h-4 mr-2 text-emerald-400" />
-                  Preço (USD) * <span className="text-gray-500 ml-2">(0-9999.99)</span>
+                  Preço (USD) *
                 </label>
                 <input
                   type="number"
@@ -593,7 +708,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.price && (
-                  <p className="text-red-400 text-sm mt-2">{errors.price}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.price}
+                  </p>
                 )}
               </div>
 
@@ -656,7 +774,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.synopsis && (
-                  <p className="text-red-400 text-sm mt-2">{errors.synopsis}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.synopsis}
+                  </p>
                 )}
               </div>
 
@@ -677,7 +798,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.synopsis_pt && (
-                  <p className="text-red-400 text-sm mt-2">{errors.synopsis_pt}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.synopsis_pt}
+                  </p>
                 )}
               </div>
 
@@ -698,7 +822,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.synopsis_es && (
-                  <p className="text-red-400 text-sm mt-2">{errors.synopsis_es}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.synopsis_es}
+                  </p>
                 )}
               </div>
 
@@ -719,7 +846,10 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.synopsis_zh && (
-                  <p className="text-red-400 text-sm mt-2">{errors.synopsis_zh}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.synopsis_zh}
+                  </p>
                 )}
               </div>
             </div>
@@ -738,8 +868,8 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
               {/* Poster URL */}
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
-                  ID do Poster *
+                  <Upload className="w-4 h-4 mr-2 text-purple-400" />
+                  ID do Google Drive (Poster) *
                 </label>
                 <input
                   type="text"
@@ -752,14 +882,20 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.posterUrl && (
-                  <p className="text-red-400 text-sm mt-2">{errors.posterUrl}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.posterUrl}
+                  </p>
                 )}
+                <p className="text-gray-400 text-xs mt-2">
+                  💡 Cole apenas o ID do arquivo do Google Drive (a parte após "/d/" na URL)
+                </p>
               </div>
 
               {/* Trailer URL */}
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <Camera className="w-4 h-4 mr-2 text-orange-400" />
+                  <Upload className="w-4 h-4 mr-2 text-orange-400" />
                   URL do Trailer *
                 </label>
                 <input
@@ -773,14 +909,17 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.trailerUrl && (
-                  <p className="text-red-400 text-sm mt-2">{errors.trailerUrl}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.trailerUrl}
+                  </p>
                 )}
               </div>
 
               {/* Video URL */}
               <div>
                 <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <Video className="w-4 h-4 mr-2 text-green-400" />
+                  <Upload className="w-4 h-4 mr-2 text-green-400" />
                   URL do Filme Completo *
                 </label>
                 <input
@@ -794,61 +933,76 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
                   disabled={isSubmitting || showSuccessMessage}
                 />
                 {errors.videoUrl && (
-                  <p className="text-red-400 text-sm mt-2">{errors.videoUrl}</p>
+                  <p className="text-red-400 text-sm mt-2 flex items-center">
+                    <X className="w-3 h-3 mr-1" />
+                    {errors.videoUrl}
+                  </p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-6 pt-2 sm:pt-6 border-t border-white/20">
-            <button
-              type="submit"
-              disabled={isSubmitting || showSuccessMessage}
-              className="px-4 py-2 sm:px-8 sm:py-4 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-xl font-bold text-base sm:text-lg hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-orange-500/25 flex items-center justify-center space-x-2 sm:space-x-3"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 sm:h-6 sm:w-6 border-b-2 border-white"></div>
-                  <span>Adicionando com amor...</span>
-                </>
-              ) : showSuccessMessage ? (
-                <>
-                  <Check className="w-4 h-4 sm:w-6 sm:h-6" />
-                  <span>Filme Adicionado!</span>
-                  <Sparkles className="w-3 h-3 sm:w-5 sm:h-5" />
-                </>
-              ) : (
-                <>
-                  <Crown className="w-4 h-4 sm:w-6 sm:h-6" />
-                  <span>Adicionar Filme</span>
-                  <Plus className="w-3 h-3 sm:w-5 sm:h-5" />
-                </>
-              )}
-            </button>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0 pt-6 border-t border-white/20">
+            {/* Main Actions - First on mobile, right side on desktop */}
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 order-1 sm:order-2">
+              <button
+                type="submit"
+                disabled={isSubmitting || showSuccessMessage || isDeleting || showDeleteConfirm}
+                className="px-4 py-2 sm:px-8 sm:py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl font-bold text-base sm:text-lg hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-blue-500/25 flex items-center justify-center space-x-2 sm:space-x-3"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Salvando...</span>
+                  </>
+                ) : showSuccessMessage ? (
+                  <>
+                    <Check className="w-5 h-5" />
+                    <span>Atualizado!</span>
+                  </>
+                ) : (
+                  <>
+                    <FilmIcon className="w-5 h-5" />
+                    <span>Salvar Alterações</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={isSubmitting || showSuccessMessage || isDeleting || showDeleteConfirm}
+                className="px-4 py-2 sm:px-8 sm:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
+              >
+                Cancelar
+              </button>
+            </div>
+
+            {/* Delete Button - Last on mobile, left side on desktop */}
             <button
               type="button"
-              onClick={handleClose}
-              disabled={isSubmitting || showSuccessMessage}
-              className="px-4 py-2 sm:px-8 sm:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
+              onClick={handleShowDeleteConfirm}
+              disabled={isSubmitting || showSuccessMessage || isDeleting || showDeleteConfirm}
+              className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none shadow-lg hover:shadow-red-500/25 flex items-center justify-center space-x-2 order-2 sm:order-1"
             >
-              Cancelar
+              <Trash2 className="w-4 h-4" />
+              <span>Deletar Filme</span>
             </button>
           </div>
         </form>
 
-        {/* Pride Footer */}
+        {/* Footer */}
         <div className="relative z-10 p-2 sm:p-6 border-t border-white/20">
           <div className="text-center">
             <div className="flex justify-center space-x-1 mb-3">
-              {['🎬', '🌈', '👑', '✨', '❤️', '🧡', '💛', '💚', '💙', '💜'].map((emoji, i) => (
-                <span key={i} className="text-lg animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}>
+              {['🎬', '✨', '📝', '🎭', '🌟'].map((emoji, i) => (
+                <span key={i} className="text-xl animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}>
                   {emoji}
                 </span>
               ))}
             </div>
             <p className="text-gray-300 text-sm">
-              🎭 Criando conteúdo diverso e inclusivo para nossa comunidade 🎭
+              ✏️ Editando conteúdo com cuidado e precisão ✏️
             </p>
           </div>
         </div>

@@ -127,6 +127,12 @@ export default function Navbar() {
                   {t('navbar.myMovies')}
                 </Link>
               )}
+
+              {user?.role == 'ADMIN' &&(
+                <Link href="/edit-movie" className={getLinkClasses("/edit-movie")}>
+                  {t('navbar.editMovie')}
+                </Link>
+              )}
             </div>
           </div>
 

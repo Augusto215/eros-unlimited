@@ -18,7 +18,8 @@
     "myMovies": "Mis películas",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
-    "loggingOut": "Cerrando sesión..."
+    "loggingOut": "Cerrando sesión...",
+    "editMovie": "Editar película"
   },
   "language": {
     "select": "Idioma",
