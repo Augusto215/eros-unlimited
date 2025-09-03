@@ -365,23 +365,23 @@ export default function FilmPlayerModal({
             <div className="absolute inset-0 z-30 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
               <div className="bg-gray-900 rounded-lg p-6 md:p-8 max-w-md w-full border border-purple-500/30">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-4">
-                  Continuar assistindo?
+                  {t('watch.continueWatching')}
                 </h3>
                 <p className="text-gray-300 mb-6 text-sm md:text-base">
-                  Você parou em {formatTime(savedProgress)}. Deseja continuar de onde parou?
+                  {t('watch.pauseWatch')} {formatTime(savedProgress)}. {t('watch.watchDesire')}
                 </p>
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                   <button
                     onClick={() => handleContinueWatching(true)}
                     className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors text-sm md:text-base"
                   >
-                    Continuar de {formatTime(savedProgress)}
+                    {t('watch.continue')} {formatTime(savedProgress)}
                   </button>
                   <button
                     onClick={() => handleContinueWatching(false)}
                     className="flex-1 bg-gray-700 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors text-sm md:text-base"
                   >
-                    Começar do início
+                    {t('watch.restart')}
                   </button>
                 </div>
               </div>

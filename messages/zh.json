@@ -3,6 +3,13 @@
     "title": "关于 Eros Unlimited",
     "text": "希腊神话中的爱神厄洛斯常与爱与美联系在一起，但事实上厄洛斯也很世俗。他最喜欢的消遣是降临人间，探索人类的性。Eros Unlimited Production 希望用不同的视角、独特的角度，照亮禁忌的快乐、禁忌、非顺性别和非顺性取向。希望你享受厄洛斯，让他用爱的箭射中你。"
   },
+  "watch": {
+    "continueWatching": "继续观看吗？",
+    "pauseWatch": "您暂停在",
+    "watchDesire": "您想从暂停的地方继续吗？",
+    "continue": "从...继续",
+    "restart": "从头开始"
+  },
   "navbar": {
     "home": "首页",
     "about": "关于",
