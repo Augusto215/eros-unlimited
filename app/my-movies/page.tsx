@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Play, Film as FilmIcon, User } from "lucide-react"
 import { initializeAuth, getCurrentUser } from "@/lib/auth"
+import { getMovies } from "@/lib/movies"
 import { getUserPurchasedFilms } from "@/lib/purchases"
 import { useMyMoviesTranslation, useTranslation } from "@/hooks/useTranslation"
 import type { Film } from "@/lib/types"
@@ -30,9 +31,15 @@ export default function MyMovies() {
           router.push('/')
           return
         }
-        
-        // Busca filmes comprados diretamente do banco
-        const purchasedFilms = await getUserPurchasedFilms(user.id)
+
+        let purchasedFilms: Film[] = []
+
+        if (user.role === 'TEST') {
+          purchasedFilms = await getMovies()
+        } else {
+          // Busca filmes comprados diretamente do banco
+          purchasedFilms = await getUserPurchasedFilms(user.id)
+        }
                 
         setFilms(purchasedFilms)
         
@@ -105,7 +112,7 @@ export default function MyMovies() {
 
           {/* Films Grid */}
           {films.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:items-start px-6">
               {films.map((film, idx) => {
                 // ...existing code...
                 return (
