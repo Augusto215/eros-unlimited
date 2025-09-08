@@ -328,7 +328,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
           src={film.posterUrl || "/placeholder.svg"} 
           alt={getLocalizedTitle(film, locale)}
           fill 
-          className="object-contain bg-black transition-transform duration-500 hover:scale-110" 
+          className="bg-black object-contains transition-transform duration-500 hover:scale-110" 
         />
         
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />

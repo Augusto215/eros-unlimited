@@ -57,18 +57,8 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
       setCurrentTime(new Date())
     }, 60000)
 
-    // Video autoplay logic with longer delay - only on desktop
-    let videoTimer: NodeJS.Timeout
-    if (!isMobile) {
-      videoTimer = setTimeout(() => {
-        setShowVideo(true)
-        setTimeout(() => setShowVideo(false), 8000)
-      }, 3000)
-    }
-
     return () => {
       clearInterval(timer)
-      if (videoTimer) clearTimeout(videoTimer)
       window.removeEventListener('resize', checkIsMobile)
     }
   }, [isMobile])
@@ -111,6 +101,12 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
   const handleMouseEnter = () => {
     if (!isMobile) {
       setIsExpanded(true)
+      if (film.trailerUrl) {
+        // Pequeno delay para suavizar a transição
+        setTimeout(() => {
+          setShowVideo(true)
+        }, 200)
+      }
     }
   }
 
@@ -424,7 +420,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                           src={film.posterUrl || "/placeholder.svg"}
                           alt={getLocalizedTitle(film, locale)}
                           fill
-                          className="object-contain"
+                          className="bg-black object-contains"
                         />
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />

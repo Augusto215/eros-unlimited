@@ -69,7 +69,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 src={film.posterUrl || "/placeholder.svg"}
                 alt={getLocalizedTitle(film, locale)}
                 fill
-                className="object-contain"
+                className="bg-black object-contains"
               />
               {/* Rainbow gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-purple-900/30 to-transparent" />
