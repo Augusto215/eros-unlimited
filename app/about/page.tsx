@@ -150,7 +150,7 @@ export default function About() {
                     <p className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
                       A Fantasia de Eros
                     </p>
-                    <p className="text-lg text-gray-300 mt-2">...no Alorro</p>
+                    <p className="text-lg text-gray-300 mt-2">...no aterro</p>
                   </div>
                 </div>
               </div>
