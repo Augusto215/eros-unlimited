@@ -112,6 +112,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
       setIsPlaying(false)
       setShowControls(true)
       setVideoLoaded(false)
+      setIsExpanded(false) 
       if (videoRef.current) {
         videoRef.current.pause()
         videoRef.current.currentTime = 0
@@ -326,7 +327,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
       style={{ transformOrigin: 'center center' }}
     >
       {/* Normal card */}
-      <div className={`relative aspect-[2/3] md:w-56 w-full rounded-xl overflow-hidden shadow-lg transition-all duration-500 ${
+      <div className={`relative aspect-[2/3] w-full rounded-xl overflow-hidden shadow-lg transition-all duration-500 ${
         showExpandedCard ? 'md:opacity-0 opacity-100' : 'opacity-100 hover:scale-105'
       }`}>
         <Image 
@@ -430,7 +431,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
       {showExpandedCard && (
         <>
           {/* Desktop version */}
-          <div className="hidden md:block absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-80 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700 z-50 transition-all duration-500">
+          <div className="hidden md:block absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-4 w-80 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700 z-50 transition-all duration-500">
             {/* Video/Poster section */}
             <div className="relative aspect-video bg-black">
               {film.trailerUrl ? (
@@ -438,6 +439,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                   ref={videoRef}
                   className="w-full h-full object-cover"
                   muted={isMuted}
+                  poster={film.img_1 || "/placeholder.svg"}
                   loop
                   onLoadedData={handleVideoLoad}
                   onCanPlay={handleVideoLoad}
@@ -604,6 +606,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
                     ref={mobileVideoRef}
                     className="w-full h-full object-cover"
                     muted={isMuted}
+                    poster={film.img_1 || "/placeholder.svg"}
                     loop
                     onLoadedData={handleVideoLoad}
                     onCanPlay={handleVideoLoad}
@@ -788,23 +791,7 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
 }
 
 function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, accentColor = "pink" }: FilmRowProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [hasExpandedCard, setHasExpandedCard] = useState(false)
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 400
-      const currentScroll = scrollContainerRef.current.scrollLeft
-      const newPosition = direction === "left" 
-        ? currentScroll - scrollAmount 
-        : currentScroll + scrollAmount
-      
-      scrollContainerRef.current.scrollTo({
-        left: newPosition,
-        behavior: "smooth",
-      })
-    }
-  }
 
   const accentColors = {
     pink: "from-pink-400 to-purple-400",
@@ -830,69 +817,21 @@ function ModernFilmRow({ title, films, purchasedFilmIds, onFilmClick, icon, acce
         </div>
       </div>
 
-      {/* Films container - Responsive layout */}
-      <div className="relative group">
-        {/* Navigation buttons - Hidden on mobile */}
-        <button
-          onClick={() => scroll("left")}
-          className={`hidden md:block absolute left-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
-            hasExpandedCard ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
-          }`}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        
-        <button
-          onClick={() => scroll("right")}
-          className={`hidden md:block absolute right-6 top-1/2 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:bg-black/90 hover:scale-110 ${
-            hasExpandedCard ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
-          }`}
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-
-        {/* Extended hover area for better UX - Hidden on mobile */}
-        <div className="absolute inset-0 z-10 pointer-events-none hidden md:block" />
-
-        {/* Films container - Horizontal scroll on desktop, vertical grid on mobile */}
-        <div className="md:px-4 md:py-8">
-          {/* Mobile: Vertical grid */}
-          <div className="grid grid-cols-1 gap-6 px-4 md:hidden">
-            {films
-              .filter(film => !purchasedFilmIds.includes(film.id))
-              .map((film) => (
-                <ModernFilmCard
-                  key={film.id}
-                  film={film}
-                  isPurchased={false}
-                  onFilmClick={onFilmClick}
-                  onExpandedChange={setHasExpandedCard}
-                />
-            ))}
-          </div>
-
-          {/* Desktop: Horizontal scroll */}
-          <div
-            ref={scrollContainerRef}
-            className="hidden md:flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 pt-16 relative z-10"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {/* Padding esquerdo */}
-            <div className="w-8 flex-shrink-0"></div>
-            {films
-              .filter(film => !purchasedFilmIds.includes(film.id))
-              .map((film) => (
-                <ModernFilmCard
-                  key={film.id}
-                  film={film}
-                  isPurchased={false}
-                  onFilmClick={onFilmClick}
-                  onExpandedChange={setHasExpandedCard}
-                />
-            ))}
-            {/* Padding direito */}
-            <div className="w-8 flex-shrink-0"></div>
-          </div>
+      {/* Films container - Responsive grid layout */}
+      <div className="px-4 md:px-6 md:pb-48 lg:pb-96">
+        {/* Responsive grid - 1 filme por linha no mobile, máximo 5 no desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          {films
+            .filter(film => !purchasedFilmIds.includes(film.id))
+            .map((film) => (
+              <ModernFilmCard
+                key={film.id}
+                film={film}
+                isPurchased={false}
+                onFilmClick={onFilmClick}
+                onExpandedChange={setHasExpandedCard}
+              />
+          ))}
         </div>
       </div>
     </div>

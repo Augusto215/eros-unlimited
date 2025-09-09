@@ -245,6 +245,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   ref={videoRef}
                   className="w-full h-full object-cover"
                   muted={isMuted}
+                  poster={film.img_1 || "/placeholder.svg"}
                   onPlay={() => setIsPlayingTrailer(true)}
                   onPause={() => setIsPlayingTrailer(false)}
                   onEnded={() => setIsPlayingTrailer(false)}
@@ -450,14 +451,8 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   src={film.posterUrl || "/placeholder.svg"}
                   alt={`${getLocalizedTitle(film, locale)} - Poster`}
                   fill
-                  className="object-cover hover:scale-105 transition-transform duration-300"
+                  className="object-cover transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-2 left-2 right-2">
-                  <span className="text-white text-sm font-medium bg-black/60 backdrop-blur-sm px-2 py-1 rounded">
-                    Poster Principal
-                  </span>
-                </div>
               </div>
 
               {/* Images Gallery - Horizontal layout */}
@@ -469,7 +464,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                       src={film.img_1}
                       alt={`${getLocalizedTitle(film, locale)} - Imagem 1`}
                       fill
-                      className="object-cover hover:scale-105 transition-transform duration-300"
+                      className="object-cover transition-transform duration-300"
                     />
                   </div>
                 )}
@@ -481,7 +476,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                       src={film.img_2}
                       alt={`${getLocalizedTitle(film, locale)} - Imagem 2`}
                       fill
-                      className="object-cover hover:scale-105 transition-transform duration-300"
+                      className="object-cover transition-transform duration-300"
                     />
                   </div>
                 )}
@@ -493,7 +488,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                       src={film.img_3}
                       alt={`${getLocalizedTitle(film, locale)} - Imagem 3`}
                       fill
-                      className="object-cover hover:scale-105 transition-transform duration-300"
+                      className="object-cover transition-transform duration-300"
                     />
                   </div>
                 )}
