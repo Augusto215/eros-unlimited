@@ -23,6 +23,9 @@ const transformDbFilmToFilm = (dbFilm: any): Film => ({
   launch: dbFilm.launch,
   main: dbFilm.main,
   posterUrl: dbFilm.poster_url,
+  img_1: dbFilm.img_1 || '',
+  img_2: dbFilm.img_2 || '',
+  img_3: dbFilm.img_3 || '',
   trailerUrl: dbFilm.trailer_url,
   videoUrl: dbFilm.movie_url,
   created_at: dbFilm.created_at,
@@ -46,6 +49,9 @@ export interface NewFilmData {
   launch: boolean
   main: boolean
   posterUrl?: string
+  img_1?: string
+  img_2?: string
+  img_3?: string
   trailerUrl?: string
   videoUrl?: string
 }
@@ -174,6 +180,9 @@ export const addFilm = async (filmData: NewFilmData): Promise<Film | null> => {
       launch: filmData.launch,
       main: filmData.main,
       poster_url,
+      img_1: filmData.img_1?.trim() || '',
+      img_2: filmData.img_2?.trim() || '',
+      img_3: filmData.img_3?.trim() || '',
       trailer_url,
       movie_url,
     }
@@ -219,6 +228,9 @@ export const updateFilm = async (filmId: string, filmData: Partial<NewFilmData>)
     if (filmData.launch !== undefined) updateData.launch = filmData.launch
     if (filmData.main !== undefined) updateData.main = filmData.main
     if (filmData.posterUrl !== undefined) updateData.poster_url = filmData.posterUrl
+    if (filmData.img_1 !== undefined) updateData.img_1 = filmData.img_1
+    if (filmData.img_2 !== undefined) updateData.img_2 = filmData.img_2
+    if (filmData.img_3 !== undefined) updateData.img_3 = filmData.img_3
     if (filmData.trailerUrl !== undefined) updateData.trailer_url = filmData.trailerUrl
     if (filmData.videoUrl !== undefined) updateData.movie_url = filmData.videoUrl
 

@@ -10,6 +10,9 @@ export interface Film {
   synopsis_zh: string
   price: number
   posterUrl: string
+  img_1: string
+  img_2: string
+  img_3: string
   trailerUrl: string
   videoUrl: string
   genre: string

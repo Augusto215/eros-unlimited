@@ -55,6 +55,9 @@ export interface Database {
           rating: number
           price: number
           poster_url: string | null
+          img_1?: string | null
+          img_2?: string | null
+          img_3?: string | null
           trailer_url: string | null
           movie_url: string | null
           created_at: string
@@ -75,6 +78,9 @@ export interface Database {
           rating: number
           price: number
           poster_url?: string | null
+          img_1?: string | null
+          img_2?: string | null
+          img_3?: string | null
           trailer_url?: string | null
           movie_url?: string | null
           created_at?: string
@@ -95,6 +101,9 @@ export interface Database {
           rating?: number
           price?: number
           poster_url?: string | null
+          img_1?: string | null
+          img_2?: string | null
+          img_3?: string | null
           trailer_url?: string | null
           movie_url?: string | null
           created_at?: string

@@ -305,18 +305,6 @@ Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeStr
                         </a>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-sm">{partner.phone}</p>
-                        <a href="tel:+13233837144" className="text-pink-400 font-semibold text-base sm:text-lg hover:text-purple-400 transition-colors">
-                          323 383 71 44
-                        </a>
-                      </div>
-                    </div>
                   </div>
                 </div>
 

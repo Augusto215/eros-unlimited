@@ -22,6 +22,9 @@ interface FilmFormData {
   launch: boolean
   main: boolean
   posterUrl: string
+  img_1: string
+  img_2: string
+  img_3: string
   trailerUrl: string
   videoUrl: string
 }
@@ -51,6 +54,9 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
     launch: false,
     main: false,
     posterUrl: '',
+    img_1: '',
+    img_2: '',
+    img_3: '',
     trailerUrl: '',
     videoUrl: ''
   })
@@ -209,6 +215,9 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
         launch: formData.launch,
         main: formData.main,
         posterUrl: formData.posterUrl.trim() ? `https://drive.usercontent.google.com/download?id=${formData.posterUrl.trim()}` : undefined,
+        img_1: formData.img_1.trim() ? `https://drive.usercontent.google.com/download?id=${formData.img_1.trim()}` : undefined,
+        img_2: formData.img_2.trim() ? `https://drive.usercontent.google.com/download?id=${formData.img_2.trim()}` : undefined, 
+        img_3: formData.img_3.trim() ? `https://drive.usercontent.google.com/download?id=${formData.img_3.trim()}` : undefined,
         trailerUrl: formData.trailerUrl.trim() || undefined,
         videoUrl: formData.videoUrl.trim() || undefined,
       }
@@ -245,6 +254,9 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
           launch: false,
           main: false,
           posterUrl: '',
+          img_1: '',
+          img_2: '',
+          img_3: '',
           trailerUrl: '',
           videoUrl: ''
         })
@@ -735,25 +747,95 @@ export default function AddFilmModal({ isOpen, onClose, onFilmAdded }: AddFilmMo
             </h3>
             
             <div className="space-y-2 sm:space-y-6">
-              {/* Poster URL */}
-              <div>
-                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
-                  ID do Poster *
-                </label>
-                <input
-                  type="text"
-                  value={formData.posterUrl}
-                  onChange={(e) => handleInputChange('posterUrl', e.target.value)}
-                  placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
-                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
-                    errors.posterUrl ? 'border-red-500' : 'border-white/20'
-                  } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
-                  disabled={isSubmitting || showSuccessMessage}
-                />
-                {errors.posterUrl && (
-                  <p className="text-red-400 text-sm mt-2">{errors.posterUrl}</p>
-                )}
+              {/* Poster e Imagem 1 na mesma linha */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
+                {/* Poster URL */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
+                    ID do Poster *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.posterUrl}
+                    onChange={(e) => handleInputChange('posterUrl', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.posterUrl ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.posterUrl && (
+                    <p className="text-red-400 text-sm mt-2">{errors.posterUrl}</p>
+                  )}
+                </div>
+
+                {/* Imagem 1 */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
+                    ID da imagem 1
+                  </label>
+
+                  <input
+                    type="text"
+                    value={formData.img_1}
+                    onChange={(e) => handleInputChange('img_1', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.img_1 ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.img_1 && (
+                    <p className="text-red-400 text-sm mt-2">{errors.img_1}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Imagem 2 e Imagem 3 na mesma linha */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
+                {/* Imagem 2 */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
+                    ID da imagem 2
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.img_2}
+                    onChange={(e) => handleInputChange('img_2', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.img_2 ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.img_2 && (
+                    <p className="text-red-400 text-sm mt-2">{errors.img_2}</p>
+                  )}
+                </div>
+
+                {/* Imagem 3 */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
+                    ID da imagem 3
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.img_3}
+                    onChange={(e) => handleInputChange('img_3', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.img_3 ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.img_3 && (
+                    <p className="text-red-400 text-sm mt-2">{errors.img_3}</p>
+                  )}
+                </div>
               </div>
 
               {/* Trailer URL */}

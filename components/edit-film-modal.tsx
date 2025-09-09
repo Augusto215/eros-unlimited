@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { X, Film as FilmIcon, Heart, Calendar, Clock, Star, DollarSign, Upload, Sparkles, Crown, Check, Trash2 } from "lucide-react"
+import { X, Film as FilmIcon, Heart, Calendar, Clock, Star, DollarSign, Upload, Sparkles, Crown, Check, Trash2, Image as ImageIcon, Camera } from "lucide-react"
 import { updateFilm, deleteFilm } from "@/lib/movies"
 import type { Film } from "@/lib/types"
 
@@ -23,6 +23,9 @@ interface FilmFormData {
   launch: boolean
   main: boolean
   posterUrl: string
+  img_1: string
+  img_2: string
+  img_3: string
   trailerUrl: string
   videoUrl: string
 }
@@ -53,6 +56,9 @@ export default function EditFilmModal({ film, isOpen, onClose, onFilmUpdated }: 
     launch: false,
     main: false,
     posterUrl: '',
+    img_1: '',
+    img_2: '', 
+    img_3: '',
     trailerUrl: '',
     videoUrl: ''
   })
@@ -73,6 +79,25 @@ export default function EditFilmModal({ film, isOpen, onClose, onFilmUpdated }: 
         posterIdOnly = driveMatch ? driveMatch[1] : film.posterUrl
       }
 
+      // Extract Google Drive IDs from image URLs if they exist
+      let img1IdOnly = ''
+      if (film.img_1) {
+        const driveMatch = film.img_1.match(/id=([a-zA-Z0-9_-]+)/)
+        img1IdOnly = driveMatch ? driveMatch[1] : film.img_1
+      }
+
+      let img2IdOnly = ''
+      if (film.img_2) {
+        const driveMatch = film.img_2.match(/id=([a-zA-Z0-9_-]+)/)
+        img2IdOnly = driveMatch ? driveMatch[1] : film.img_2
+      }
+
+      let img3IdOnly = ''
+      if (film.img_3) {
+        const driveMatch = film.img_3.match(/id=([a-zA-Z0-9_-]+)/)
+        img3IdOnly = driveMatch ? driveMatch[1] : film.img_3
+      }
+
       setFormData({
         title: film.title || '',
         title_pt: film.title_pt || '',
@@ -90,6 +115,9 @@ export default function EditFilmModal({ film, isOpen, onClose, onFilmUpdated }: 
         launch: film.launch || false,
         main: film.main || false,
         posterUrl: posterIdOnly,
+        img_1: img1IdOnly,
+        img_2: img2IdOnly,
+        img_3: img3IdOnly,
         trailerUrl: film.trailerUrl || '',
         videoUrl: film.videoUrl || ''
       })
@@ -246,6 +274,9 @@ export default function EditFilmModal({ film, isOpen, onClose, onFilmUpdated }: 
         launch: formData.launch,
         main: formData.main,
         posterUrl: formData.posterUrl.trim() ? `https://drive.usercontent.google.com/download?id=${formData.posterUrl.trim()}` : undefined,
+        img_1: formData.img_1.trim() ? `https://drive.usercontent.google.com/download?id=${formData.img_1.trim()}` : undefined,
+        img_2: formData.img_2.trim() ? `https://drive.usercontent.google.com/download?id=${formData.img_2.trim()}` : undefined,
+        img_3: formData.img_3.trim() ? `https://drive.usercontent.google.com/download?id=${formData.img_3.trim()}` : undefined,
         trailerUrl: formData.trailerUrl.trim() || undefined,
         videoUrl: formData.videoUrl.trim() || undefined,
       }
@@ -865,31 +896,109 @@ export default function EditFilmModal({ film, isOpen, onClose, onFilmUpdated }: 
             </h3>
             
             <div className="space-y-2 sm:space-y-6">
-              {/* Poster URL */}
-              <div>
-                <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
-                  <Upload className="w-4 h-4 mr-2 text-purple-400" />
-                  ID do Google Drive (Poster) *
-                </label>
-                <input
-                  type="text"
-                  value={formData.posterUrl}
-                  onChange={(e) => handleInputChange('posterUrl', e.target.value)}
-                  placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
-                  className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
-                    errors.posterUrl ? 'border-red-500' : 'border-white/20'
-                  } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
-                  disabled={isSubmitting || showSuccessMessage}
-                />
-                {errors.posterUrl && (
-                  <p className="text-red-400 text-sm mt-2 flex items-center">
-                    <X className="w-3 h-3 mr-1" />
-                    {errors.posterUrl}
+              {/* Poster e Imagem 1 na mesma linha */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
+                {/* Poster URL */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <Upload className="w-4 h-4 mr-2 text-purple-400" />
+                    ID do Poster *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.posterUrl}
+                    onChange={(e) => handleInputChange('posterUrl', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.posterUrl ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.posterUrl && (
+                    <p className="text-red-400 text-sm mt-2 flex items-center">
+                      <X className="w-3 h-3 mr-1" />
+                      {errors.posterUrl}
+                    </p>
+                  )}
+                  <p className="text-gray-400 text-xs mt-2">
+                    💡 Cole apenas o ID do arquivo do Google Drive (a parte após "/d/" na URL)
                   </p>
-                )}
-                <p className="text-gray-400 text-xs mt-2">
-                  💡 Cole apenas o ID do arquivo do Google Drive (a parte após "/d/" na URL)
-                </p>
+                </div>
+
+                {/* Imagem 1 */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
+                    ID da imagem 1
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.img_1}
+                    onChange={(e) => handleInputChange('img_1', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.img_1 ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.img_1 && (
+                    <p className="text-red-400 text-sm mt-2 flex items-center">
+                      <X className="w-3 h-3 mr-1" />
+                      {errors.img_1}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Imagem 2 e Imagem 3 na mesma linha */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
+                {/* Imagem 2 */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
+                    ID da imagem 2
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.img_2}
+                    onChange={(e) => handleInputChange('img_2', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.img_2 ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.img_2 && (
+                    <p className="text-red-400 text-sm mt-2 flex items-center">
+                      <X className="w-3 h-3 mr-1" />
+                      {errors.img_2}
+                    </p>
+                  )}
+                </div>
+
+                {/* Imagem 3 */}
+                <div>
+                  <label className="block text-gray-200 text-sm font-medium mb-3 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
+                    ID da imagem 3
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.img_3}
+                    onChange={(e) => handleInputChange('img_3', e.target.value)}
+                    placeholder="1TNfgCz6IrRTPZdZfoUOx1dNLBXqyXiXj"
+                    className={`w-full p-4 bg-white/10 backdrop-blur-sm text-white rounded-xl border ${
+                      errors.img_3 ? 'border-red-500' : 'border-white/20'
+                    } focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-300`}
+                    disabled={isSubmitting || showSuccessMessage}
+                  />
+                  {errors.img_3 && (
+                    <p className="text-red-400 text-sm mt-2 flex items-center">
+                      <X className="w-3 h-3 mr-1" />
+                      {errors.img_3}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Trailer URL */}
