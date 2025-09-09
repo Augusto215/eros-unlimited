@@ -93,6 +93,8 @@
     "loginPasswordPlaceholder": "••••••••"
   },
   "movies": {
+    "trailer": "预告片",
+    "fullScreen": "全屏",
     "title": "电影",
     "genres": "类型",
     "duration": "时长",

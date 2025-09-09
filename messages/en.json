@@ -93,6 +93,8 @@
     "loginPasswordPlaceholder": "••••••••"
   },
   "movies": {
+    "trailer": "Trailer",
+    "fullScreen": "Full Screen",
     "title": "Movies",
     "genres": "Genres",
     "duration": "Duration",

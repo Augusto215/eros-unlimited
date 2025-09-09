@@ -121,8 +121,13 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
 
   const handleMobileClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    setShowExpandedCard(true)
-    onExpandedChange?.(true)
+    // On mobile, clicking the poster goes directly to purchase modal
+    if (window.innerWidth < 768) {
+      onFilmClick(film)
+    } else {
+      setShowExpandedCard(true)
+      onExpandedChange?.(true)
+    }
   }
 
   const closeMobileModal = () => {
@@ -492,9 +497,21 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
             <div className="p-4 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-white font-bold text-lg mb-2">
-                    {getLocalizedTitle(film, locale)}
-                  </h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-white font-bold text-lg">
+                      {getLocalizedTitle(film, locale)}
+                    </h3>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFilmClick(film)
+                      }}
+                      className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                    >
+                      <span>{t('movies.fullScreen')}</span>
+                      <Info className="w-3 h-3" />
+                    </button>
+                  </div>
                   
                   <div className="flex items-center space-x-3 text-sm text-gray-300 mb-3">
                     <div className="flex items-center space-x-1">
@@ -668,9 +685,23 @@ function ModernFilmCard({ film, isPurchased, onFilmClick, onExpandedChange }: {
               {/* Film info section */}
               <div className="flex-1 p-6 space-y-4 bg-gray-900">
                 <div>
-                  <h3 className="text-white font-bold text-2xl mb-3">
-                    {getLocalizedTitle(film, locale)}
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-bold text-2xl">
+                      {getLocalizedTitle(film, locale)}
+                    </h3>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFilmClick(film)
+                        closeMobileModal()
+                      }}
+                      className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                    >
+                      <span>{t('movies.fullScreen')}</span>
+                      <Info className="w-4 h-4" />
+                    </button>
+                  </div>
+
                   
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300 mb-4">
                     <div className="flex items-center space-x-1">

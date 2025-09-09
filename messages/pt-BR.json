@@ -93,6 +93,8 @@
     "loginPasswordPlaceholder": "••••••••"
   },
   "movies": {
+    "trailer": "Trailer",
+    "fullScreen": "Tela Cheia",
     "title": "Filmes",
     "genres": "Gêneros",
     "duration": "Duração",
