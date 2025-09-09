@@ -462,7 +462,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
                     <Image
                       src={film.img_1}
-                      alt={`${getLocalizedTitle(film, locale)} - Imagem 1`}
+                      alt={getLocalizedTitle(film, locale)}
                       fill
                       className="object-cover transition-transform duration-300"
                     />
@@ -474,7 +474,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
                     <Image
                       src={film.img_2}
-                      alt={`${getLocalizedTitle(film, locale)} - Imagem 2`}
+                      alt={getLocalizedTitle(film, locale)}
                       fill
                       className="object-cover transition-transform duration-300"
                     />
@@ -486,7 +486,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                   <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
                     <Image
                       src={film.img_3}
-                      alt={`${getLocalizedTitle(film, locale)} - Imagem 3`}
+                      alt={getLocalizedTitle(film, locale)}
                       fill
                       className="object-cover transition-transform duration-300"
                     />
