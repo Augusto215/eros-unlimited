@@ -224,14 +224,14 @@ export default function About() {
       </section>
 
       {/* Director's Biography */}
-      <section className="py-24 bg-black">
+      <section className="py-8 sm:py-24 bg-black">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-4">
-          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-12 sm:mb-16 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
             {about.directorBioTitle}
           </h2>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 sm:gap-12 lg:gap-16 items-center">
+            <div className="space-y-4 sm:space-y-6">
               <div className="flex items-center space-x-4">
                 <div className="w-4 h-4 bg-cyan-400 rounded-full" />
                 <h3 className="text-xl sm:text-2xl font-bold text-cyan-400">{about.directorName}</h3>
@@ -239,12 +239,12 @@ export default function About() {
               
               <div className="space-y-4 text-gray-300 text-base sm:text-lg">
                 <div className="flex items-center space-x-3">
-                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 flex-shrink-0" />
                   <span className="text-sm sm:text-base">{about.bornIn}</span>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 flex-shrink-0" />
                   <span className="text-sm sm:text-base">{about.graduated}</span>
                 </div>
               </div>
@@ -257,17 +257,15 @@ export default function About() {
             </div>
 
             <div className="relative">
-              <div className="relative w-full h-96 rounded-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 z-10" />
-                <div className="w-full h-full bg-gradient-to-br from-gray-900 via-cyan-900 to-blue-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-32 h-32 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-4xl">🎭</span>
-                    </div>
-                    <p className="text-lg sm:text-xl font-bold text-cyan-400">{about.directorName}</p>
-                    <p className="text-gray-300 text-sm sm:text-base">{about.directorProducer}</p>
-                  </div>
-                </div>
+              <div className="relative w-full h-[35rem] rounded-2xl overflow-hidden">
+                <div className="absolute inset-0" />
+                <Image 
+                  src="https://drive.google.com/uc?export=download&id=12zn7_fX89gwOZc0pQnX2OLV9CCzmwv-E"
+                  alt="Diretor"
+                  fill
+                  className="object-contain transition-transform duration-500 hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-20" />
               </div>
             </div>
           </div>
@@ -275,7 +273,7 @@ export default function About() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-24 bg-gradient-to-r from-pink-900/40 via-purple-900/40 to-blue-900/40">
+      <section className="py-16 sm:py-24 bg-gradient-to-r from-pink-900/40 via-purple-900/40 to-blue-900/40">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-white">{about.joinJourneyTitle}</h2>
           <p className="text-lg sm:text-xl text-gray-300 mb-12 leading-relaxed">
