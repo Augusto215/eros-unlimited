@@ -94,6 +94,7 @@
   },
   "movies": {
     "trailer": "Trailer",
+    "galeryImages": "Galeria de Imagens",
     "fullScreen": "Tela Cheia",
     "title": "Filmes",
     "genres": "Gêneros",

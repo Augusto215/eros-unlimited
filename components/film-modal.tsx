@@ -442,7 +442,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
           <div className="mb-8">
             <h3 className="text-white text-xl font-semibold mb-4 flex items-center">
               <Sparkles className="w-5 h-5 mr-2 text-cyan-400" />
-              Galeria de Imagens
+              {t('movies.galeryImages')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Poster */}

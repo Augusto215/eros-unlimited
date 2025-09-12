@@ -95,6 +95,7 @@
   "movies": {
     "trailer": "Trailer",
     "fullScreen": "Full Screen",
+    "galeryImages": "Image Gallery",
     "title": "Movies",
     "genres": "Genres",
     "duration": "Duration",
