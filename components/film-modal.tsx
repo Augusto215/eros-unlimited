@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { X, Play, Pause, Volume2, VolumeX, Star, Clock, Calendar, Film, Heart, Crown, Sparkles, Maximize2, Minimize2, RotateCcw, RotateCw } from "lucide-react"
 import { useMoviesTranslation, useTranslation } from "@/hooks/useTranslation"
+import { getCurrentUser } from "@/lib/auth"
 import type { Film as FilmType } from "@/lib/types"
 import Image from "next/image"
 
@@ -18,6 +20,7 @@ interface FilmModalProps {
 export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurchase, onPlay }: FilmModalProps) {
   const movies = useMoviesTranslation()
   const { t, locale } = useTranslation()
+  const router = useRouter()
   const [isPlayingTrailer, setIsPlayingTrailer] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const [showControls, setShowControls] = useState(true)
@@ -171,6 +174,15 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
   }
 
   const handlePurchase = () => {
+    // Verificar se o usuário está logado antes de proceder com a compra
+    const user = getCurrentUser()
+    if (!user) {
+      // Redirecionar para login se não estiver autenticado
+      router.push('/login')
+      return
+    }
+    
+    // Só procede com a compra se o usuário estiver logado
     if (film) {
       onPurchase(film.id)
     }

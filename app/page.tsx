@@ -148,26 +148,12 @@ export default function Home() {
   }
 
   const handleFilmClick = (film: Film) => {
-    // Check if user is logged in before opening modal
-    if (!userId) {
-      // Redirect to login if not logged in
-      router.push("/login")
-      return
-    }
-    
     setSelectedFilm(film)
     setIsModalOpen(true)
   }
 
   const handleHeroPlay = () => {
     if (!heroFilm) return
-    
-    // Check if user is logged in before opening modal
-    if (!userId) {
-      // Redirect to login if not logged in
-      router.push("/login")
-      return
-    }
     
     setSelectedFilm(heroFilm)
     setIsModalOpen(true)
