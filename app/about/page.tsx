@@ -10,6 +10,8 @@ export default function About() {
   const router = useRouter()
   const about = useAboutTranslation()
   const [activeSection, setActiveSection] = useState(0)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const totalSlides = 4 // 3 images + 1 video
 
   const awards = [
     "Festival Entretodos - São Paulo",
@@ -72,6 +74,49 @@ export default function About() {
     }, 8000)
     return () => clearInterval(interval)
   }, [])
+
+  // Carousel navigation functions
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)
+  }
+
+  // Auto-advance carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide()
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Touch/swipe handling
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) {
+      nextSlide()
+    } else if (isRightSwipe) {
+      prevSlide()
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -142,17 +187,114 @@ export default function About() {
             </div>
 
             <div className="relative">
-              <div className="relative w-full h-96 rounded-2xl overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 to-purple-500/30 z-10" />
-                <div className="w-full h-full bg-gradient-to-br from-pink-900 via-purple-900 to-blue-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">🏳️‍🌈</div>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                      A Fantasia de Eros
-                    </p>
-                    <p className="text-lg text-gray-300 mt-2">...no aterro</p>
+              <div 
+                className="relative w-full h-96 rounded-2xl overflow-hidden"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              >
+                {/* Galeria de imagens com carrossel */}
+                <div 
+                  className="flex transition-transform duration-500 ease-in-out h-full"
+                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                >
+                  {/* Imagem 1 */}
+                  <div className="min-w-full h-full relative">
+                    <Image 
+                      src="https://drive.google.com/uc?export=download&id=1maZyRiOu1-jnoOFzVwy364UWl3r_w2-i" 
+                      alt="A Fantasia de Eros"
+                      fill
+                      className="bg-black object-contain"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 z-10" />
                   </div>
+
+                  {/* Imagem 2 */}
+                  <div className="min-w-full h-full relative">
+                    <Image 
+                      src="https://drive.google.com/uc?export=download&id=1MGcc8rqRchYhPy72K5mn0muj_d9GYL1W" 
+                      alt="A Fantasia de Eros"
+                      fill
+                      className="bg-black object-contain"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 z-10" />
+                  </div>
+
+                  {/* Imagem 3 */}
+                  <div className="min-w-full h-full relative">
+                    <Image 
+                      src="https://drive.google.com/uc?export=download&id=1ZxYJW_3at8NfeKdYA3YNP17VqmtOssUu" 
+                      alt="A Fantasia de Eros"
+                      fill
+                      className="bg-black object-contain"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 z-10" />
+                  </div>
+
+                  {/* Imagem 4 */}
+                  <div className="min-w-full h-full relative">
+                    <Image 
+                      src="https://drive.google.com/uc?export=download&id=1XiXcRofBwNbc-6DG8Q7JkQcp6NPG08wn" 
+                      alt="A Fantasia de Eros"
+                      fill
+                      className="bg-black object-contain"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 z-10" />
+                  </div>
+
+                  {/* Vídeo no final */}
+                  {/* <div className="min-w-full h-full relative bg-black flex items-center justify-center">
+                    <video 
+                      className="w-full h-full object-cover"
+                      autoPlay 
+                      muted 
+                      loop
+                      playsInline
+                    >
+                      <source src="/placeholder-video.mp4" type="video/mp4" />
+                      <div className="w-full h-full bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-6xl mb-4">�</div>
+                          <p className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                            Em Breve
+                          </p>
+                          <p className="text-lg text-gray-300 mt-2">Vídeo promocional</p>
+                        </div>
+                      </div>
+                    </video>
+                  </div> */}
                 </div>
+
+                {/* Indicadores de posição */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-30">
+                  {[...Array(totalSlides)].map((_, index) => (
+                    <button
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === currentSlide ? 'bg-white' : 'bg-white/30 hover:bg-white/50'
+                      }`}
+                      onClick={() => setCurrentSlide(index)}
+                    />
+                  ))}
+                </div>
+
+                {/* Botões de navegação */}
+                <button 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 backdrop-blur-sm text-white p-2 rounded-full hover:bg-black/70 transition-all duration-300 z-30"
+                  onClick={prevSlide}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button 
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 backdrop-blur-sm text-white p-2 rounded-full hover:bg-black/70 transition-all duration-300 z-30"
+                  onClick={nextSlide}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>

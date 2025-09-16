@@ -112,6 +112,13 @@ export default function Home() {
   }
 
   const handlePurchaseClick = (filmId: string) => {
+    const user = getCurrentUser()
+    if (!user) {
+      // Redirect to login if user is not authenticated
+      router.push('/login')
+      return
+    }
+    
     // Close film modal and open payment modal
     setIsModalOpen(false)
     setIsPaymentModalOpen(true)
