@@ -29,6 +29,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isPortrait, setIsPortrait] = useState(false)
+  const [showVideo, setShowVideo] = useState(false)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -58,23 +59,76 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
   // Atualiza tempo e duração do trailer
   useEffect(() => {
     const video = videoRef.current
-    if (!video || !film?.trailerUrl) return
-    const updateTime = () => setCurrentTime(video.currentTime)
-    const updateDuration = () => setDuration(video.duration)
+    if (!video || !film?.trailerUrl || !showVideo) return
+    
+    const updateTime = () => {
+      if (video.currentTime && !isNaN(video.currentTime)) {
+        setCurrentTime(video.currentTime)
+      }
+    }
+    
+    const updateDuration = () => {
+      if (video.duration && !isNaN(video.duration) && video.duration > 0) {
+        setDuration(video.duration)
+      }
+    }
+    
+    // Múltiplos event listeners para capturar a duração
     video.addEventListener('timeupdate', updateTime)
     video.addEventListener('loadedmetadata', updateDuration)
+    video.addEventListener('loadeddata', updateDuration)
+    video.addEventListener('canplay', updateDuration)
+    video.addEventListener('canplaythrough', updateDuration)
+    video.addEventListener('durationchange', updateDuration)
+    video.addEventListener('progress', updateDuration)
+    
+    // Força atualização se já tem duração
+    if (video.duration > 0 && !isNaN(video.duration)) {
+      setDuration(video.duration)
+    }
+    
+    // Polling fallback para casos difíceis
+    const durationCheckInterval = setInterval(() => {
+      if (video.duration > 0 && !isNaN(video.duration) && duration === 0) {
+        setDuration(video.duration)
+        clearInterval(durationCheckInterval)
+      }
+    }, 200)
+    
+    // Timeout para limpar o polling após 15 segundos e mostrar fallback
+    const pollTimeout = setTimeout(() => {
+      clearInterval(durationCheckInterval)
+      // Se após 15 segundos ainda não temos duração, define como estimativa ou desabilita
+      if (duration === 0 && video.duration <= 0) {
+        console.warn('Duração do vídeo não pôde ser determinada após 15 segundos')
+      }
+    }, 15000)
+    
     return () => {
       video.removeEventListener('timeupdate', updateTime)
       video.removeEventListener('loadedmetadata', updateDuration)
+      video.removeEventListener('loadeddata', updateDuration)
+      video.removeEventListener('canplay', updateDuration)
+      video.removeEventListener('canplaythrough', updateDuration)
+      video.removeEventListener('durationchange', updateDuration)
+      video.removeEventListener('progress', updateDuration)
+      clearInterval(durationCheckInterval)
+      clearTimeout(pollTimeout)
     }
-  }, [film?.trailerUrl, isOpen])
+  }, [film?.trailerUrl, isOpen, showVideo, duration])
 
   // Efeito para reiniciar o trailer ao abrir a modal ou trocar de filme
   useEffect(() => {
-    if (isOpen && film?.trailerUrl && videoRef.current) {
-      videoRef.current.currentTime = 0;
+    if (isOpen && film?.trailerUrl) {
       setCurrentTime(0);
       setIsPlayingTrailer(false);
+      setShowVideo(false);
+      setIsMuted(false); // Garante que sempre inicia mudo para permitir autoplay
+      
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.muted = true;
+      }
     }
   }, [isOpen, film?.trailerUrl])
 
@@ -119,6 +173,64 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
         setIsPlayingTrailer(true)
       }
     }
+  }
+
+  const handleStartVideo = () => {
+    setShowVideo(true)
+    setIsPlayingTrailer(true) // Marca como playing imediatamente
+    
+    // Aguarda o próximo frame para garantir que o vídeo foi renderizado
+    requestAnimationFrame(() => {
+      if (videoRef.current) {
+        // Reset time tracking
+        setCurrentTime(0)
+        setDuration(0)
+        
+        const video = videoRef.current
+        
+        // Configura propriedades para mobile
+        video.muted = true // Garante que está mudo para autoplay mobile
+        video.playsInline = true
+        
+        // Força o carregamento do metadata
+        video.load()
+        
+        // Função para tentar reproduzir
+        const attemptPlay = () => {
+          if (video && !video.paused) return // Já está reproduzindo
+          
+          const playPromise = video.play()
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              setIsPlayingTrailer(true)
+              console.log('Vídeo iniciado com sucesso')
+            }).catch(error => {
+              console.warn('Tentativa de autoplay falhou:', error)
+              setIsPlayingTrailer(false)
+              
+              // Tenta novamente após um pequeno delay
+              setTimeout(() => {
+                if (video && video.paused) {
+                  video.play().catch(e => console.warn('Segunda tentativa falhou:', e))
+                }
+              }, 100)
+            })
+          }
+        }
+        
+        // Múltiplas tentativas de reprodução
+        attemptPlay() // Tentativa imediata
+        
+        // Tentativa após loadeddata
+        video.addEventListener('loadeddata', attemptPlay, { once: true })
+        
+        // Tentativa após canplay
+        video.addEventListener('canplay', attemptPlay, { once: true })
+        
+        // Tentativa final após um delay
+        setTimeout(attemptPlay, 200)
+      }
+    })
   }
 
   const toggleMute = () => {
@@ -246,147 +358,207 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
                 ref={playerContainerRef}
                 className="relative w-full bg-black rounded-lg overflow-hidden shadow-2xl"
                 style={{ aspectRatio: '16/9' }}
-                onClick={handleVideoAreaInteraction}
-                onTouchStart={handleVideoAreaInteraction}
-                onMouseMove={handleInteractionMove}
-                onTouchMove={handleInteractionMove}
+                onClick={!showVideo ? handleStartVideo : handleVideoAreaInteraction}
+                onTouchStart={!showVideo ? handleStartVideo : handleVideoAreaInteraction}
+                onMouseMove={showVideo ? handleInteractionMove : undefined}
+                onTouchMove={showVideo ? handleInteractionMove : undefined}
                 role="presentation"
                 tabIndex={-1}
               >
-                <video 
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  muted={isMuted}
-                  poster={film.img_1 || "/placeholder.svg"}
-                  onPlay={() => setIsPlayingTrailer(true)}
-                  onPause={() => setIsPlayingTrailer(false)}
-                  onEnded={() => setIsPlayingTrailer(false)}
-                >
-                  <source src={film.trailerUrl} type="video/mp4" />
-                </video>
-
-                <div className={`absolute inset-0 transition-opacity duration-300 ${
-                  showControls ? 'opacity-100' : 'opacity-0'
-                }`}>
-                  {/* Botões centrais */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center">
-                    {showSkipButtons && (
-                      <button
-                        onClick={() => skipSeconds(-10)}
-                        className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ${centerButtonSpacing.split(' ')[0]}`}
-                        aria-label="Voltar 10 segundos"
-                      >
-                        <RotateCcw className={centerButtonSize + " text-white"} />
-                      </button>
+                {!showVideo ? (
+                  /* Mostrar imagem com botão de play */
+                  <div className="relative w-full h-full flex items-center justify-center cursor-pointer">
+                    {film.img_1 ? (
+                      <Image
+                        src={film.img_1}
+                        alt={`${getLocalizedTitle(film, locale)} - Trailer Preview`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-600" />
                     )}
                     
-                    <button
-                      onClick={togglePlayPause}
-                      className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors`}
-                    >
-                      {isPlayingTrailer ? (
-                        <Pause className={centerButtonSize + " text-white"} />
-                      ) : (
-                        <Play className={centerButtonSize + " text-white ml-1"} />
-                      )}
-                    </button>
-                    
-                    {showSkipButtons && (
-                      <button
-                        onClick={() => skipSeconds(10)}
-                        className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ${centerButtonSpacing.split(' ')[1]}`}
-                        aria-label="Avançar 10 segundos"
-                      >
-                        <RotateCw className={centerButtonSize + " text-white"} />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Controles inferiores */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 md:p-6">
-                    <div className="flex items-center justify-between w-full gap-2">
-                      <div className="flex items-center space-x-1 md:space-x-4">
-                        <button
-                          onClick={togglePlayPause}
-                          className="p-1.5 md:p-2 hover:bg-white/20 rounded-full transition-colors"
-                        >
-                          {isPlayingTrailer ? (
-                            <Pause className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          ) : (
-                            <Play className="w-4 h-4 md:w-5 md:h-5 text-white ml-0.5" />
-                          )}
-                        </button>
-
-                        <button
-                          onClick={toggleMute}
-                          className="p-1.5 md:p-2 hover:bg-white/20 rounded-full transition-colors"
-                        >
-                          {isMuted ? (
-                            <VolumeX className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          ) : (
-                            <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          )}
-                        </button>
-                      </div>
-
-                      <div className="flex items-center space-x-1 md:space-x-4 flex-1 mx-2 md:mx-6">
-                        <span className="text-white text-xs font-mono min-w-[32px] md:min-w-[40px] text-center">{formatTime(currentTime)}</span>
-                        <div className="relative flex-1 group min-w-0">
-                          <div className="relative w-full h-2 md:h-2 bg-gray-700 rounded-lg overflow-visible">
-                            <div 
-                              className="absolute left-0 top-0 h-full bg-pink-500 rounded-lg transition-all duration-100"
-                              style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
-                            />
-                            <div 
-                              className="absolute top-1/2 w-4 h-4 md:w-4 md:h-4 bg-pink-500 rounded-full shadow-lg transition-all duration-100 hover:scale-125 group-hover:scale-125"
-                              style={{ 
-                                left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
-                                transform: 'translate(-50%, -50%)'
-                              }}
-                            >
-                              <div className="absolute inset-1 bg-white rounded-full opacity-30" />
-                            </div>
-                          </div>
-                          <input
-                            type="range"
-                            min={0}
-                            max={duration || 0}
-                            step={0.1}
-                            value={currentTime}
-                            onChange={e => {
-                              const time = Number(e.target.value)
-                              setCurrentTime(time)
-                              if (videoRef.current) {
-                                videoRef.current.currentTime = time
-                              }
-                            }}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer touch-manipulation"
-                            style={{
-                              background: 'transparent',
-                              WebkitAppearance: 'none',
-                              appearance: 'none',
-                            }}
-                          />
-                        </div>
-                        <span className="text-white text-xs font-mono min-w-[32px] md:min-w-[40px] text-center">{formatTime(duration)}</span>
-                      </div>
-
-                      <div className="flex items-center">
-                        <button
-                          onClick={handleFullscreen}
-                          className="p-1.5 md:p-2 hover:bg-white/20 rounded-full transition-colors"
-                          aria-label="Tela cheia"
-                        >
-                          {isFullscreen ? (
-                            <Minimize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          ) : (
-                            <Maximize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                          )}
-                        </button>
+                    {/* Botão de play sobreposto */}
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      <div className={`${centerButtonPadding} bg-black/70 backdrop-blur-sm rounded-full hover:bg-black/80 transition-all duration-300 transform hover:scale-110`}>
+                        <Play className={`${centerButtonSize} text-white ml-1`} />
                       </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  /* Mostrar vídeo */
+                  <>
+                    <video 
+                      ref={videoRef}
+                      className="w-full h-full object-cover"
+                      muted={isMuted}
+                      autoPlay
+                      playsInline
+                      webkit-playsinline="true"
+                      poster={film.img_1 || "/placeholder.svg"}
+                      onPlay={() => setIsPlayingTrailer(true)}
+                      onPause={() => setIsPlayingTrailer(false)}
+                      onEnded={() => setIsPlayingTrailer(false)}
+                      onTimeUpdate={() => {
+                        if (videoRef.current) {
+                          setCurrentTime(videoRef.current.currentTime)
+                        }
+                      }}
+                      onLoadedMetadata={() => {
+                        if (videoRef.current) {
+                          setDuration(videoRef.current.duration)
+                        }
+                      }}
+                      onLoadedData={() => {
+                        if (videoRef.current && videoRef.current.duration > 0) {
+                          setDuration(videoRef.current.duration)
+                          // Garante configurações para mobile
+                          videoRef.current.muted = isMuted
+                          videoRef.current.playsInline = true
+                        }
+                      }}
+                      onCanPlay={() => {
+                        if (videoRef.current && videoRef.current.duration > 0) {
+                          setDuration(videoRef.current.duration)
+                        }
+                      }}
+                      onDurationChange={() => {
+                        if (videoRef.current && videoRef.current.duration > 0) {
+                          setDuration(videoRef.current.duration)
+                        }
+                      }}
+                    >
+                      <source src={film.trailerUrl} type="video/mp4" />
+                    </video>
+
+                    <div className={`absolute inset-0 transition-opacity duration-300 ${
+                      showControls ? 'opacity-100' : 'opacity-0'
+                    }`}>
+                      {/* Botões centrais */}
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center">
+                        {showSkipButtons && (
+                          <button
+                            onClick={() => skipSeconds(-10)}
+                            className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ${centerButtonSpacing.split(' ')[0]}`}
+                            aria-label="Voltar 10 segundos"
+                          >
+                            <RotateCcw className={centerButtonSize + " text-white"} />
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={togglePlayPause}
+                          className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors`}
+                        >
+                          {isPlayingTrailer ? (
+                            <Pause className={centerButtonSize + " text-white"} />
+                          ) : (
+                            <Play className={centerButtonSize + " text-white ml-1"} />
+                          )}
+                        </button>
+                        
+                        {showSkipButtons && (
+                          <button
+                            onClick={() => skipSeconds(10)}
+                            className={`${centerButtonPadding} bg-black/70 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors ${centerButtonSpacing.split(' ')[1]}`}
+                            aria-label="Avançar 10 segundos"
+                          >
+                            <RotateCw className={centerButtonSize + " text-white"} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Controles inferiores */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 md:p-6">
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <div className="flex items-center space-x-1 md:space-x-4">
+                            <button
+                              onClick={togglePlayPause}
+                              className="p-1.5 md:p-2 hover:bg-white/20 rounded-full transition-colors"
+                            >
+                              {isPlayingTrailer ? (
+                                <Pause className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                              ) : (
+                                <Play className="w-4 h-4 md:w-5 md:h-5 text-white ml-0.5" />
+                              )}
+                            </button>
+
+                            <button
+                              onClick={toggleMute}
+                              className="p-1.5 md:p-2 hover:bg-white/20 rounded-full transition-colors"
+                            >
+                              {isMuted ? (
+                                <VolumeX className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                              ) : (
+                                <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                              )}
+                            </button>
+                          </div>
+
+                          <div className="flex items-center space-x-1 md:space-x-4 flex-1 mx-2 md:mx-6">
+                            <span className="text-white text-xs font-mono min-w-[32px] md:min-w-[40px] text-center">{formatTime(currentTime)}</span>
+                            <div className="relative flex-1 group min-w-0">
+                              <div className="relative w-full h-2 md:h-2 bg-gray-700 rounded-lg overflow-visible">
+                                <div 
+                                  className="absolute left-0 top-0 h-full bg-pink-500 rounded-lg transition-all duration-100"
+                                  style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+                                />
+                                <div 
+                                  className="absolute top-1/2 w-4 h-4 md:w-4 md:h-4 bg-pink-500 rounded-full shadow-lg transition-all duration-100 hover:scale-125 group-hover:scale-125"
+                                  style={{ 
+                                    left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                                    transform: 'translate(-50%, -50%)'
+                                  }}
+                                >
+                                  <div className="absolute inset-1 bg-white rounded-full opacity-30" />
+                                </div>
+                              </div>
+                              <input
+                                type="range"
+                                min={0}
+                                max={duration || 0}
+                                step={0.1}
+                                value={currentTime}
+                                onChange={e => {
+                                  const time = Number(e.target.value)
+                                  setCurrentTime(time)
+                                  if (videoRef.current) {
+                                    videoRef.current.currentTime = time
+                                  }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer touch-manipulation"
+                                style={{
+                                  background: 'transparent',
+                                  WebkitAppearance: 'none',
+                                  appearance: 'none',
+                                }}
+                              />
+                            </div>
+                            <span className="text-white text-xs font-mono min-w-[32px] md:min-w-[40px] text-center">
+                              {duration > 0 ? formatTime(duration) : '--:--'}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center">
+                            <button
+                              onClick={handleFullscreen}
+                              className="p-1.5 md:p-2 hover:bg-white/20 rounded-full transition-colors"
+                              aria-label="Tela cheia"
+                            >
+                              {isFullscreen ? (
+                                <Minimize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                              ) : (
+                                <Maximize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
