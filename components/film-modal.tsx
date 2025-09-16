@@ -123,7 +123,7 @@ export default function FilmModal({ film, isOpen, isPurchased, onClose, onPurcha
       setCurrentTime(0);
       setIsPlayingTrailer(false);
       setShowVideo(false);
-      setIsMuted(false); // Garante que sempre inicia mudo para permitir autoplay
+      setIsMuted(false);
       
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
