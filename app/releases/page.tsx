@@ -294,7 +294,7 @@ export default function Home() {
             <h2 className="text-white text-2xl font-bold mb-2 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
               EROS UNLIMITED
             </h2>
-            <p className="text-gray-300 animate-pulse">Carregando experiência cinematográfica...</p>
+            <p className="text-gray-300 animate-pulse">{t('common.loadExperience')}</p>
           </div>
         </div>
       </div>

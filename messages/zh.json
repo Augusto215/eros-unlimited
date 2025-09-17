@@ -39,7 +39,8 @@
     "edit": "编辑",
     "close": "关闭",
     "backToHome": "返回首页",
-    "tryAgain": "重试"
+    "tryAgain": "重试",
+    "loadExperience": "正在加载电影体验..."
   },
   "auth": {
     "login": "登录",

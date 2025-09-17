@@ -39,7 +39,8 @@
     "edit": "Editar",
     "close": "Cerrar",
     "backToHome": "Volver al Inicio",
-    "tryAgain": "Inténtalo de nuevo"
+    "tryAgain": "Inténtalo de nuevo",
+    "loadExperience": "Cargando experiencia cinematográfica..."
   },
   "auth": {
     "login": "Iniciar sesión",

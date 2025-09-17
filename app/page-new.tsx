@@ -10,8 +10,10 @@ import ModernHomeContent from "@/components/modern-home-content"
 import FilmModal from "@/components/film-modal"
 import PaymentModal from "@/components/payment-modal"
 import AddFilmModal from "@/components/add-film-modal"
+import { useTranslation } from "@/hooks/useTranslation"
 
 export default function Home() {
+  const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -164,7 +166,7 @@ export default function Home() {
             <h2 className="text-white text-2xl font-bold mb-2 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
               EROS UNLIMITED
             </h2>
-            <p className="text-gray-300 animate-pulse">Carregando experiência cinematográfica...</p>
+            <p className="text-gray-300 animate-pulse">{t('common.loadExperience')}</p>
           </div>
         </div>
       </div>
