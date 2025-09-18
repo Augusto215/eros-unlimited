@@ -10,6 +10,7 @@ import ModernHomeContent from "@/components/modern-home-content"
 import FilmModal from "@/components/film-modal"
 import PaymentModal from "@/components/payment-modal"
 import AddFilmModal from "@/components/add-film-modal"
+import IntroVideoModal from "@/components/intro-video-modal"
 import { useTranslation } from "@/hooks/useTranslation"
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [isAddFilmModalOpen, setIsAddFilmModalOpen] = useState(false)
+  const [isIntroVideoOpen, setIsIntroVideoOpen] = useState(false)
   const [heroFilm, setHeroFilm] = useState<Film | null>(null)
   const [purchasedFilmIds, setPurchasedFilmIds] = useState<string[]>([])
   const [userId, setUserId] = useState('')
@@ -60,6 +62,12 @@ export default function Home() {
             }
           }
         }
+
+        // Show intro video after a short delay
+        setTimeout(() => {
+          setIsIntroVideoOpen(true)
+        }, 1500)
+
       } catch (error) {
         // Still load films even if auth fails
         try {
@@ -85,6 +93,12 @@ export default function Home() {
               setHeroFilm(filmsData[randomIndex])
             }
           }
+
+          // Show intro video even if auth fails
+          setTimeout(() => {
+            setIsIntroVideoOpen(true)
+          }, 1500)
+
         } catch (filmError) {
           // Handle film loading error silently
         }
@@ -366,6 +380,12 @@ export default function Home() {
         isOpen={isAddFilmModalOpen}
         onClose={() => setIsAddFilmModalOpen(false)}
         onFilmAdded={handleFilmAdded}
+      />
+
+      {/* Intro Video Modal */}
+      <IntroVideoModal
+        isOpen={isIntroVideoOpen}
+        onClose={() => setIsIntroVideoOpen(false)}
       />
     </div>
   )
