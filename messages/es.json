@@ -16,6 +16,7 @@
     "partner": "Socio",
     "releases": "Lanzamientos",
     "myMovies": "Mis películas",
+    "makingOf": "Making Of",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
     "loggingOut": "Cerrando sesión...",
@@ -395,5 +396,22 @@
     "Western": "Western",
     "Musical": "Musical",
     "Documentário": "Documental"
+  },
+  "makingOfPage": {
+    "title": "Making Of",
+    "subtitle": "Ve detrás de las cámaras y descubre el proceso creativo detrás de nuestras películas premiadas. Explora fotos exclusivas, stills de producción, reconocimientos de festivales y documentales del making of.",
+    "behindScenesTitle": "Escenas de Películas",
+    "behindScenesDesc": "Fotos de escenas y momentos memorables de nuestras películas",
+    "productionStillsTitle": "Bastidores y Festivales",
+    "productionStillsDesc": "Fotos de eventos, bastidores de producción y festivales cinematográficos",
+    "festivalLaurelsTitle": "Laureles de Festivales",
+    "festivalLaurelsDesc": "Premios y reconocimientos de festivales internacionales de cine",
+    "makingOfVideosTitle": "Videos del Making Of",
+    "makingOfVideosDesc": "Videos estilo documental mostrando el proceso creativo",
+    "collaborateTitle": "¿Quieres Colaborar?",
+    "collaborateDesc": "¿Interesado en trabajar con nosotros o mostrar tu trabajo en nuestro contenido de making of? Siempre estamos buscando artistas y colaboradores talentosos.",
+    "partnerWithUs": "Colabora Con Nosotros",
+    "learnMore": "Conoce Más Sobre Nosotros",
+    "view": "Ver"
   }
 }

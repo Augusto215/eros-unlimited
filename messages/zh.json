@@ -15,6 +15,7 @@
     "about": "关于",
     "partner": "合作伙伴",
     "releases": "发布",
+    "makingOf": "幕后花絮",
     "myMovies": "我的电影",
     "login": "登录",
     "logout": "退出",
@@ -401,5 +402,22 @@
     "Romance": "爱情",
     "Drama": "剧情",
     "Documentário": "纪录片"
+  },
+  "makingOfPage": {
+    "title": "幕后花絮",
+    "subtitle": "深入幕后，发现我们获奖电影背后的创作过程。探索独家照片、制作剧照、电影节认可和幕后纪录片。",
+    "behindScenesTitle": "电影场景",
+    "behindScenesDesc": "我们电影中的场景和难忘时刻的照片",
+    "productionStillsTitle": "幕后花絮与电影节",
+    "productionStillsDesc": "活动、制作花絮和电影节的照片",
+    "festivalLaurelsTitle": "电影节荣誉",
+    "festivalLaurelsDesc": "来自国际电影节的奖项和认可",
+    "makingOfVideosTitle": "幕后制作视频",
+    "makingOfVideosDesc": "展示创作过程的纪录片风格视频",
+    "collaborateTitle": "想要合作吗？",
+    "collaborateDesc": "有兴趣与我们合作或在我们的幕后内容中展示您的作品吗？我们一直在寻找有才华的艺术家和合作者。",
+    "partnerWithUs": "与我们合作",
+    "learnMore": "了解更多关于我们",
+    "view": "查看"
   }
 }

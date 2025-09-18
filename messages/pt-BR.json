@@ -16,6 +16,7 @@
     "partner": "Parceiro",
     "releases": "Lançamentos",
     "myMovies": "Meus filmes",
+    "makingOf": "Making Of",
     "login": "Login",
     "logout": "Sair",
     "loggingOut": "Saindo...",
@@ -401,5 +402,22 @@
     "Western": "Western",
     "Musical": "Musical",
     "Documentário": "Documentário"
+  },
+  "makingOfPage": {
+    "title": "Bastidores",
+    "subtitle": "Vá atrás das câmeras e descubra o processo criativo por trás dos nossos filmes premiados. Explore fotos exclusivas, stills de produção, reconhecimentos de festivais e documentários dos bastidores.",
+    "behindScenesTitle": "Cenas dos Filmes",
+    "behindScenesDesc": "Fotos das cenas e momentos marcantes dos nossos filmes",
+    "productionStillsTitle": "Bastidores e Festivais",
+    "productionStillsDesc": "Fotos de eventos, bastidores de produção e festivais cinematográficos",
+    "festivalLaurelsTitle": "Lauréis de Festivais",
+    "festivalLaurelsDesc": "Prêmios e reconhecimentos de festivais internacionais de cinema",
+    "makingOfVideosTitle": "Vídeos dos Bastidores",
+    "makingOfVideosDesc": "Vídeos no estilo documentário mostrando o processo criativo",
+    "collaborateTitle": "Quer Colaborar?",
+    "collaborateDesc": "Interessado em trabalhar conosco ou destacar seu trabalho no nosso conteúdo de bastidores? Estamos sempre procurando artistas e colaboradores talentosos.",
+    "partnerWithUs": "Seja Nosso Parceiro",
+    "learnMore": "Saiba Mais Sobre Nós",
+    "view": "Ver"
   }
 }

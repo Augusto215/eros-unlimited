@@ -115,6 +115,9 @@ export default function Navbar() {
               <Link href="/about" className={getLinkClasses("/about")}>
                 {t('navbar.about')}
               </Link>
+              <Link href="/making-of" className={getLinkClasses("/making-of")}>
+                {t('navbar.makingOf')}
+              </Link>
               <Link href="/partner" className={getLinkClasses("/partner")}>
                 {t('navbar.partner')}
               </Link>
