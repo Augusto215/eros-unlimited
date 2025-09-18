@@ -19,7 +19,7 @@ export default function MakingOf() {
     {
         id: 1,
         title: t('makingOfPage.productionStillsTitle'),
-        icon: <Award className="w-5 h-5" />,
+        icon: <Film className="w-5 h-5" />,
         description: t('makingOfPage.productionStillsDesc')
     },
     {
@@ -364,31 +364,27 @@ export default function MakingOf() {
     },
     {
         id: 35,
-        image: "https://drive.usercontent.google.com/download?id="
+        image: "https://drive.usercontent.google.com/download?id=1B_8Urfj-kC8QtnrV6DiE03rtBwaIjvGd"
     },
     {
         id: 36,
-        image: "https://drive.usercontent.google.com/download?id="
+        image: "https://drive.usercontent.google.com/download?id=1ndd1qHtP4b9KieVZz2MEN0EIrNw8LLh4"
     },
     {
         id: 37,
-        image: "https://drive.usercontent.google.com/download?id="
+        image: "https://drive.usercontent.google.com/download?id=1g5ZYVtRIOXG3wXflVl3PLmsO-a5-Igmp"
     },
     {
         id: 38,
-        image: "https://drive.usercontent.google.com/download?id="
+        image: "https://drive.usercontent.google.com/download?id=18wb4VzxJnp8hssnOYaN9xuhsT3URYukI"
     },
     {
         id: 39,
-        image: "https://drive.usercontent.google.com/download?id="
+        image: "https://drive.usercontent.google.com/download?id=1ypVM0nlAqjeOuEFfSuAeXJ3YVmH1iET8"
     },
     {
         id: 40,
-        image: "https://drive.usercontent.google.com/download?id="
-    },
-    {
-        id: 41,
-        image: "https://drive.usercontent.google.com/download?id="
+        image: "https://drive.usercontent.google.com/download?id=1tPAw289NwOEKQTZL5xjCsQ38tJxGlsd3"
     }
   ]
 
@@ -524,26 +520,28 @@ export default function MakingOf() {
       {/* Category Navigation */}
       <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-center items-center gap-6 mb-12">
+          <div className="flex flex-col md:flex-row justify-center items-stretch gap-4 mb-12">
             {categories.map((category, index) => (
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(index)}
-                className={`relative p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 w-full md:w-auto md:flex-shrink-0 md:min-w-[280px] ${
+                className={`relative p-4 md:p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 w-full md:flex-1 md:max-w-[320px] min-h-[120px] md:min-h-[140px] ${
                   activeCategory === index
                     ? 'bg-gradient-to-br from-pink-500/20 to-purple-500/20 border-2 border-pink-400/50 shadow-lg shadow-pink-500/25'
                     : 'bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15'
                 }`}
               >
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className={`p-2 rounded-lg ${
-                    activeCategory === index ? 'bg-pink-500/20 text-pink-400' : 'bg-white/10 text-white'
-                  }`}>
-                    {category.icon}
+                <div className="flex flex-col justify-between h-full">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${
+                      activeCategory === index ? 'bg-pink-500/20 text-pink-400' : 'bg-white/10 text-white'
+                    }`}>
+                      {category.icon}
+                    </div>
+                    <h3 className="font-bold text-white text-left text-sm md:text-base leading-tight">{category.title}</h3>
                   </div>
-                  <h3 className="font-bold text-white text-left">{category.title}</h3>
+                  <p className="text-gray-300 text-xs md:text-sm text-left leading-tight">{category.description}</p>
                 </div>
-                <p className="text-gray-300 text-sm text-left">{category.description}</p>
               </button>
             ))}
           </div>
