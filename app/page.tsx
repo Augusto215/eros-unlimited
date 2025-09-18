@@ -204,7 +204,6 @@ export default function Home() {
         setPurchasedFilmIds(newPurchasedFilmIds)
         setIsPaymentModalOpen(false)
         
-        // ✅ NOVA LÓGICA: Se o filme comprado é o filme principal atual, trocar por outro
         if (heroFilm && heroFilm.id === filmId) {
           const unpurchasedMainFilms = films.filter(
             film => film.main === true && !newPurchasedFilmIds.includes(film.id)

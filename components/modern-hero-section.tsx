@@ -24,6 +24,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const desktopVideoRef = useRef<HTMLVideoElement>(null)
 
   const getLocalizedTitle = (film: Film, locale: string) => {
     if (locale === "pt-BR") return film.title_pt || film.title
@@ -114,6 +115,11 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
     if (!isMobile) {
       setIsExpanded(false)
       setShowVideo(false)
+      // Reset desktop video to beginning when mouse leaves
+      if (desktopVideoRef.current) {
+        desktopVideoRef.current.pause()
+        desktopVideoRef.current.currentTime = 0
+      }
     }
   }
 
@@ -278,6 +284,7 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                       {/* Show video on hover if available */}
                       {isExpanded && showVideo && film.trailerUrl ? (
                         <video 
+                          ref={desktopVideoRef}
                           autoPlay 
                           muted 
                           loop
