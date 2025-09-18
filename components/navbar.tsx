@@ -233,6 +233,16 @@ export default function Navbar() {
             >
               {t('navbar.about')}
             </Link>
+
+            <Link 
+              href="/making-of" 
+              className={`block px-4 py-3 text-lg rounded-lg transition-colors ${
+                pathname === "/making-of" ? 'bg-pink-500/20 text-pink-400 font-semibold' : 'text-white/80 hover:text-white hover:bg-white/5'
+              }`}
+              onClick={handleMobileMenuClick}
+            >
+              {t('navbar.makingOf')}
+            </Link>
             
             <Link 
               href="/partner" 
@@ -307,40 +317,3 @@ export default function Navbar() {
     </>
   )
 }
-
-
-// const [leaveTimeout, setLeaveTimeout] = useState<NodeJS.Timeout | null>(null)
-
-//   const handleMouseEnter = () => {
-//     setIsHovered(true)
-
-//     // Cancelar timeout de saída se existir
-//     if (leaveTimeout) {
-//       clearTimeout(leaveTimeout)
-//       setLeaveTimeout(null)
-//     }
-    
-//     // Delay trailer display like Netflix
-//     const timeout = setTimeout(() => {
-//       if (film.trailerUrl) {
-//         setShowTrailer(true)
-//       }
-//     }, 1000) // 1 second delay
-    
-//     setHoverTimeout(timeout)
-//   }
-
-//   const handleMouseLeave = () => {
-//     if (hoverTimeout) {
-//       clearTimeout(hoverTimeout)
-//       setHoverTimeout(null)
-//     }
-
-//     // Delay para evitar efeito bugado ao sair do trailer
-//     const timeout = setTimeout(() => {
-//       setIsHovered(false)
-//       setShowTrailer(false)
-//     }, 300) // 300ms delay para suavizar a transição
-    
-//     setLeaveTimeout(timeout)
-//   }
