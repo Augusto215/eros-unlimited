@@ -7,6 +7,7 @@ import { getMovies, getUserPurchasedFilms, purchaseFilm } from "@/lib/movies"
 import type { Film } from "@/lib/types"
 import ModernHeroSection from "@/components/modern-hero-section"
 import ModernHomeContent from "@/components/modern-home-content"
+import OpeningHeroSection from "@/components/opening-hero-section"
 import FilmModal from "@/components/film-modal"
 import PaymentModal from "@/components/payment-modal"
 import AddFilmModal from "@/components/add-film-modal"
@@ -276,6 +277,14 @@ export default function Home() {
     // This would typically open a video player
   }
 
+  const handleExploreCatalog = () => {
+    // Scroll to the catalog section (ModernHomeContent)
+    const catalogElement = document.getElementById('catalog-section')
+    if (catalogElement) {
+      catalogElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 flex items-center justify-center overflow-hidden">
@@ -342,12 +351,19 @@ export default function Home() {
       </div>
 
       <div className="relative z-10">
+        {/* Opening Hero Section - Institutional presentation */}
+        <OpeningHeroSection 
+          onExploreClick={handleExploreCatalog}
+          onAdminClick={handleAdminClick}
+        />
+        
+        {/* Featured Movie Hero Section */}
         <ModernHeroSection 
           film={heroFilm} 
           onPlayClick={handleHeroPlay}
           onAdminClick={handleAdminClick}
         />
-        
+                
         <ModernHomeContent 
           films={films}
           onFilmClick={handleFilmClick}
@@ -381,11 +397,6 @@ export default function Home() {
         onFilmAdded={handleFilmAdded}
       />
 
-      {/* Intro Video Modal */}
-      <IntroVideoModal
-        isOpen={isIntroVideoOpen}
-        onClose={() => setIsIntroVideoOpen(false)}
-      />
     </div>
   )
 }

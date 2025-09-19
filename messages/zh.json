@@ -1,7 +1,9 @@
 {
   "aboutEros": {
     "title": "关于 Eros Unlimited",
-    "text": "希腊神话中的爱神厄洛斯常与爱与美联系在一起，但事实上厄洛斯也很世俗。他最喜欢的消遣是降临人间，探索人类的性。Eros Unlimited Production 希望用不同的视角、独特的角度，照亮禁忌的快乐、禁忌、非顺性别和非顺性取向。希望你享受厄洛斯，让他用爱的箭射中你。"
+    "text": "希腊神话中的爱神厄洛斯常与爱与美联系在一起，但事实上厄洛斯也很世俗。他最喜欢的消遣是降临人间，探索人类的性。Eros Unlimited Production 希望用不同的视角、独特的角度，照亮禁忌的快乐、禁忌、非顺性别和非顺性取向。希望你享受厄洛斯，让他用爱的箭射中你。",
+    "textDescription": "Eros Unlimited Productions 邀请您进入一个为成熟观众打造的艺术与欲望的世界。我们的电影尚未评级，通过独特而富有想象力的视角，揭示了性、禁忌和流动身份的隐秘领域。走近一点，让厄洛斯用他那永恒的爱与好奇之箭触动你。"
+
   },
   "watch": {
     "continueWatching": "继续观看吗？",
@@ -144,7 +146,14 @@
     "libraryUnderConstruction": "库正在建设中",
     "noMoviesAvailable": "目前没有可用的电影",
     "tapToWatchTrailer": "点击观看预告片",
-    "noVideoAvailable": "没有可用的视频"
+    "noVideoAvailable": "没有可用的视频",
+    "platform": "平台",
+    "exclusive": "独家",
+    "exclusiveFilms": "独家电影", 
+    "premiumContent": "优质内容",
+    "globalAccess": "全球访问",
+    "exploreCatalog": "探索目录",
+    "since": "自"
   },
   "about": {
     "title": "关于我们",

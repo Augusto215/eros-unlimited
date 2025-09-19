@@ -1,7 +1,8 @@
 {
   "aboutEros": {
     "title": "About Eros Unlimited",
-    "text": "The God Eros in Greek mythology is often related to Love and Beauty, but the truth is Eros was also mundane. His favorite hobby was descending to Earth with one goal in mind, exploring Human sexuality. Eros Unlimited Production desires to enlighten the World of forbidden pleasures, taboos, ambiguous non-conformist genders and sexuality with a different eye, an unique angle. We hope You enjoy Eros and let him hit you with his arrow of Love."
+    "text": "The God Eros in Greek mythology is often related to Love and Beauty, but the truth is Eros was also mundane. His favorite hobby was descending to Earth with one goal in mind, exploring Human sexuality. Eros Unlimited Production desires to enlighten the World of forbidden pleasures, taboos, ambiguous non-conformist genders and sexuality with a different eye, an unique angle. We hope You enjoy Eros and let him hit you with his arrow of Love.",
+    "textDescription": "Eros Unlimited Productions invites you into a world of art and desire, created for mature audiences. Our films, not yet rated, illuminate the hidden realms of sexuality, taboos, and fluid identities through a distinct, imaginative lens. Step closer, and let Eros touch you with his timeless arrow of love and curiosity."
   },
   "watch": {
     "continueWatching": "Continue Watching?",
@@ -144,7 +145,14 @@
     "libraryUnderConstruction": "Library Under Construction",
     "noMoviesAvailable": "No movies available at the moment",
     "tapToWatchTrailer": "Tap to watch trailer",
-    "noVideoAvailable": "No video available"
+    "noVideoAvailable": "No video available",
+    "platform": "Platform",
+    "exclusive": "Exclusive",
+    "exclusiveFilms": "Exclusive Films",
+    "premiumContent": "Premium Content",
+    "globalAccess": "Global Access", 
+    "exploreCatalog": "Explore Catalog",
+    "since": "Since"
   },
   "payment": {
     "success": "Payment successful!",

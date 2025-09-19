@@ -1,7 +1,8 @@
 {
   "aboutEros": {
     "title": "Sobre Eros Unlimited",
-    "text": "El dios Eros en la mitología griega suele estar relacionado con el Amor y la Belleza, pero la verdad es que Eros también era mundano. Su pasatiempo favorito era descender a la Tierra con un objetivo: explorar la sexualidad humana. Eros Unlimited Production desea iluminar el mundo de los placeres prohibidos, tabúes, géneros y sexualidades no conformistas con una mirada diferente, un ángulo único. Esperamos que disfrutes de Eros y dejes que te alcance con su flecha de Amor."
+    "text": "El dios Eros en la mitología griega suele estar relacionado con el Amor y la Belleza, pero la verdad es que Eros también era mundano. Su pasatiempo favorito era descender a la Tierra con un objetivo: explorar la sexualidad humana. Eros Unlimited Production desea iluminar el mundo de los placeres prohibidos, tabúes, géneros y sexualidades no conformistas con una mirada diferente, un ángulo único. Esperamos que disfrutes de Eros y dejes que te alcance con su flecha de Amor.",
+    "textDescription": "Eros Unlimited Productions te invita a un mundo de arte y deseo, creado para audiencias maduras. Nuestros filmes, aún no clasificados, iluminan los reinos ocultos de la sexualidad, tabúes e identidades fluidas a través de una lente distinta e imaginativa. Acércate y deja que Eros te toque con su flecha atemporal de amor y curiosidad."
   },
   "watch": {
     "continueWatching": "¿Continuar viendo?",
@@ -144,7 +145,14 @@
     "libraryUnderConstruction": "Biblioteca en Construcción",
     "noMoviesAvailable": "No hay películas disponibles en este momento",
     "tapToWatchTrailer": "Toca para ver el tráiler",
-    "noVideoAvailable": "No hay video disponible"
+    "noVideoAvailable": "No hay video disponible",
+    "platform": "Plataforma",
+    "exclusive": "Exclusivo",
+    "exclusiveFilms": "Películas Exclusivas",
+    "premiumContent": "Contenido Premium",
+    "globalAccess": "Acceso Global",
+    "exploreCatalog": "Explorar Catálogo",
+    "since": "Desde"
   },
   "about": {
     "title": "Acerca de Nosotros",

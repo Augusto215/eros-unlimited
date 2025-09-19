@@ -272,15 +272,14 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
 
               {/* Desktop: Original poster section with hover effects */}
               <div className="relative lg:block hidden">
-                <div 
-                  className="relative"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
                   {/* Main poster with enhanced effects */}
                   <div className="relative w-96 aspect-[2/3] mx-auto">
                     <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-2xl blur-xl animate-pulse" />
-                    <div className={`relative w-full h-full rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-2xl transition-all duration-500 ${isExpanded ? 'rotate-0 scale-105' : 'rotate-3'}`}>
+                    <div 
+                      className={`relative w-full h-full rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-2xl transition-all duration-500 ${isExpanded ? 'rotate-0 scale-105' : 'rotate-3'}`}
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                    >
                       {/* Show video on hover if available */}
                       {isExpanded && showVideo && film.trailerUrl ? (
                         <video 
@@ -326,7 +325,6 @@ export default function ModernHeroSection({ film, onPlayClick, onAdminClick }: M
                       })}
                     </div>
                   </div>
-                </div>
 
                 {/* Background decorative elements */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] -z-10">
