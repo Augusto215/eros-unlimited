@@ -228,8 +228,8 @@ export default function OpeningHeroSection({ onAdminClick, onExploreClick }: Ope
           </div>
         ) : (
           <div className="relative w-full h-full">
-            {/* Desktop: Imagens com efeito blur */}
-            <div className="hidden md:block">
+            {/* Desktop: Imagens com efeito blur - only for lg+ screens where rotated poster appears */}
+            <div className="hidden lg:block">
               {/* Imagem de fundo com blur */}
               <Image 
                 src="https://drive.usercontent.google.com/download?id=1F3WmPwD6KXiXRDCAVgBpZuElMHtmV9Yn" 
@@ -251,8 +251,8 @@ export default function OpeningHeroSection({ onAdminClick, onExploreClick }: Ope
               />
             </div>
 
-            {/* Mobile: Apenas uma imagem de fundo nítida */}
-            <div className="block md:hidden">
+            {/* Mobile & Medium: Apenas uma imagem de fundo nítida - for screens up to lg */}
+            <div className="block lg:hidden">
               <Image 
                 src="https://drive.usercontent.google.com/download?id=1RwRRNWJ6Z_NpPZvjvrL6WysWQEPM1HF0" 
                 alt="Eros Unlimited"
@@ -260,7 +260,7 @@ export default function OpeningHeroSection({ onAdminClick, onExploreClick }: Ope
                 className="object-cover" 
                 priority 
               />
-              {/* Much darker overlay for mobile - maximum contrast for text visibility */}
+              {/* Much darker overlay for mobile & medium - maximum contrast for text visibility */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-black/70" />
             </div>
           </div>
